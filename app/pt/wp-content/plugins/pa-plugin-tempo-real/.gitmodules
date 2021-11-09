@@ -1,0 +1,3 @@
+[submodule "advanced-custom-fields-pro"]
+	path = advanced-custom-fields-pro
+	url = git@bitbucket.org:internetdsa/advanced-custom-fields-pro.git

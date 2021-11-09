@@ -1,0 +1,31 @@
+#wp-admin-bar-quick_access, #wp-admin-bar-quick_access>.ab-item {
+	background: red;	
+	color: #fff;
+	cursor: pointer;
+}
+
+#wp-admin-bar-quick_access ul.ab-submenu {
+	padding: 0;
+}
+
+#wp-admin-bar-quick_access ul.ab-submenu li a {
+	line-height: 35px !important;
+	height: 35px !important;
+}
+
+#wp-admin-bar-quick_access ul.ab-submenu li a:hover {
+	color: #fff !important;
+}
+
+
+#wp-admin-bar-quick_access ul.ab-submenu li.menu_downloads a:hover {
+	background-color: #de6739;
+}
+
+#wp-admin-bar-quick_access ul.ab-submenu li.menu_noticias a:hover {
+	background-color: #4d9951;
+}
+
+#wp-admin-bar-quick_access ul.ab-submenu li.menu_videos a:hover {
+	background-color: #377fb2;
+}

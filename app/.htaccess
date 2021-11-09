@@ -1,0 +1,35 @@
+# hotlink protection
+<IfModule mod_rewrite.c>
+	RewriteEngine on
+	RewriteCond %{HTTP_REFERER} !^$
+	RewriteCond %{HTTP_REFERER} !^http://(www|noticias|videos|downloads)?.adventistas.org(/)?.*$     [NC]
+	RewriteRule ^(.*)\.(gif|jpg|png|bmp|jpeg|js)$ http://noticias.adventistas.org/404.php?$1.$2   [NC,L]
+</ifModule>
+
+SetEnvIfNoCase Request_URI ^ / async-upload.php no-gzip -vary 
+
+# <FilesMatch ".*">
+#    Order deny,allow
+#    Deny from all
+#    Allow from 54.207.103.31
+#    Allow from 54.94.158.235
+#    Allow from 192.88.134.13
+#    Allow from 192.88.135.13
+#    Allow from 185.93.228.13
+#    Allow from 185.93.229.13
+#    Allow from 185.93.230.13
+#    Allow from 192.88.134.0/23
+#    Allow from 185.93.228.0/22
+#    Allow from 192.124.249.0/24
+#    Allow from 199.223.236.179
+#    Allow from 146.148.117.213
+#    Allow from 23.251.134.134
+#    Allow from 178.33.238.180
+#    Allow from 142.4.217.0/24
+#    Allow from 167.114.0.0/24
+#    Allow from 192.99.17.0/24
+#    Allow from 5.196.79.0/24
+#    Allow from 130.211.0.0/16
+#    Allow from 104.155.0.0/16
+#    Allow from 177.72.127.109
+# </FilesMatch>
