@@ -23,7 +23,7 @@ class MeowPro_WPMC_Core {
 		$this->core = $core;
 
 		// Common behaviors, license, update system, etc.
-		new MeowCommon_Licenser( WPMC_PREFIX, WPMC_ENTRY, WPMC_DOMAIN, $this->item, WPMC_VERSION );
+		new MeowCommonPro_Licenser( WPMC_PREFIX, WPMC_ENTRY, WPMC_DOMAIN, $this->item, WPMC_VERSION );
 
 		//new MeowApps_Admin_Pro( $prefix, $mainfile, $domain, $this->item, $version );
 
@@ -177,7 +177,7 @@ class MeowPro_WPMC_Core {
 				// $mainfile not found in Media Library - Try three different methods to find this disk file in the Media Library rows
 				//
 				$pathinfo = pathinfo( $mainfile );
-				$ext = $pathinfo['extension'];
+				$ext = isset( $pathinfo['extension'] ) ? $pathinfo['extension'] : "";
 				// These three methods only apply to image files
 				if ( strpos( $this->imagefiletypes, $ext ) !== false ) {
 					// Did not find the mainfile in the Media Library. 

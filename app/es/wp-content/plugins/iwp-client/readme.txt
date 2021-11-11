@@ -2,7 +2,7 @@
 Contributors: infinitewp
 Tags: admin, administration, amazon, api, authentication, automatic, dashboard, dropbox, events, integration, manage, multisite, multiple, notification, performance, s3, security, seo, stats, tracking, infinitewp, updates, backup, restore, iwp, infinite
 Requires at least: 3.1
-Tested up to: 5.4.2
+Tested up to: 5.7.2
 Stable tag: trunk
 
 Install this plugin on unlimited sites and manage them all from a central dashboard.
@@ -24,9 +24,9 @@ Main features:
 
 Visit us at [InfiniteWP.com](https://infinitewp.com/ "Manage Multiple WordPress").
 
-Check out the [InfiniteWP Overview Video](https://www.youtube.com/watch?v=8wOMewY2EBY) below.
+Check out the [InfiniteWP Overview Video](https://www.youtube.com/watch?v=s35ZoW95cnU) below.
 
-https://www.youtube.com/watch?v=8wOMewY2EBY
+https://www.youtube.com/watch?v=s35ZoW95cnU
 
 Credits: [Vladimir Prelovac](http://prelovac.com/vladimir) for his worker plugin on which the client plugin is being developed.
 
@@ -47,6 +47,37 @@ Credits: [Vladimir Prelovac](http://prelovac.com/vladimir) for his worker plugin
 5. One-click updates
 
 == Changelog ==
+
+= 1.9.4.11 - Jun 16th 2021 =
+* Improvement: Amazon s3 library updated.
+* Improvement: Wordfence data not correctly showing in Client report due to the Wordfence recent release.
+* Improvement: wp_new_user_notification function deprecated arg removed.
+* Improvement: New constant (IWP_PHP_DB_ROWS) introduced on the WordPress site to take more row in the PHP database dump backup method.
+* Improvement: If MySQL Dump fails, the admin panel will automatically retry MySQL Dump with a different 'max_allowed_packet' value.
+* Improvement: Added a few locations for the MySQL dump command.
+* Improvement: Multicall method backup speed enhanced.
+* Improvement: Enabled support for "Exclude file size" in Phoenix method backup.
+* Fix: Multiple Deprecated notices and Warnings when backing up a site (installed on a server with PHP8) using all backup methods.
+* Fix: Fatal errors due to disabled PHP functions on certain hosting providers.
+* Fix: WP Option cache causing issue in Phoenix backup on certain servers.
+* Fix: MySQL Dump using 'passthru()' function not working both single and multicall method.
+* Fix: MySQL Dump not working if 'max_allowed_packet' size has low value.
+* Fix: open_basedir warning fixed.
+
+= 1.9.4.8.2 - Dec 2nd 2020 =
+* Improvement: Improved support for the recent WordPress DB update
+* Fix: Percentage ( % ) converted to random string after Restore the single call backup in certain databases
+* Fix: IWP maintancemode not working if Minimal Coming Soon & Maintenance Mode – Coming Soon Page plugin activated
+* Fix: SSL verification disabled during install plugins/themes from the panel.
+* Fix: PHP Notice: Trying to get property 'old_version' of non-object in /home/public_html/wp-content/plugins/iwp-client/installer.class.php on line 250
+
+= 1.9.4.7 - Aug 10th 2020 =
+* Improvement: Multicall backup iwp_file_list table prefix validation improved.
+* Improvement: Improved compatibility for PHP 7.4 or above.
+* Improvement: Clone,Staging and restore DB details call improved.
+* Improvement: Website URL added in the Activation key section after activating the IWP client plugin.
+* Improvement: Redis cache will be cleared while running the Phoenix backup.
+
 = 1.9.4.6 - Apr 24th 2020 =
 * Improvement: WPMerge Temp folder Excluded on all backup methods (single call, multicall, Phoenix).
 * Improvement: Improved Error messages for failed plugins, themes, translation updates in the process queue, and activity log.

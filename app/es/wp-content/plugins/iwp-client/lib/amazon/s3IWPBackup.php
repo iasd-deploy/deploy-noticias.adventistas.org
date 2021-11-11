@@ -329,7 +329,9 @@ class IWP_MMB_S3_MULTICALL extends IWP_MMB_Backup_Multicall
 								$partNumber++;
 							}
 						}
-						@fclose($file);
+						if(is_resource($file)) {
+							@fclose($file);
+						}
 					}
 					catch (S3Exception $e) {
 						$this->statusLog($this -> hisID, array('stage' => 's3MultiCall', 'status' => 'partiallyCompleted', 'statusMsg' => 'retracingValues','nextFunc' => 'amazons3_backup', 'task_result' => $task_result, 'responseParams' => $result_arr));
@@ -381,7 +383,6 @@ class IWP_MMB_S3_MULTICALL extends IWP_MMB_Backup_Multicall
 						$status = 'completed';
 						iwp_mmb_print_flush('Amazon S3 upload: End');
 						if($status == 'completed'){
-							$partArrayLength = count($partsArray);
 							$verificationResult = $this -> postUploadVerification($s3, $backup_file, $as3_file, $type = "amazons3", $as3_bucket,$as3_access_key,$as3_secure_key,$as3_bucket_region);
 							if(!$verificationResult){
 								return $this->statusLog($historyID, array('stage' => 'uploadAmazons3', 'status' => 'error', 'statusMsg' => 'S3 verification failed: File may be corrupted.', 'statusCode' => 'docomplete_S3_verification_failed_file_may_be_corrupted'));
@@ -574,7 +575,7 @@ class IWP_MMB_S3_MULTICALL extends IWP_MMB_Backup_Multicall
       }
     }
 	
-	function postUploadS3Verification($backup_file, $destFile, $type = "", $as3_bucket = "", $as3_access_key = "", $as3_secure_key = "", $as3_bucket_region = "", $size1, $size2, $return_size = false){
+	function postUploadS3Verification($backup_file, $destFile, $type = "", $as3_bucket = "", $as3_access_key = "", $as3_secure_key = "", $as3_bucket_region = "", $size1 = 0, $size2 = 0, $return_size = false){
 		if (empty($as3_bucket_region)) {
 			require_once($GLOBALS['iwp_mmb_plugin_dir']."/lib/S3.php");
 			$s3 = new IWP_MMB_S3(trim($as3_access_key), trim(str_replace(' ', '+', $as3_secure_key)), false, 's3.amazonaws.com');
@@ -611,6 +612,9 @@ class IWP_MMB_S3_MULTICALL extends IWP_MMB_Backup_Multicall
 			$s3_file_size = $s3_file_metadata['ContentLength'];
 			if ($return_size == true) {
 				return $s3_file_size;
+			}
+			if(!isset($actual_file_size)){
+				$actual_file_size = 0;
 			}
 			echo "S3 fileszie during verification - ".$s3_file_size.PHP_EOL."size 1 - ".$size1.PHP_EOL."size 2 - ".$size2.PHP_EOL;
 

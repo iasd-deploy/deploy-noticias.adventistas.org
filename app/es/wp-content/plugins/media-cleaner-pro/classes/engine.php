@@ -180,13 +180,16 @@ SQL;
 	 * @param int $size   Negative number means no limit
 	 * @return NULL|array
 	 */
-	function get_media_entries( $offset = -1, $size = -1 ) {
+	function get_media_entries( $offset = -1, $size = -1, $unattachedOnly = false ) {
 		global $wpdb;
 		$r = null;
+
+		$extraAnd = $unattachedOnly ? "AND p.post_parent = 0" : "";
 
 		$q = <<<SQL
 SELECT p.ID FROM $wpdb->posts p
 WHERE p.post_status = 'inherit'
+$extraAnd
 AND p.post_type = 'attachment'
 SQL;
 		if ( get_option( 'wpmc_images_only' ) ) {

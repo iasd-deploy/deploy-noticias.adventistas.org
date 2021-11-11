@@ -94,7 +94,7 @@ class IWP_MMB_Backup {
 		if ($this->binzip === 0 && (!defined('IWP_PREFERPCLZIP') || IWP_PREFERPCLZIP != true) && (!defined('IWP_NO_BINZIP') || !IWP_NO_BINZIP) && $iwp_backup_core->current_resumption <9) {
 
 			if (@file_exists('/proc/user_beancounters') && @file_exists('/proc/meminfo') && @is_readable('/proc/meminfo')) {
-				$meminfo = @file_get_contents('/proc/meminfo', false, null, -1, 200);
+				$meminfo = @file_get_contents('/proc/meminfo', false, null, 0, 200);
 				if (is_string($meminfo) && preg_match('/MemTotal:\s+(\d+) kB/', $meminfo, $matches)) {
 					$memory_mb = $matches[1]/1024;
 					# If the report is of a large amount, then we're probably getting the total memory on the hypervisor (this has been observed), and don't really know the VPS's memory
@@ -1466,7 +1466,7 @@ class IWP_MMB_Backup {
 			if ($sind % 100 == 0) $iwp_backup_core->something_useful_happened();
 		}
 
-		if (@constant("DB_CHARSET")) {
+		if (defined('DB_CHARSET') && DB_CHARSET) {
 			$this->stow("/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;\n/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;\n/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;\n");
 		}
 
@@ -1850,7 +1850,7 @@ class IWP_MMB_Backup {
 		
 		$this->stow("# --------------------------------------------------------\n");
 
-		if (@constant("DB_CHARSET")) {
+		if (defined("DB_CHARSET") && DB_CHARSET) {
 			$this->stow("/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;\n");
 			$this->stow("/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;\n");
 			$this->stow("/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;\n");
@@ -1859,7 +1859,7 @@ class IWP_MMB_Backup {
 		$this->stow("/*!40101 SET foreign_key_checks = 0 */;\n\n");
 	}
 
-	private function makezip_recursive_add($fullpath, $use_path_when_storing, $original_fullpath, $startlevels = 1, &$exclude) {
+	private function makezip_recursive_add($fullpath, $use_path_when_storing, $original_fullpath, $startlevels, &$exclude) {
 
 // 		$zipfile = $this->zip_basename.(($this->index == 0) ? '' : ($this->index+1)).'.zip.tmp';
 
@@ -2559,7 +2559,7 @@ class IWP_MMB_Backup {
 
 			$fsize = filesize($file);
 
-			if (@constant('IWP_SKIP_FILE_OVER_SIZE') && $fsize > IWP_SKIP_FILE_OVER_SIZE) {
+			if (defined('IWP_SKIP_FILE_OVER_SIZE') && $fsize > IWP_SKIP_FILE_OVER_SIZE) {
 				$iwp_backup_core->log("File is larger than the user-configured (IWP_SKIP_FILE_OVER_SIZE) maximum (is: ".round($fsize/1024, 1)." KB); will skip: ".$add_as);
 				continue;
 			} elseif ($fsize > IWP_WARN_FILE_SIZE) {

@@ -74,7 +74,7 @@ class IWP_MMB_ftp_wrapper {
 		return false;
 	}
  
-	public function put($local_file_path, $remote_file_path, $mode = FTP_BINARY, $resume = false, $iwp_backup_core = false, $ftp_remote_path) {
+	public function put($local_file_path, $remote_file_path, $mode = FTP_BINARY, $resume = false, $iwp_backup_core = false, $ftp_remote_path = false) {
 
 		$file_size = filesize($local_file_path);
 

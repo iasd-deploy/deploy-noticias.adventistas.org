@@ -69,6 +69,7 @@ class Meow_WPMC_Admin extends MeowCommon_Admin {
       'wpmc_live_content' => false,
       'wpmc_debuglogs' => false,
       'wpmc_images_only' => false,
+      'wpmc_attach_is_use' => false,
       'wpmc_thumbnails_only' => false,
       'wpmc_dirs_filter' => '',
       'wpmc_files_filter' => '',

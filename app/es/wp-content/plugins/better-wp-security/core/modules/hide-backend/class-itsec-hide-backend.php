@@ -21,7 +21,7 @@ class ITSEC_Hide_Backend {
 			return;
 		}
 
-		add_action( 'itsec_initialized', array( $this, 'handle_specific_page_requests' ), 1000 );
+		add_action( 'setup_theme', array( $this, 'handle_specific_page_requests' ) );
 		add_action( 'signup_hidden_fields', array( $this, 'add_token_to_registration_form' ) );
 		add_action( 'login_enqueue_scripts', array( $this, 'login_enqueue' ) );
 
@@ -55,8 +55,8 @@ class ITSEC_Hide_Backend {
 		// The email is plain text and the links are at the end of lines, so a lazy match can be used.
 		if ( preg_match_all( '|(https?:\/\/((.*)wp-admin(.*)))|', $text, $urls ) ) {
 			foreach ( $urls[0] as $url ) {
-				$url = trim( $url );
-				$text = str_replace( $url, wp_login_url( $url ), $text );
+				$url  = trim( $url );
+				$text = str_replace( $url, ITSEC_Lib::get_login_url( '', $url ), $text );
 			}
 		}
 
@@ -121,7 +121,7 @@ class ITSEC_Hide_Backend {
 	 * @return void
 	 */
 	private function handle_login_alias() {
-		if ( isset( $_GET['action'] ) && $_GET['action'] === trim( $this->settings['post_logout_slug'] ) ) {
+		if ( isset( $_REQUEST['action'] ) && $_REQUEST['action'] === trim( $this->settings['post_logout_slug'] ) ) {
 			// I'm not sure if this feature is still needed or if anyone still uses it. - Chris
 			do_action( 'itsec_custom_login_slug' );
 		}
@@ -135,21 +135,31 @@ class ITSEC_Hide_Backend {
 	 * @return void
 	 */
 	private function handle_canonical_login_page() {
-		$action = isset( $_GET['action'] ) ? $_GET['action'] : '';
+		$action = isset( $_REQUEST['action'] ) ? $_REQUEST['action'] : '';
 
 		if ( 'postpass' === $action ) {
 			return;
-		} else if ( 'register' === $action ) {
-			$this->block_access( 'register' );
+		}
+
+		if ( 'register' === $action ) {
+			if ( 'wp-signup.php' !== $this->settings['register'] ) {
+				$this->block_access( 'register' );
+			}
+
 			return;
-		} else if ( 'jetpack_json_api_authorization' === $action && has_filter( 'login_form_jetpack_json_api_authorization' ) ) {
+		}
+
+		if ( 'jetpack_json_api_authorization' === $action && has_filter( 'login_form_jetpack_json_api_authorization' ) ) {
 			// Jetpack handles authentication for this action. Processing is left to it.
 			return;
-		} else if ( 'jetpack-sso' === $action && has_filter( 'login_form_jetpack-sso' ) ) {
+		}
+
+		if ( 'jetpack-sso' === $action && has_filter( 'login_form_jetpack-sso' ) ) {
 			// Jetpack's SSO redirects from wordpress.com to wp-login.php on the site. Only allow this process to
 			// continue if they successfully log in, which should happen by login_init in Jetpack which happens just
 			// before this action fires.
 			add_action( 'login_form_jetpack-sso', array( $this, 'block_access' ) );
+
 			return;
 		}
 
@@ -239,9 +249,9 @@ class ITSEC_Hide_Backend {
 		$this->set_cookie( $type );
 
 		// Preserve existing query vars and add access token query arg.
-		$query_vars = $_GET;
-		$query_vars[$this->token_var] = $this->get_access_token( $type );
-		$query = http_build_query( $query_vars, null, '&' );
+		$query_vars                     = $_GET;
+		$query_vars[ $this->token_var ] = $this->get_access_token( $type );
+		$query                          = http_build_query( $query_vars, null, '&' );
 
 		// Disable the Hide Backend URL filters to prevent infinite loops when calling site_url().
 		$this->disable_filters = true;
@@ -282,10 +292,10 @@ class ITSEC_Hide_Backend {
 				$url = $this->add_token_to_url( $url, 'register' );
 			} elseif ( false !== strpos( $path, 'action=rp' ) ) {
 				$url = $this->add_token_to_url( $url, 'login' );
-			} elseif ( 'wp-login.php' !== $request_path || empty( $_GET['action'] ) || 'register' !== $_GET['action'] ) {
+			} elseif ( 'wp-login.php' !== $request_path || empty( $_REQUEST['action'] ) || 'register' !== $_REQUEST['action'] ) {
 				$url = $this->add_token_to_url( $url, 'login' );
 			}
-		} else if ( 'wp-signup.php' === $clean_path && 'wp-signup.php' !== $this->settings['register'] ) {
+		} elseif ( 'wp-signup.php' === $clean_path && 'wp-signup.php' !== $this->settings['register'] ) {
 			$url = $this->add_token_to_url( $url, 'register' );
 		}
 
@@ -295,7 +305,7 @@ class ITSEC_Hide_Backend {
 	/**
 	 * Filter the admin URL to include hide backend tokens when necessary.
 	 *
-	 * @param string $url Complete admin URL.
+	 * @param string $url  Complete admin URL.
 	 * @param string $path Path passed to the admin_url function.
 	 *
 	 * @return string
@@ -373,7 +383,7 @@ class ITSEC_Hide_Backend {
 	 * lead to a 404 page.
 	 */
 	public function login_enqueue() {
-		if ( ! empty( $_GET['action'] ) && 'register' === $_GET['action'] ) {
+		if ( ! empty( $_REQUEST['action'] ) && 'register' === $_REQUEST['action'] ) {
 			wp_enqueue_style( 'itsec-hide-backend-login-page', plugins_url( 'css/login-page.css', __FILE__ ) );
 		}
 	}
@@ -408,14 +418,18 @@ class ITSEC_Hide_Backend {
 	 */
 	public function notification_strings() {
 		return array(
-			'label'       => esc_html__( 'Hide Backend – New Login URL', 'better-wp-security' ),
-			'description' => sprintf( esc_html__( '%1$sHide Backend%2$s will notify the chosen recipients whenever the login URL is changed.', 'better-wp-security' ), '<a href="#" data-module-link="hide-backend">', '</a>' ),
-			'subject'     => esc_html__( 'WordPress Login Address Changed', 'better-wp-security' ),
-			'message'     => esc_html__( 'The login address for {{ $site_title }} has changed. The new login address is {{ $login_url }}. You will be unable to use the old login address.', 'better-wp-security' ),
+			'label'       => __( 'Hide Backend – New Login URL', 'better-wp-security' ),
+			'description' => sprintf(
+				__( '%1$sHide Backend%2$s will notify the chosen recipients whenever the login URL is changed.', 'better-wp-security' ),
+				ITSEC_Core::get_link_for_settings_route( ITSEC_Core::get_settings_module_route( 'hide-backend' ) ),
+				'</a>'
+			),
+			'subject'     => __( 'WordPress Login Address Changed', 'better-wp-security' ),
+			'message'     => __( 'The login address for {{ $site_title }} has changed. The new login address is {{ $login_url }}. You will be unable to use the old login address.', 'better-wp-security' ),
 			'tags'        => array(
-				'login_url'  => esc_html__( 'The new login link.', 'better-wp-security' ),
-				'site_title' => esc_html__( 'The WordPress Site Title. Can be changed under Settings -> General -> Site Title', 'better-wp-security' ),
-				'site_url'   => esc_html__( 'The URL to your website.', 'better-wp-security' ),
+				'login_url'  => __( 'The new login link.', 'better-wp-security' ),
+				'site_title' => __( 'The WordPress Site Title. Can be changed under Settings → General → Site Title', 'better-wp-security' ),
+				'site_url'   => __( 'The URL to your website.', 'better-wp-security' ),
 			),
 		);
 	}
@@ -443,10 +457,11 @@ class ITSEC_Hide_Backend {
 	private function is_validated( $type ) {
 		$token = $this->get_access_token( $type );
 
-		if ( isset( $_REQUEST[$this->token_var] ) && $_REQUEST[$this->token_var] === $token ) {
+		if ( isset( $_REQUEST[ $this->token_var ] ) && $_REQUEST[ $this->token_var ] === $token ) {
 			$this->set_cookie( $type );
+
 			return true;
-		} else if ( isset( $_COOKIE["itsec-hb-$type-" . COOKIEHASH] ) && $_COOKIE["itsec-hb-$type-" . COOKIEHASH] === $token ) {
+		} elseif ( isset( $_COOKIE[ "itsec-hb-$type-" . COOKIEHASH ] ) && $_COOKIE[ "itsec-hb-$type-" . COOKIEHASH ] === $token ) {
 			return true;
 		}
 
@@ -461,8 +476,8 @@ class ITSEC_Hide_Backend {
 	 * @return string The access token.
 	 */
 	private function get_access_token( $type ) {
-		if ( isset( $this->settings[$type] ) ) {
-			return $this->settings[$type];
+		if ( isset( $this->settings[ $type ] ) ) {
+			return $this->settings[ $type ];
 		}
 
 		return $this->settings['slug'];

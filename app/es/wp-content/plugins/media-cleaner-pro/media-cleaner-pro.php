@@ -3,7 +3,7 @@
 Plugin Name: Media Cleaner (Pro)
 Plugin URI: https://meowapps.com
 Description: Clean your WordPress from unused or broken media entries and files.
-Version: 6.2.1
+Version: 6.2.5
 Author: Jordy Meow
 Author URI: https://meowapps.com
 Text Domain: media-cleaner
@@ -13,12 +13,14 @@ Originally developed for two of my websites:
 - Haikyo (https://haikyo.org)
 */
 
-define( 'WPMC_VERSION', '6.2.1' );
-define( 'WPMC_PREFIX', 'wpmc' );
-define( 'WPMC_DOMAIN', 'media-cleaner' );
-define( 'WPMC_ENTRY', __FILE__ );
-define( 'WPMC_PATH', dirname( __FILE__ ) );
-define( 'WPMC_URL', plugin_dir_url( __FILE__ ) );
+if ( !defined( 'WPMC_VERSION' ) ) {
+  define( 'WPMC_VERSION', '6.2.5' );
+  define( 'WPMC_PREFIX', 'wpmc' );
+  define( 'WPMC_DOMAIN', 'media-cleaner' );
+  define( 'WPMC_ENTRY', __FILE__ );
+  define( 'WPMC_PATH', dirname( __FILE__ ) );
+  define( 'WPMC_URL', plugin_dir_url( __FILE__ ) );
+}
 
 require_once( 'classes/init.php');
 

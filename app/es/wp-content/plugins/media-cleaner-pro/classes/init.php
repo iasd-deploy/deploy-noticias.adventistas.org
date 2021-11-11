@@ -14,11 +14,12 @@ spl_autoload_register(function ( $class ) {
   if ( strpos( $class, 'Meow_WPMC' ) !== false ) {
     $file = WPMC_PATH . '/classes/' . str_replace( 'meow_wpmc_', '', strtolower( $class ) ) . '.php';
   }
-  else if ( strpos( $class, 'MeowCommon_Classes_' ) !== false ) {
-    $file = WPMC_PATH . '/common/classes/' . str_replace( 'meowcommon_classes_', '', strtolower( $class ) ) . '.php';
-  }
   else if ( strpos( $class, 'MeowCommon_' ) !== false ) {
     $file = WPMC_PATH . '/common/' . str_replace( 'meowcommon_', '', strtolower( $class ) ) . '.php';
+  }
+  else if ( strpos( $class, 'MeowCommonPro_' ) !== false ) {
+    $necessary = false;
+    $file = WPMC_PATH . '/common/premium/' . str_replace( 'meowcommonpro_', '', strtolower( $class ) ) . '.php';
   }
   else if ( strpos( $class, 'MeowPro_WPMC' ) !== false ) {
     $necessary = false;

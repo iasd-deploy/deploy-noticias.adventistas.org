@@ -24,24 +24,40 @@ msgstr ""
 "X-Poedit-Bookmarks: \n"
 "X-Textdomain-Support: yes\n"
 
-#: Controller/cache.php:41
+#: Controller/cache.php:35
 msgid "All cache was deleted."
 msgstr ""
 
-#: Controller/cache.php:45
+#: Controller/cache.php:39
 msgid "Could not delete cache."
 msgstr ""
 
-#: Controller/cache.php:60
+#: Controller/cache.php:54
 msgid "Empty field."
 msgstr ""
 
-#: Controller/cache.php:70
+#: Controller/cache.php:64
 msgid "Invalid URL."
 msgstr ""
 
-#: Controller/cache.php:77
+#: Controller/cache.php:71
 msgid "Clear URL: "
+msgstr ""
+
+#: Controller/cache.php:90
+msgid "The sitemap cannot be found, but you can insert it manually."
+msgstr ""
+
+#: Controller/cache.php:97
+msgid "Sitemaps successfully fetched!"
+msgstr ""
+
+#: Controller/cache.php:212
+msgid "The sitemap page must be of the .xml type!. Invalids Urls: "
+msgstr ""
+
+#: Controller/cache.php:221
+msgid "Sitemaps saved successfully!"
 msgstr ""
 
 #: Controller/requests.php:26
@@ -326,6 +342,10 @@ msgstr ""
 
 #: View/settings.php:309
 msgid "Enter one URL per line"
+msgstr ""
+
+#: View/settings.php:332
+msgid "Search automatically or insert your site's sitemap pages (One URL per line)."
 msgstr ""
 
 #. Plugin Name of the plugin/theme

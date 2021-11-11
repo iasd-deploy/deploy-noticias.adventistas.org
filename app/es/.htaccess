@@ -1,3 +1,55 @@
+# BEGIN iThemes Security - No modifiques ni borres esta línea
+# iThemes Security Config Details: 2
+	# Banear servidores - Seguridad > Ajustes > Usuarios baneados
+	SetEnvIF REMOTE_ADDR "^193\.142\.146\.202$" DenyAccess
+	SetEnvIF X-FORWARDED-FOR "^193\.142\.146\.202$" DenyAccess
+	SetEnvIF X-CLUSTER-CLIENT-IP "^193\.142\.146\.202$" DenyAccess
+
+	SetEnvIF REMOTE_ADDR "^89\.35\.39\.60$" DenyAccess
+	SetEnvIF X-FORWARDED-FOR "^89\.35\.39\.60$" DenyAccess
+	SetEnvIF X-CLUSTER-CLIENT-IP "^89\.35\.39\.60$" DenyAccess
+
+	SetEnvIF REMOTE_ADDR "^85\.204\.246\.240$" DenyAccess
+	SetEnvIF X-FORWARDED-FOR "^85\.204\.246\.240$" DenyAccess
+	SetEnvIF X-CLUSTER-CLIENT-IP "^85\.204\.246\.240$" DenyAccess
+
+	SetEnvIF REMOTE_ADDR "^188\.213\.49\.210$" DenyAccess
+	SetEnvIF X-FORWARDED-FOR "^188\.213\.49\.210$" DenyAccess
+	SetEnvIF X-CLUSTER-CLIENT-IP "^188\.213\.49\.210$" DenyAccess
+
+	SetEnvIF REMOTE_ADDR "^188\.240\.208\.26$" DenyAccess
+	SetEnvIF X-FORWARDED-FOR "^188\.240\.208\.26$" DenyAccess
+	SetEnvIF X-CLUSTER-CLIENT-IP "^188\.240\.208\.26$" DenyAccess
+
+	SetEnvIF REMOTE_ADDR "^89\.35\.39\.180$" DenyAccess
+	SetEnvIF X-FORWARDED-FOR "^89\.35\.39\.180$" DenyAccess
+	SetEnvIF X-CLUSTER-CLIENT-IP "^89\.35\.39\.180$" DenyAccess
+
+	<IfModule mod_authz_core.c>
+		<RequireAll>
+			Require all granted
+			Require not env DenyAccess
+			Require not ip 193.142.146.202
+			Require not ip 89.35.39.60
+			Require not ip 85.204.246.240
+			Require not ip 188.213.49.210
+			Require not ip 188.240.208.26
+			Require not ip 89.35.39.180
+		</RequireAll>
+	</IfModule>
+	<IfModule !mod_authz_core.c>
+		Order allow,deny
+		Allow from all
+		Deny from env=DenyAccess
+		Deny from 193.142.146.202
+		Deny from 89.35.39.60
+		Deny from 85.204.246.240
+		Deny from 188.213.49.210
+		Deny from 188.240.208.26
+		Deny from 89.35.39.180
+	</IfModule>
+# END iThemes Security - No modifiques ni borres esta línea
+
 # BEGIN WordPress
 RewriteEngine On
 RewriteBase /es/

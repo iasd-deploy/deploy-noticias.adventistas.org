@@ -262,11 +262,8 @@ abstract class WPCOM_JSON_API_Post_Endpoint extends WPCOM_JSON_API_Endpoint {
 			case 'likes_enabled' :
 				/** This filter is documented in modules/likes.php */
 				$sitewide_likes_enabled = (bool) apply_filters( 'wpl_is_enabled_sitewide', ! get_option( 'disabled_likes' ) );
-				$post_likes_switched    = (bool) get_post_meta( $post->ID, 'switch_like_status', true );
-				$post_likes_enabled = $sitewide_likes_enabled;
-				if ( $post_likes_switched ) {
-					$post_likes_enabled = ! $post_likes_enabled;
-				}
+				$post_likes_switched    = get_post_meta( $post->ID, 'switch_like_status', true );
+				$post_likes_enabled = $post_likes_switched || ( $sitewide_likes_enabled && $post_likes_switched !== '0' );
 				$response[$key] = (bool) $post_likes_enabled;
 				break;
 			case 'sharing_enabled' :
@@ -419,7 +416,6 @@ abstract class WPCOM_JSON_API_Post_Endpoint extends WPCOM_JSON_API_Endpoint {
 					if ( current_user_can( 'edit_post_meta', $post_id , $meta['meta_key'] ) )
 						$show = true;
 
-					// Only business plan subscribers can view custom meta description.
 					if ( Jetpack_SEO_Posts::DESCRIPTION_META_KEY === $meta['meta_key'] && ! Jetpack_SEO_Utils::is_enabled_jetpack_seo() ) {
 						$show = false;
 					}
@@ -537,40 +533,77 @@ abstract class WPCOM_JSON_API_Post_Endpoint extends WPCOM_JSON_API_Endpoint {
 				unset( $attr['orderby'] );
 		}
 
-		extract( shortcode_atts( array(
-			'order'     => 'ASC',
-			'orderby'   => 'menu_order ID',
-			'id'        => $post->ID,
-			'include'   => '',
-			'exclude'   => '',
-			'slideshow' => false
-		), $attr, 'gallery' ) );
+		$atts = shortcode_atts(
+			array(
+				'order'     => 'ASC',
+				'orderby'   => 'menu_order ID',
+				'id'        => $post->ID,
+				'include'   => '',
+				'exclude'   => '',
+				'slideshow' => false,
+			),
+			$attr,
+			'gallery'
+		);
+		$id   = ! empty( $atts['id'] ) ? (int) $atts['id'] : 0;
 
-		// Custom image size and always use it
+		// Custom image size and always use it.
 		add_image_size( 'win8app-column', 480 );
 		$size = 'win8app-column';
 
-		$id = intval( $id );
-		if ( 'RAND' === $order )
+		if ( 'RAND' === $atts['order'] ) {
 			$orderby = 'none';
+		} else {
+			$orderby = $atts['orderby'];
+		}
 
-		if ( !empty( $include ) ) {
-			$include      = preg_replace( '/[^0-9,]+/', '', $include );
-			$_attachments = get_posts( array( 'include' => $include, 'post_status' => 'inherit', 'post_type' => 'attachment', 'post_mime_type' => 'image', 'order' => $order, 'orderby' => $orderby ) );
+		if ( ! empty( $atts['include'] ) ) {
+			$include      = preg_replace( '/[^0-9,]+/', '', $atts['include'] );
+			$_attachments = get_posts(
+				array(
+					'include'        => $include,
+					'post_status'    => 'inherit',
+					'post_type'      => 'attachment',
+					'post_mime_type' => 'image',
+					'order'          => $atts['order'],
+					'orderby'        => $orderby,
+				)
+			);
 			$attachments  = array();
 			foreach ( $_attachments as $key => $val ) {
-				$attachments[$val->ID] = $_attachments[$key];
+				$attachments[ $val->ID ] = $_attachments[ $key ];
 			}
-		} elseif ( !empty( $exclude ) ) {
-			$exclude     = preg_replace( '/[^0-9,]+/', '', $exclude );
-			$attachments = get_children( array( 'post_parent' => $id, 'exclude' => $exclude, 'post_status' => 'inherit', 'post_type' => 'attachment', 'post_mime_type' => 'image', 'order' => $order, 'orderby' => $orderby ) );
+		} elseif ( ! empty( $atts['exclude'] ) ) {
+			$exclude     = preg_replace( '/[^0-9,]+/', '', $atts['exclude'] );
+			$attachments = get_children(
+				array(
+					'post_parent'    => $id,
+					'exclude'        => $exclude,
+					'post_status'    => 'inherit',
+					'post_type'      => 'attachment',
+					'post_mime_type' => 'image',
+					'order'          => $atts['order'],
+					'orderby'        => $orderby,
+				)
+			);
 		} else {
-			$attachments = get_children( array( 'post_parent' => $id, 'post_status' => 'inherit', 'post_type' => 'attachment', 'post_mime_type' => 'image', 'order' => $order, 'orderby' => $orderby ) );
+			$attachments = get_children(
+				array(
+					'post_parent'    => $id,
+					'post_status'    => 'inherit',
+					'post_type'      => 'attachment',
+					'post_mime_type' => 'image',
+					'order'          => $atts['order'],
+					'orderby'        => $orderby,
+				)
+			);
 		}
 
 		if ( ! empty( $attachments ) ) {
 			foreach ( $attachments as $id => $attachment ) {
-				$link = isset( $attr['link'] ) && 'file' === $attr['link'] ? wp_get_attachment_link( $id, $size, false, false ) : wp_get_attachment_link( $id, $size, true, false );
+				$link = isset( $attr['link'] ) && 'file' === $attr['link']
+					? wp_get_attachment_link( $id, $size, false, false )
+					: wp_get_attachment_link( $id, $size, true, false );
 
 				if ( $captiontag && trim($attachment->post_excerpt) ) {
 					$output .= "<div class='wp-caption aligncenter'>$link
@@ -616,9 +649,9 @@ abstract class WPCOM_JSON_API_Post_Endpoint extends WPCOM_JSON_API_Endpoint {
 	 */
 	function get_current_user_capabilities( $post ) {
 		return array(
-			'publish_post' => current_user_can( 'publish_post', $post ),
-			'delete_post'  => current_user_can( 'delete_post', $post ),
-			'edit_post'    => current_user_can( 'edit_post', $post )
+			'publish_post' => current_user_can( 'publish_post', $post->ID ),
+			'delete_post'  => current_user_can( 'delete_post', $post->ID ),
+			'edit_post'    => current_user_can( 'edit_post', $post->ID )
 		);
 	}
 

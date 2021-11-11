@@ -1,5 +1,8 @@
 <?php
 
+use Automattic\Jetpack\Status\Host;
+use Automattic\Jetpack\Sync\Functions;
+
 require_once dirname( __FILE__ ) . '/class.json-api-site-jetpack-base.php';
 require_once dirname( __FILE__ ) . '/class.json-api-post-jetpack.php';
 
@@ -51,11 +54,11 @@ class Jetpack_Site extends Abstract_Jetpack_Site {
 	}
 
 	protected function is_version_controlled() {
-		return Jetpack_Sync_Functions::is_version_controlled();
+		return Functions::is_version_controlled();
 	}
 
 	protected function file_system_write_access() {
-		return Jetpack_Sync_Functions::file_system_write_access();
+		return Functions::file_system_write_access();
 	}
 
 	protected function current_theme_supports( $feature_name ) {
@@ -64,6 +67,17 @@ class Jetpack_Site extends Abstract_Jetpack_Site {
 
 	protected function get_theme_support( $feature_name ) {
 		return get_theme_support( $feature_name );
+	}
+
+	/**
+	 * Fetch a list of active plugins that are using Jetpack Connection.
+	 *
+	 * @return array An array of active plugins (by slug) that are using Jetpack Connection.
+	 */
+	protected function get_connection_active_plugins() {
+		$plugins = $this->get_mock_option( 'connection_active_plugins' );
+
+		return is_array( $plugins ) ? array_keys( $plugins ) : array();
 	}
 
 	public function get_updates() {
@@ -92,12 +106,26 @@ class Jetpack_Site extends Abstract_Jetpack_Site {
 		return true;
 	}
 
+	function get_unmapped_url() {
+		// Fallback to the home URL since all Jetpack sites don't have an unmapped *.wordpress.com domain.
+		return $this->get_url();
+	}
+
 	function is_redirect() {
 		return false;
 	}
 
 	function is_following() {
 		return false;
+	}
+
+	/**
+	 * Points to the user ID of the site owner
+	 *
+	 * @return null for Jetpack sites
+	 */
+	public function get_site_owner() {
+		return null;
 	}
 
 	function has_wordads() {
@@ -108,6 +136,10 @@ class Jetpack_Site extends Abstract_Jetpack_Site {
 		return false;
 	}
 
+	function get_jetpack_frame_nonce() {
+		return false;
+	}
+
 	function is_headstart_fresh() {
 		return false;
 	}
@@ -115,7 +147,7 @@ class Jetpack_Site extends Abstract_Jetpack_Site {
 	function allowed_file_types() {
 		$allowed_file_types = array();
 
-		// http://codex.wordpress.org/Uploading_Files
+		// https://codex.wordpress.org/Uploading_Files
 		$mime_types = get_allowed_mime_types();
 		foreach ( $mime_types as $type => $mime_type ) {
 			$extras = explode( '|', $type );
@@ -127,8 +159,49 @@ class Jetpack_Site extends Abstract_Jetpack_Site {
 		return $allowed_file_types;
 	}
 
+	/**
+	 * Return site's privacy status.
+	 *
+	 * @return boolean  Is site private?
+	 */
 	function is_private() {
-		return false;
+		return (int) $this->get_atomic_cloud_site_option( 'blog_public' ) === -1;
+	}
+
+	/**
+	 * Return site's coming soon status.
+	 *
+	 * @return boolean  Is site "Coming soon"?
+	 */
+	function is_coming_soon() {
+		return $this->is_private() && (int) $this->get_atomic_cloud_site_option( 'wpcom_coming_soon' ) === 1;
+	}
+
+	/**
+	 * Return site's launch status.
+	 *
+	 * @return string|boolean  Launch status ('launched', 'unlaunched', or false).
+	 */
+	function get_launch_status() {
+		return $this->get_atomic_cloud_site_option( 'launch-status' );
+	}
+
+	function get_atomic_cloud_site_option( $option ) {
+		if ( ! ( new Host() )->is_woa_site() ) {
+			return false;
+		}
+
+		$jetpack = Jetpack::init();
+		if ( ! method_exists( $jetpack, 'get_cloud_site_options' ) ) {
+			return false;
+		}
+
+		$result = $jetpack->get_cloud_site_options( [ $option ] );
+		if ( ! array_key_exists( $option, $result ) ) {
+			return false;
+		}
+
+		return $result[ $option ];
 	}
 
 	function get_plan() {
@@ -147,7 +220,21 @@ class Jetpack_Site extends Abstract_Jetpack_Site {
 		return get_bloginfo( 'language' );
 	}
 
-	function is_jetpack() {
+	/**
+	 * The flag indicates that the site has Jetpack installed
+	 *
+	 * @return bool
+	 */
+	public function is_jetpack() {
+		return true;
+	}
+
+	/**
+	 * The flag indicates that the site is connected to WP.com via Jetpack Connection
+	 *
+	 * @return bool
+	 */
+	public function is_jetpack_connection() {
 		return true;
 	}
 
@@ -177,8 +264,65 @@ class Jetpack_Site extends Abstract_Jetpack_Site {
 		return true;
 	}
 
+	function is_wpforteams_site() {
+		return false;
+	}
+
 	function current_user_can( $role ) {
 		return current_user_can( $role );
+	}
+
+	/**
+	 * Check if full site editing should be considered as currently active. Full site editing
+	 * requires the FSE plugin to be installed and activated, as well the current
+	 * theme to be FSE compatible. The plugin can also be explicitly disabled via the
+	 * a8c_disable_full_site_editing filter.
+	 *
+	 * @since 7.7.0
+	 *
+	 * @return bool true if full site editing is currently active.
+	 */
+	function is_fse_active() {
+		if ( ! Jetpack::is_plugin_active( 'full-site-editing/full-site-editing-plugin.php' ) ) {
+			return false;
+		}
+		return function_exists( '\A8C\FSE\is_full_site_editing_active' ) && \A8C\FSE\is_full_site_editing_active();
+	}
+
+	/**
+	 * Check if site should be considered as eligible for full site editing. Full site editing
+	 * requires the FSE plugin to be installed and activated. For this method to return true
+	 * the current theme does not need to be FSE compatible. The plugin can also be explicitly
+	 * disabled via the a8c_disable_full_site_editing filter.
+	 *
+	 * @since 8.1.0
+	 *
+	 * @return bool true if site is eligible for full site editing
+	 */
+	public function is_fse_eligible() {
+		if ( ! Jetpack::is_plugin_active( 'full-site-editing/full-site-editing-plugin.php' ) ) {
+			return false;
+		}
+		return function_exists( '\A8C\FSE\is_site_eligible_for_full_site_editing' ) && \A8C\FSE\is_site_eligible_for_full_site_editing();
+	}
+
+	/**
+	 * Check if site should be considered as eligible for use of the core Site Editor.
+	 * The Site Editor requires a block based theme to be active.
+	 *
+	 * @return bool true if site is eligible for the Site Editor
+	 */
+	public function is_core_site_editor_enabled() {
+		return function_exists( 'gutenberg_is_fse_theme' ) && gutenberg_is_fse_theme();
+	}
+
+	/**
+	 * Return the last engine used for an import on the site.
+	 *
+	 * This option is not used in Jetpack.
+	 */
+	function get_import_engine() {
+		return null;
 	}
 
 	/**
@@ -187,6 +331,15 @@ class Jetpack_Site extends Abstract_Jetpack_Site {
 
 	function wrap_post( $post, $context ) {
 		return new Jetpack_Post( $this, $post, $context );
+	}
+
+	/**
+	 * Get the option storing the Anchor podcast ID that identifies a site as a podcasting site.
+	 *
+	 * @return string
+	 */
+	public function get_anchor_podcast() {
+		return $this->get_atomic_cloud_site_option( 'anchor_podcast' );
 	}
 
 }

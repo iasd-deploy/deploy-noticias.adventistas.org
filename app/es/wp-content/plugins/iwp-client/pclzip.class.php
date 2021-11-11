@@ -2570,17 +2570,19 @@ endif;
 			  {
 				  foreach($exclude_extensions as $ext)
 				  {
-					  $this_pos = strrpos($this_base_name, $ext);
-					  if($this_pos !== false)
-					  {
-						  if(substr($this_base_name, $this_pos) == $ext)
-						  {
-							//$files_excluded_by_size[] = substr($value, strlen(ABSPATH));
-							$skip_after_ext = true;											//to skip the file exclude by size 
-							break;
-						  }
-					  }
-				  }
+            if(!empty($ext)){
+  					  $this_pos = strrpos($this_base_name, $ext);
+  					  if($this_pos !== false)
+  					  {
+  						  if(substr($this_base_name, $this_pos) == $ext)
+  						  {
+  							//$files_excluded_by_size[] = substr($value, strlen(ABSPATH));
+  							$skip_after_ext = true;											//to skip the file exclude by size 
+  							break;
+  						  }
+  					  }
+  				  }
+          }
 			  }
 			  if($skip_after_ext)
 			  {

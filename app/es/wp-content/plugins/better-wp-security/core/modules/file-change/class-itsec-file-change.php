@@ -38,10 +38,7 @@ class ITSEC_File_Change {
 		add_action( 'itsec_scheduled_file-change-fast', array( $this, 'run_scan' ) );
 		ITSEC_Core::get_scheduler()->register_loop( 'file-change', ITSEC_Scheduler::S_DAILY, 60 );
 		ITSEC_Core::get_scheduler()->register_loop( 'file-change-fast', ITSEC_Scheduler::S_DAILY, 0 );
-
-		if ( ITSEC_Modules::get_setting( 'file-change', 'notify_admin' ) ) {
-			add_action( 'itsec_register_highlighted_logs', array( $this, 'register_highlight' ) );
-		}
+		add_action( 'itsec_register_highlighted_logs', array( $this, 'register_highlight' ) );
 	}
 
 	public function run_scan( $job ) {
@@ -132,7 +129,7 @@ class ITSEC_File_Change {
 	 */
 	public function register_notification( $notifications ) {
 		$notifications['file-change'] = array(
-			'recipient'        => ITSEC_Notification_Center::R_USER_LIST_ADMIN_UPGRADE,
+			'recipient'        => ITSEC_Notification_Center::R_USER_LIST,
 			'schedule'         => ITSEC_Notification_Center::S_NONE,
 			'subject_editable' => true,
 			'optional'         => true,
@@ -149,9 +146,13 @@ class ITSEC_File_Change {
 	 */
 	public function register_notification_strings() {
 		return array(
-			'label'       => esc_html__( 'File Change', 'better-wp-security' ),
-			'description' => sprintf( esc_html__( 'The %1$sFile Change Detection%2$s module will email a file scan report after changes have been detected.', 'better-wp-security' ), '<a href="#" data-module-link="file-change">', '</a>' ),
-			'subject'     => esc_html__( 'File Change Warning', 'better-wp-security' ),
+			'label'       => __( 'File Change', 'better-wp-security' ),
+			'description' => sprintf(
+				__( 'The %1$sFile Change Detection%2$s module will email a file scan report after changes have been detected.', 'better-wp-security' ),
+				ITSEC_Core::get_link_for_settings_route( ITSEC_Core::get_settings_module_route( 'file-change' ) ),
+				'</a>'
+			),
+			'subject'     => __( 'File Change Warning', 'better-wp-security' ),
 		);
 	}
 

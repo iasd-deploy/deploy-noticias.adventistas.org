@@ -1,6 +1,21 @@
-<?php //phpcs:ignore
+<?php // phpcs:ignore WordPress.Files.FileName.InvalidClassFileName
+/**
+ * Class file for provisioning Jetpack.
+ *
+ * @package automattic/jetpack
+ */
 
-class Jetpack_Provision { //phpcs:ignore
+use Automattic\Jetpack\Connection\Client;
+use Automattic\Jetpack\Connection\Secrets;
+use Automattic\Jetpack\Connection\Tokens;
+use Automattic\Jetpack\Identity_Crisis;
+use Automattic\Jetpack\Roles;
+use Automattic\Jetpack\Sync\Actions;
+
+/**
+ * Jetpack_Provision class.
+ */
+class Jetpack_Provision {
 
 	/**
 	 * Responsible for checking pre-conditions, registering site, and returning an array of details
@@ -17,51 +32,41 @@ class Jetpack_Provision { //phpcs:ignore
 		);
 
 		foreach ( $url_args as $url_arg => $constant_name ) {
-			// Anonymous functions were introduced in 5.3.0. So, if we're running on
-			// >= 5.3.0, use an anonymous function to set the home/siteurl value%s.
-			//
-			// Otherwise, fallback to setting the home/siteurl value via the WP_HOME and
-			// WP_SITEURL constants if the constant hasn't already been defined.
 			if ( isset( $named_args[ $url_arg ] ) ) {
-				if ( version_compare( phpversion(), '5.3.0', '>=' ) ) {
-					add_filter( $url_arg, function() use ( $url_arg, $named_args ) { // phpcs:ignore PHPCompatibility.PHP.NewClosure.Found
+				add_filter(
+					$url_arg,
+					function () use ( $url_arg, $named_args ) {
 						return $named_args[ $url_arg ];
-					}, 11 );
-				} elseif ( ! defined( $constant_name ) ) {
-					define( $constant_name, $named_args[ $url_arg ] );
-				}
+					},
+					11
+				);
 			}
 		}
 
 		// If Jetpack is currently connected, and is not in Safe Mode already, kick off a sync of the current
 		// functions/callables so that we can test if this site is in IDC.
-		if ( Jetpack::is_active() && ! Jetpack::validate_sync_error_idc_option() && Jetpack_Sync_Actions::sync_allowed() ) {
-			Jetpack_Sync_Actions::do_full_sync( array( 'functions' => true ) );
-			Jetpack_Sync_Actions::$sender->do_full_sync();
+		if ( Jetpack::is_connection_ready() && ! Identity_Crisis::validate_sync_error_idc_option() && Actions::sync_allowed() ) {
+			Actions::do_full_sync( array( 'functions' => true ) );
+			Actions::$sender->do_full_sync();
 		}
 
-		if ( Jetpack::validate_sync_error_idc_option() ) {
+		if ( Identity_Crisis::validate_sync_error_idc_option() ) {
 			return new WP_Error(
 				'site_in_safe_mode',
 				__( 'Can not provision a plan while in safe mode. See: https://jetpack.com/support/safe-mode/', 'jetpack' )
 			);
 		}
 
-		$blog_id    = Jetpack_Options::get_option( 'id' );
-		$blog_token = Jetpack_Options::get_option( 'blog_token' );
-
-		if ( ! $blog_id || ! $blog_token || ( isset( $named_args['force_register'] ) && intval( $named_args['force_register'] ) ) ) {
+		if ( ! Jetpack::connection()->is_connected() || ( isset( $named_args['force_register'] ) && (int) $named_args['force_register'] ) ) {
 			// This code mostly copied from Jetpack::admin_page_load.
 			Jetpack::maybe_set_version_option();
-			$registered = Jetpack::try_registration();
+			Jetpack::connection()->add_register_request_param( 'from', 'jetpack-start' );
+			$registered = Jetpack::connection()->try_registration();
 			if ( is_wp_error( $registered ) ) {
 				return $registered;
 			} elseif ( ! $registered ) {
 				return new WP_Error( 'registration_error', __( 'There was an unspecified error registering the site', 'jetpack' ) );
 			}
-
-			$blog_id    = Jetpack_Options::get_option( 'id' );
-			$blog_token = Jetpack_Options::get_option( 'blog_token' );
 		}
 
 		// If the user isn't specified, but we have a current master user, then set that to current user.
@@ -70,11 +75,9 @@ class Jetpack_Provision { //phpcs:ignore
 			wp_set_current_user( $master_user_id );
 		}
 
-		$site_icon = ( function_exists( 'has_site_icon' ) && has_site_icon() )
-			? get_site_icon_url()
-			: false;
+		$site_icon = get_site_icon_url();
 
-		$auto_enable_sso = ( ! Jetpack::is_active() || Jetpack::is_module_active( 'sso' ) );
+		$auto_enable_sso = ( ! Jetpack::connection()->has_connected_owner() || Jetpack::is_module_active( 'sso' ) );
 
 		/** This filter is documented in class.jetpack-cli.php */
 		if ( apply_filters( 'jetpack_start_enable_sso', $auto_enable_sso ) ) {
@@ -102,10 +105,11 @@ class Jetpack_Provision { //phpcs:ignore
 			$user = wp_get_current_user();
 
 			// Role.
-			$role        = Jetpack::translate_current_user_to_role();
-			$signed_role = Jetpack::sign_role( $role );
+			$roles       = new Roles();
+			$role        = $roles->translate_current_user_to_role();
+			$signed_role = Jetpack::connection()->sign_role( $role );
 
-			$secrets = Jetpack::init()->generate_secrets( 'authorize' );
+			$secrets = ( new Secrets() )->generate( 'authorize' );
 
 			// Jetpack auth stuff.
 			$request_body['scope']  = $signed_role;
@@ -132,11 +136,11 @@ class Jetpack_Provision { //phpcs:ignore
 		}
 
 		if ( isset( $named_args['onboarding'] ) && ! empty( $named_args['onboarding'] ) ) {
-			$request_body['onboarding'] = intval( $named_args['onboarding'] );
+			$request_body['onboarding'] = (int) $named_args['onboarding'];
 		}
 
 		if ( isset( $named_args['force_connect'] ) && ! empty( $named_args['force_connect'] ) ) {
-			$request_body['force_connect'] = intval( $named_args['force_connect'] );
+			$request_body['force_connect'] = (int) $named_args['force_connect'];
 		}
 
 		if ( isset( $request_body['onboarding'] ) && (bool) $request_body['onboarding'] ) {
@@ -178,21 +182,24 @@ class Jetpack_Provision { //phpcs:ignore
 		);
 
 		$blog_id = Jetpack_Options::get_option( 'id' );
-		$url     = esc_url_raw( sprintf(
-			'https://%s/rest/v1.3/jpphp/%d/partner-provision',
-			self::get_api_host(),
-			$blog_id
-		) );
+		$url     = esc_url_raw(
+			sprintf(
+				'%s/rest/v1.3/jpphp/%d/partner-provision',
+				self::get_api_host(),
+				$blog_id
+			)
+		);
 		if ( ! empty( $named_args['partner_tracking_id'] ) ) {
 			$url = esc_url_raw( add_query_arg( 'partner_tracking_id', $named_args['partner_tracking_id'], $url ) );
 		}
 
 		// Add calypso env if set.
-		if ( getenv( 'CALYPSO_ENV' ) ) {
-			$url = add_query_arg( array( 'calypso_env' => getenv( 'CALYPSO_ENV' ) ), $url );
+		$calypso_env = Jetpack::get_calypso_env();
+		if ( ! empty( $calypso_env ) ) {
+			$url = add_query_arg( array( 'calypso_env' => $calypso_env ), $url );
 		}
 
-		$result = Jetpack_Client::_wp_remote_request( $url, $request );
+		$result = Client::_wp_remote_request( $url, $request );
 
 		if ( is_wp_error( $result ) ) {
 			return $result;
@@ -215,7 +222,7 @@ class Jetpack_Provision { //phpcs:ignore
 
 		if ( isset( $body_json->access_token ) && is_user_logged_in() ) {
 			// Check if this matches the existing token before replacing.
-			$existing_token = Jetpack_Data::get_access_token( get_current_user_id() );
+			$existing_token = ( new Tokens() )->get_access_token( get_current_user_id() );
 			if ( empty( $existing_token ) || $existing_token->secret !== $body_json->access_token ) {
 				self::authorize_user( get_current_user_id(), $body_json->access_token );
 			}
@@ -224,9 +231,15 @@ class Jetpack_Provision { //phpcs:ignore
 		return $body_json;
 	}
 
+	/**
+	 * Authorizes the passed user.
+	 *
+	 * @param int    $user_id User ID.
+	 * @param string $access_token Access token.
+	 */
 	private static function authorize_user( $user_id, $access_token ) {
-		// authorize user and enable SSO
-		Jetpack::update_user_token( $user_id, sprintf( '%s.%d', $access_token, $user_id ), true );
+		// authorize user and enable SSO.
+		( new Tokens() )->update_user_token( $user_id, sprintf( '%s.%d', $access_token, $user_id ), true );
 
 		/**
 		 * Auto-enable SSO module for new Jetpack Start connections
@@ -239,7 +252,9 @@ class Jetpack_Provision { //phpcs:ignore
 			? array( 'sso' )
 			: array();
 
-		if ( $active_modules = Jetpack_Options::get_option( 'active_modules' ) ) {
+		$active_modules = Jetpack_Options::get_option( 'active_modules' );
+
+		if ( $active_modules ) {
 			Jetpack::delete_active_modules();
 			Jetpack::activate_default_modules( 999, 1, array_merge( $active_modules, $other_modules ), false );
 		} else {
@@ -247,19 +262,26 @@ class Jetpack_Provision { //phpcs:ignore
 		}
 	}
 
+	/**
+	 * Verifies the access token being used.
+	 *
+	 * @param string $access_token Access token.
+	 *
+	 * @return array|\Automattic\Jetpack\Connection\WP_Error|bool|WP_Error
+	 */
 	private static function verify_token( $access_token ) {
 		$request = array(
 			'headers' => array(
-				'Authorization' => "Bearer " . $access_token,
+				'Authorization' => 'Bearer ' . $access_token,
 				'Host'          => 'public-api.wordpress.com',
 			),
 			'timeout' => 10,
 			'method'  => 'POST',
-			'body'    => ''
+			'body'    => '',
 		);
 
-		$url = sprintf( 'https://%s/rest/v1.3/jpphp/partner-keys/verify', self::get_api_host() );
-		$result = Jetpack_Client::_wp_remote_request( $url, $request );
+		$url    = sprintf( '%s/rest/v1.3/jpphp/partner-keys/verify', self::get_api_host() );
+		$result = Client::_wp_remote_request( $url, $request );
 
 		if ( is_wp_error( $result ) ) {
 			return $result;
@@ -268,10 +290,11 @@ class Jetpack_Provision { //phpcs:ignore
 		$response_code = wp_remote_retrieve_response_code( $result );
 		$body_json     = json_decode( wp_remote_retrieve_body( $result ) );
 
-		if( 200 !== $response_code ) {
+		if ( 200 !== $response_code ) {
 			if ( isset( $body_json->error ) ) {
 				return new WP_Error( $body_json->error, $body_json->message );
 			} else {
+				/* translators: %s is HTTP response code (e.g. 500, 401, etc). */
 				return new WP_Error( 'server_error', sprintf( __( 'Request failed with code %s', 'jetpack' ), $response_code ) );
 			}
 		}
@@ -279,8 +302,13 @@ class Jetpack_Provision { //phpcs:ignore
 		return true;
 	}
 
+	/**
+	 * Gets the API host as set via env.
+	 *
+	 * @return string API URL.
+	 */
 	private static function get_api_host() {
-		$env_api_host = getenv( 'JETPACK_START_API_HOST', true );
-		return $env_api_host ? $env_api_host : JETPACK__WPCOM_JSON_API_HOST;
+		$env_api_host = getenv( 'JETPACK_START_API_HOST', true ); // phpcs:ignore PHPCompatibility.FunctionUse.NewFunctionParameters.getenv_local_onlyFound
+		return $env_api_host ? 'https://' . $env_api_host : JETPACK__WPCOM_JSON_API_BASE;
 	}
 }

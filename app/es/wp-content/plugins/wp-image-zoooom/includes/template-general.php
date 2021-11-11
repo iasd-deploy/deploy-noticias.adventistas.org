@@ -30,7 +30,6 @@ $brand = vsprintf(
 <div id="supported-lightboxes" style="display:none;">
 	<p>The zoom is compatible with:
 		<ul style="list-style: inside; padding-left: 20px;">
-			<li>the lightbox created by the <a href="https://www.silkypress.com/i/wp-huge-it-gallery" target="_blank" rel="nofollow">Huge IT Gallery</a> plugin</li>
 			<li>the lightbox created by the <a href="https://www.silkypress.com/i/wp-photo-gallery" target="_blank" rel="nofollow">Photo Gallery</a> plugin</li>
 			<li>the iLightbox from the <a href="https://www.silkypress.com/i/avada-theme" target="_blank" rel="nofollow">Avada Theme</a></li>
 			<li>the lightbox created by <a href="https://www.silkypress.com/i/jetpack-carousel" target="_blank" rel="nofollow">Carousel</a> from Jetpack</li>
@@ -40,7 +39,6 @@ $brand = vsprintf(
 			<li>the lightbox created by the Ultimate Product Catalogue by Etoile Web Design</li>
 			<li>the <a href="http://dimsemenov.com/plugins/magnific-popup/" target="_blank" rel="nofollow">Magnific Popup</a> lightbox (also used by <a href="https://www.silkypress.com/i/enfold-theme" target="_blank" rel="nofollow">Enfold</a> portfolio items, the Divi gallery or the <a href="https://wordpress.org/plugins/beaver-builder-lite-version/" target="_blank">Beaver Builder</a>)</li>
 			<li>the lightbox from the <a href="https://wordpress.org/plugins/elementor/" target="_blank" rel="nofollow">Elementor</a> Page Builder</li>
-			<li>the lightbox from the <a href="https://lcweb.it/media-grid/bundle-pack" target="_blank" rel="nofollow">Media Grid - Bundle Pack</a></li>
 		</ul>
 	</p>
 </div>

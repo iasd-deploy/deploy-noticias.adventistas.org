@@ -62,6 +62,30 @@ export default class WPError {
 	}
 
 	/**
+	 * Adds an error to the object.
+	 *
+	 * @param {string} code
+	 * @param {string} message
+	 * @return {WPError} The modified error object.
+	 */
+	add = ( code, message ) => {
+		if ( ! this.#errors[ code ] ) {
+			this.#errors[ code ] = [];
+		}
+
+		this.#errors[ code ].push( message );
+
+		return this;
+	};
+
+	/**
+	 * Checks if this Error object contains any errors.
+	 *
+	 * @return {boolean} True if has errors.
+	 */
+	hasErrors = () => this.getErrorCodes().length > 0;
+
+	/**
 	 * Get all the codes.
 	 *
 	 * @return {string[]} Array of error codes.
@@ -123,5 +147,22 @@ export default class WPError {
 		code = code || this.getErrorCode();
 
 		return this.#errorData[ code ];
+	};
+
+	/**
+	 * Get all error messages combined into one string.
+	 *
+	 * @return {Array<string>} All error messages combined into a single array ignoring code.
+	 */
+	getAllErrorMessages = () => {
+		const messages = [];
+
+		for ( const errorCode in this.#errors ) {
+			if ( this.#errors.hasOwnProperty( errorCode ) ) {
+				messages.push( ...this.#errors[ errorCode ] );
+			}
+		}
+
+		return messages;
 	};
 }

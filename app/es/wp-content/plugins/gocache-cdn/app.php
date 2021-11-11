@@ -41,4 +41,4 @@ App::uses( 'core', 'Config' );
 
 $core = new Core();
 
-register_activation_hook( __FILE__, array( $core, 'activate' ) );
+register_activation_hook( __DIR__ . '/gocache-manager.php', array( $core, 'activate' ) );

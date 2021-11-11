@@ -127,7 +127,7 @@ class IWP_MMB_User extends IWP_MMB_Core
 			
 				if($args['email_notify']){
 					//require_once ABSPATH . WPINC . '/pluggable.php';
-					wp_new_user_notification($user_id, $args['user_pass']);
+					wp_new_user_notification($user_id);
 				}
 				return $user_id;
 			}else{

@@ -567,7 +567,9 @@ class IWP_MMB_Stats extends IWP_MMB_Core
         $stats = array();
         
 		$current = get_site_transient( 'update_plugins' );
-		$r = $current->response['iwp-client/init.php'];
+        if (isset($current->response['iwp-client/init.php'])) {
+          $r = $current->response['iwp-client/init.php'];
+        }
 		//For BWP
 		$bwp = get_option("bit51_bwps");
 		$wp_admin_URL=admin_url();
@@ -589,8 +591,10 @@ class IWP_MMB_Stats extends IWP_MMB_Core
         $stats['content_path']    			= WP_CONTENT_DIR;
         $stats['client_path']     			= $iwp_mmb_plugin_dir;
         $stats['client_version'] 			= IWP_MMB_CLIENT_VERSION;
-		$stats['client_new_version']        = $r->new_version;
-		$stats['client_new_package']       	= $r->package;
+        if (!empty($r)) {
+            $stats['client_new_version']    = $r->new_version;
+            $stats['client_new_package']    = $r->package;
+        }
         $stats['site_title']      			= get_bloginfo('name');
         $stats['site_tagline']    			= get_bloginfo('description');
         $stats['site_home']       			= get_option('home');

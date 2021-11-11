@@ -6,7 +6,7 @@ jQuery(document).ready(function($) {
     function updateZoomer() {
         $(".zoomContainer").remove();
 
-        $("#demo").unbind( 'touchstart touchmove touchend click mouseenter' );
+        $("#demo").off( 'touchstart touchmove touchend click mouseenter' );
 
         var zoom_options = {};
 
@@ -136,13 +136,13 @@ jQuery(document).ready(function($) {
         $("#tab_lens, #tab_zoom_window").removeClass('disabled');
         $("#tab_lens a").attr('href', '#lens_settings');
         $("#tab_zoom_window a").attr('href', '#zoom_window_settings');
-        $("#lensSize").removeAttr('disabled');
-        $("#lensColour").removeAttr('disabled');
-        $("#lensBgImage").removeAttr('disabled');
-        $("#tintColor").removeAttr('disabled');
-        $("#tintOpacity").removeAttr('disabled');
-        $("#lensColour").removeAttr('disabled');
-        $("#lensOverlay").removeAttr('disabled');
+        $("#lensSize").prop('disabled', false);
+        $("#lensColour").prop('disabled', false);
+        $("#lensBgImage").prop('disabled', false);
+        $("#tintColor").prop('disabled', false);
+        $("#tintOpacity").prop('disabled', false);
+        $("#lensColour").prop('disabled', false);
+        $("#lensOverlay").prop('disabled', false);
 
         // Enable/disable fields
         switch ( settings['lensShape'] ) {
@@ -181,6 +181,6 @@ jQuery(document).ready(function($) {
 
     }
 
-    $(".form-group input").change(updateZoomer);
+    $(".form-group input").on('change', updateZoomer);
 
 });

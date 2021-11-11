@@ -266,7 +266,7 @@ function iwp_mmb_direct_to_any_copy($source, $destination, $overwrite = false, $
             }
         }
 
-        $fileHandler = fopen($new_temp_subfolders.$file['name'],w);
+        $fileHandler = fopen($new_temp_subfolders.$file['name'],'w');
         fwrite($fileHandler,$fileContent);
         fclose($fileHandler);
 

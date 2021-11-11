@@ -3,7 +3,7 @@
  * Plugin Name: WP Image Zoom
  * Plugin URI: https://wordpress.org/plugins/wp-image-zoooom/
  * Description: Add zoom effect over the an image, whether it is an image in a post/page or the featured image of a product in a WooCommerce shop
- * Version: 1.43
+ * Version: 1.49
  * Author: SilkyPress
  * Author URI: https://www.silkypress.com
  * License: GPL2
@@ -11,8 +11,8 @@
  * Text Domain: wp-image-zoooom
  * Domain Path: /languages/
  *
- * WC requires at least: 2.3.0
- * WC tested up to: 4.4 
+ * WC requires at least: 3.0.0
+ * WC tested up to: 5.9 
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -26,7 +26,7 @@ if ( ! class_exists( 'ImageZoooom' ) ) :
 	 * @class ImageZoooom
 	 */
 	final class ImageZoooom {
-		public $version             = '1.43';
+		public $version             = '1.49';
 		public $theme               = '';
 		protected static $_instance = null;
 
@@ -107,8 +107,14 @@ if ( ! class_exists( 'ImageZoooom' ) ) :
 				// remove_theme_support( 'wc-product-gallery-lightbox' );
 				add_theme_support( 'wc-product-gallery-slider' );
 
-				if ( $this->theme( 'kiddy' ) || ( $this->theme( 'flatsome' ) && ! get_theme_mod( 'product_gallery_woocommerce' ) ) ) {
-					remove_theme_support( 'wc-product-gallery-slider' );
+				$themes_no_slider = array( 'kiddy', 'oshin', 'startit', 'flatsome', 'retail-therapy', 'woodmart' );
+				if ( $this->theme( 'bridge' ) && ! defined( 'QODE_FRAMEWORK_ADMIN_ASSETS_ROOT' ) ) {
+					$themes_no_slider[] = 'bridge';
+				}
+				foreach ( $themes_no_slider as $_t ) {
+					if ( $this->theme( $_t ) ) {
+						remove_theme_support( 'wc-product-gallery-slider' );
+					}
 				}
 
 				if ( $this->theme( 'thegem' ) ) {

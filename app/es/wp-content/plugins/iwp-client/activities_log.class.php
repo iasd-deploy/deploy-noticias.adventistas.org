@@ -548,7 +548,7 @@ class IWP_MMB_Activities_log {
 		return $this->iwp_mmb_post_update_translations_complete_actions($update_actions);
 	}
 	
-	function iwp_mmb_upgrader_post_install($flag, $hook_extra, $result) {
+	function iwp_mmb_upgrader_post_install($response, $hook_extra, $result) {
 		global $wp_version;
 
 		if(
@@ -557,7 +557,8 @@ class IWP_MMB_Activities_log {
 			&& is_object($hook_extra['language_update'])
 		) {
 			remove_filter('update_translations_complete_actions', array(&$this,'iwp_mmb_update_translations_complete_actions'));
-			return $this->iwp_mmb_post_update_translations_complete_actions(array());
+			$this->iwp_mmb_post_update_translations_complete_actions(array());
+			return $response;
 		}
 		
 		if(
@@ -569,7 +570,7 @@ class IWP_MMB_Activities_log {
 			$this->iwp_mmb_collect_plugin_details($hook_extra['plugin']);	
 		}
 		
-		return $result;
+		return $response;
 	}
 	
 	function iwp_mmb_update_is_save_activity_log($is_save_activity_log) {
@@ -687,7 +688,7 @@ class IWP_MMB_Activities_log {
 				unset($return['detailed'][$key]);
 			} else if(!array_key_exists('details',$mainActionArray)) {
 				foreach($mainActionArray as $key_inner => &$subActionsArray) {
-					if(!$subActionsArray[$count_key] && $key_inner!=$count_key) {
+					if(empty($subActionsArray[$count_key]) && $key_inner!=$count_key) {
 						unset($mainActionArray[$key_inner]);
 					}
 				}

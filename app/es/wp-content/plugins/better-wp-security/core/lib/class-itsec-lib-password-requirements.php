@@ -1,17 +1,21 @@
 <?php
 
+use iThemesSecurity\Lib\Legacy_Password_Requirement;
+use iThemesSecurity\Lib\Password_Requirement;
+use iThemesSecurity\User_Groups;
+
 /**
  * Class ITSEC_Lib_Password_Requirements
  */
 class ITSEC_Lib_Password_Requirements {
 
-	/** @var array[] */
+	/** @var Password_Requirement[] */
 	private static $requirements;
 
 	/**
 	 * Get all registered password requirements.
 	 *
-	 * @return array
+	 * @return Password_Requirement[]
 	 */
 	public static function get_registered() {
 		if ( null === self::$requirements ) {
@@ -29,10 +33,20 @@ class ITSEC_Lib_Password_Requirements {
 	/**
 	 * Register a password requirement.
 	 *
-	 * @param string $reason_code
-	 * @param array  $opts
+	 * @param Password_Requirement|string $requirement_or_code
+	 * @param array                       $opts
 	 */
-	public static function register( $reason_code, $opts ) {
+	public static function register( $requirement_or_code, $opts = [] ) {
+		if ( $requirement_or_code instanceof Password_Requirement ) {
+			self::$requirements[ $requirement_or_code->get_code() ] = $requirement_or_code;
+
+			return;
+		}
+
+		_doing_it_wrong( __METHOD__, 'Pass a Password_Requirement instance instead of a configuration array.', '7.0.0' );
+
+		$reason_code = $requirement_or_code;
+
 		$merged = wp_parse_args( $opts, array(
 			'evaluate'                => null,
 			'validate'                => null,
@@ -48,28 +62,38 @@ class ITSEC_Lib_Password_Requirements {
 			( array_key_exists( 'validate', $opts ) || array_key_exists( 'evaluate', $opts ) ) &&
 			( ! is_callable( $merged['validate'] ) || ! is_callable( $merged['evaluate'] ) )
 		) {
+			_doing_it_wrong( __METHOD__, 'Validate and evaluate must be callable if defined.', '5.8.0' );
+
 			return;
 		}
 
 		if ( array_key_exists( 'flag_check', $opts ) && ! is_callable( $merged['flag_check'] ) ) {
+			_doing_it_wrong( __METHOD__, 'Flag check must be callable if defined.', '5.8.0' );
+
 			return;
 		}
 
 		if ( array_key_exists( 'defaults', $opts ) ) {
 			if ( ! is_array( $merged['defaults'] ) ) {
+				_doing_it_wrong( __METHOD__, 'Defaults must be an array if defined.', '5.8.0' );
+
 				return;
 			}
 
 			if ( ! array_key_exists( 'settings_config', $opts ) ) {
+				_doing_it_wrong( __METHOD__, 'Settings config must be defined if defaults are provided.', '5.8.0' );
+
 				return;
 			}
 		}
 
 		if ( array_key_exists( 'settings_config', $opts ) && ! is_callable( $merged['settings_config'] ) ) {
+			_doing_it_wrong( __METHOD__, 'Settings config must be a callable if defined.', '5.8.0' );
+
 			return;
 		}
 
-		self::$requirements[ $reason_code ] = $merged;
+		self::$requirements[ $reason_code ] = new Legacy_Password_Requirement( $reason_code, $merged );
 	}
 
 	/**
@@ -90,8 +114,9 @@ class ITSEC_Lib_Password_Requirements {
 		$registered = self::get_registered();
 
 		if ( isset( $registered[ $reason ] ) ) {
-			$settings = self::get_requirement_settings( $reason );
-			$message  = call_user_func( $registered[ $reason ]['reason'], get_user_meta( $user->ID, $registered[ $reason ]['meta'], true ), $settings );
+			$settings   = self::get_requirement_settings( $reason );
+			$evaluation = get_user_meta( $user->ID, $registered[ $reason ]->get_meta_key(), true );
+			$message    = $registered[ $reason ]->get_reason_message( $evaluation, $settings );
 		}
 
 		/**
@@ -144,19 +169,25 @@ class ITSEC_Lib_Password_Requirements {
 			return $error;
 		}
 
-		require_once( ITSEC_Core::get_core_dir() . '/lib/class-itsec-lib-canonical-roles.php' );
+		ITSEC_Lib::load( 'canonical-roles' );
 
 		if ( isset( $args['role'] ) && $user instanceof WP_User ) {
 			$canonical = ITSEC_Lib_Canonical_Roles::get_canonical_role_from_role_and_user( $args['role'], $user );
+			$target    = User_Groups\Match_Target::for_user( $user, $args['role'] );
 		} elseif ( isset( $args['role'] ) ) {
+			$target    = User_Groups\Match_Target::for_role( $args['role'] );
 			$canonical = ITSEC_Lib_Canonical_Roles::get_canonical_role_from_role( $args['role'] );
 		} elseif ( empty( $user->ID ) || ! is_numeric( $user->ID ) ) {
-			$canonical = ITSEC_Lib_Canonical_Roles::get_canonical_role_from_role( get_option( 'default_role', 'subscriber' ) );
+			$args['role'] = get_option( 'default_role', 'subscriber' );
+			$target       = User_Groups\Match_Target::for_role( $args['role'] );
+			$canonical    = ITSEC_Lib_Canonical_Roles::get_canonical_role_from_role( $args['role'] );
 		} else {
+			$target    = User_Groups\Match_Target::for_user( get_userdata( $user->ID ) );
 			$canonical = ITSEC_Lib_Canonical_Roles::get_user_role( $user );
 		}
 
 		$args['canonical'] = $canonical;
+		$args['target']    = $target;
 
 		/**
 		 * Fires when modules should validate a password according to their rules.
@@ -273,9 +304,12 @@ class ITSEC_Lib_Password_Requirements {
 			return false;
 		}
 
-		// If the requirement does not have any settings, than it is always enabled.
-		if ( null === $requirements[ $requirement ]['settings_config'] ) {
+		if ( $requirements[ $requirement ]->is_always_enabled() ) {
 			return true;
+		}
+
+		if ( $requirements[ $requirement ]->has_user_group() ) {
+			return ! empty( self::get_requirement_settings( $requirement )['group'] );
 		}
 
 		$enabled = ITSEC_Modules::get_setting( 'password-requirements', 'enabled_requirements' );
@@ -292,23 +326,22 @@ class ITSEC_Lib_Password_Requirements {
 	 *
 	 * @param string $requirement
 	 *
-	 * @return array|false
+	 * @return array
 	 */
 	public static function get_requirement_settings( $requirement ) {
 
 		$requirements = self::get_registered();
 
 		if ( ! isset( $requirements[ $requirement ] ) ) {
-			return false;
+			return [];
 		}
 
-		if ( null === $requirements[ $requirement ]['settings_config'] ) {
-			return false;
+		if ( ! $requirements[ $requirement ]->get_settings_schema() ) {
+			return [];
 		}
 
 		$all_settings = ITSEC_Modules::get_setting( 'password-requirements', 'requirement_settings' );
-		$settings     = isset( $all_settings[ $requirement ] ) ? $all_settings[ $requirement ] : array();
 
-		return wp_parse_args( $settings, $requirements[ $requirement ]['defaults'] );
+		return $all_settings[ $requirement ] ?? [];
 	}
 }

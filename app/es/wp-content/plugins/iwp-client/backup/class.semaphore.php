@@ -31,7 +31,7 @@ class IWP_MMB_Semaphore {
 	 * @return bool
 	 */
 	public function lock() {
-		global $wpdb, $iwp_backup_core;
+		global $wpdb, $iwp_backup_core,$iwp_mmb_core;
 
 		// Attempt to set the lock
 		$affected = $wpdb->query("
@@ -77,8 +77,8 @@ class IWP_MMB_Semaphore {
 		$iwp_backup_core->log('Set semaphore last lock ('.$this->lock_name.') time to '.current_time('mysql', 1));
 
 		$iwp_backup_core->log('Semaphore lock ('.$this->lock_name.') complete');
-		update_option('IWP_backup_status', '1');
-		delete_option('IWP_running_backupID');
+		$iwp_mmb_core->iwp_update_option($option_name = 'IWP_backup_status',$option_value = '1');
+		$iwp_mmb_core->iwp_delete_option('IWP_running_backupID');
 		return true;
 	}
 

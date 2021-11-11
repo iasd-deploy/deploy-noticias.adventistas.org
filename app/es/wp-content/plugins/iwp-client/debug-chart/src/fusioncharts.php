@@ -20,7 +20,7 @@
 		';
 
 		// constructor
-		function __construct($type, $id, $width = 400, $height = 300, $renderAt, $dataFormat, $dataSource) {
+		function __construct($type, $id, $width = 400, $height = 300, $renderAt = null, $dataFormat = null, $dataSource = null) {
 			isset($type) ? $this->constructorOptions['type'] = $type : '';
 			isset($id) ? $this->constructorOptions['id'] = $id : 'php-fc-'.time();
 			isset($width) ? $this->constructorOptions['width'] = $width : '';

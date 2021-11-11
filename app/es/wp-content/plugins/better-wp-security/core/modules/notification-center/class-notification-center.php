@@ -538,27 +538,6 @@ final class ITSEC_Notification_Center {
 	}
 
 	/**
-	 * Dismiss an error encountered while sending a notification with wp_mail().
-	 *
-	 * @param string $error_id
-	 */
-	public function dismiss_mail_error( $error_id ) {
-		_deprecated_function( __METHOD__, '4.7.1' );
-	}
-
-	/**
-	 * Get the loggged mail errors keyed by id.
-	 *
-	 * @return array
-	 */
-	public function get_mail_errors() {
-
-		_deprecated_function( __METHOD__, '4.7.1' );
-
-		return array();
-	}
-
-	/**
 	 * Initialize the module.
 	 */
 	public function run() {
@@ -727,6 +706,14 @@ final class ITSEC_Notification_Center {
 				$to_send[] = $slug;
 			}
 		}
+
+		/**
+		 * Filters the list of scheduled notifications to send on this request.
+		 *
+		 * @param string[] $to_send       Notification slugs to send.
+		 * @param array    $notifications List of available notifications that could be sent.
+		 */
+		$to_send = apply_filters( 'itsec_notification_center_send_scheduled_notifications', $to_send, $notifications );
 
 		$ret = array();
 

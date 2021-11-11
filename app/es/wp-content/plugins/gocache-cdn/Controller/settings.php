@@ -61,7 +61,8 @@ class Settings_Controller
 			array( 'GoCache\Settings_View', 'render_authenticate_page' )
 		);
 
-		if ( ! $this->model->status ) {
+		$status = get_option( 'gocache_option-status' );
+		if ( $status != 1  ) {
 			return;
 		}
 
@@ -109,7 +110,17 @@ class Settings_Controller
 			$list = preg_split( "/\\r\\n|\\r|\\n/", $value );
 			$list = array_splice( $list, 0, 3 );
 			$list = array_map(function($item){
-				return strtolower( preg_replace( '/[^0-9a-z]+/i', '', $item ) );
+				return strtolower( preg_replace( '/[^0-9a-z%_-]+/i', '', $item ) );
+			}, $list);
+			$value = implode( PHP_EOL, $list );
+		}
+
+		if ( $name == $this->model->get_option_name( 'override_url_domain' ) ) {
+
+			$list = preg_split( "/\\r\\n|\\r|\\n/", $value );
+			$list = array_splice( $list, 0, 5 );
+			$list = array_map(function($item){
+				return strtolower( preg_replace( '/[^0-9a-z-_\.]+/i', '', $item ) );
 			}, $list);
 			$value = implode( PHP_EOL, $list );
 		}

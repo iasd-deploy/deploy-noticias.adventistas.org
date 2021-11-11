@@ -1,31 +1,43 @@
 <?php
 
-final class ITSEC_Strong_Passwords {
+use iThemesSecurity\Contracts\Runnable;
+use iThemesSecurity\Lib\Password_Requirement;
+use iThemesSecurity\User_Groups;
+
+final class ITSEC_Strong_Passwords implements Runnable {
 
 	const STRENGTH_KEY = 'itsec-password-strength';
 
-	public function __construct() {
+	/** @var User_Groups\Matcher */
+	private $matcher;
 
-		add_action( 'itsec_register_password_requirements', array( $this, 'register_requirements' ) );
+	/** @var Password_Requirement */
+	private $requirement;
 
-		add_action( 'admin_enqueue_scripts', array( $this, 'add_scripts' ) );
-		add_action( 'resetpass_form', array( $this, 'add_scripts_to_wp_login' ) );
-		add_action( 'itsec_password_requirements_change_form', array( $this, 'add_scripts_to_wp_login' ) );
+	/**
+	 * ITSEC_Strong_Passwords constructor.
+	 *
+	 * @param User_Groups\Matcher  $matcher
+	 * @param Password_Requirement $requirement
+	 */
+	public function __construct( User_Groups\Matcher $matcher, Password_Requirement $requirement ) {
+		$this->matcher     = $matcher;
+		$this->requirement = $requirement;
+	}
+
+	public function run() {
+		add_action( 'itsec_register_password_requirements', [ $this, 'register_requirements' ] );
+		add_action( 'admin_enqueue_scripts', [ $this, 'add_scripts' ] );
+		add_action( 'resetpass_form', [ $this, 'add_scripts_to_wp_login' ] );
+		add_action( 'itsec_password_requirements_change_form', [ $this, 'add_scripts_to_wp_login' ] );
+		add_filter( 'random_password', [ $this, 'make_random_password_strong' ], 10, 4 );
 	}
 
 	/**
 	 * Register the Strong Passwords requirement.
 	 */
 	public function register_requirements() {
-		ITSEC_Lib_Password_Requirements::register( 'strength', array(
-			'evaluate'                => array( $this, 'evaluate' ),
-			'validate'                => array( $this, 'validate' ),
-			'reason'                  => array( $this, 'reason' ),
-			'meta'                    => self::STRENGTH_KEY,
-			'evaluate_if_not_enabled' => true,
-			'defaults'                => array( 'role' => 'administrator' ),
-			'settings_config'         => array( $this, 'get_settings_config' ),
-		) );
+		ITSEC_Lib_Password_Requirements::register( $this->requirement );
 	}
 
 	/**
@@ -34,7 +46,6 @@ final class ITSEC_Strong_Passwords {
 	 * @return void
 	 */
 	public function add_scripts() {
-
 		global $pagenow;
 
 		if ( 'profile.php' !== $pagenow ) {
@@ -46,12 +57,9 @@ final class ITSEC_Strong_Passwords {
 		}
 
 		$settings = ITSEC_Lib_Password_Requirements::get_requirement_settings( 'strength' );
-		$role     = isset( $settings['role'] ) ? $settings['role'] : 'administrator';
 
-		require_once( ITSEC_Core::get_core_dir() . '/lib/class-itsec-lib-canonical-roles.php' );
-
-		if ( ITSEC_Lib_Canonical_Roles::is_user_at_least( $role ) ) {
-			wp_enqueue_script( 'itsec_strong_passwords', plugins_url( 'js/script.js', __FILE__ ), array( 'jquery' ), ITSEC_Core::get_plugin_build() );
+		if ( $this->matcher->matches( User_Groups\Match_Target::for_user( wp_get_current_user() ), $settings['group'] ) ) {
+			wp_enqueue_script( 'itsec_strong_passwords', plugins_url( 'js/script.js', __FILE__ ), [ 'jquery' ], ITSEC_Core::get_plugin_build() );
 		}
 	}
 
@@ -69,151 +77,47 @@ final class ITSEC_Strong_Passwords {
 		}
 
 		$settings = ITSEC_Lib_Password_Requirements::get_requirement_settings( 'strength' );
-		$role     = isset( $settings['role'] ) ? $settings['role'] : 'administrator';
 
-		require_once( ITSEC_Core::get_core_dir() . '/lib/class-itsec-lib-canonical-roles.php' );
-
-		if ( ITSEC_Lib_Canonical_Roles::is_user_at_least( $role, $user ) ) {
-			wp_enqueue_script( 'itsec_strong_passwords', plugins_url( 'js/script.js', __FILE__ ), array( 'jquery' ), ITSEC_Core::get_plugin_build() );
+		if ( $this->matcher->matches( User_Groups\Match_Target::for_user( $user ), $settings['group'] ) ) {
+			wp_enqueue_script( 'itsec_strong_passwords', plugins_url( 'js/script.js', __FILE__ ), [ 'jquery' ], ITSEC_Core::get_plugin_build() );
 		}
 	}
 
 	/**
-	 * Provide the reason string displayed to users on the change password form.
+	 * Forces `wp_generate_password()` to generate a password that zxcvbn will treat as strong.
 	 *
-	 * @param $evaluation
+	 * WordPress uses a 24 character password length in its suggested passwords which isn't always long
+	 * enough for zxcvbn to think is secure.
+	 *
+	 * @param string $password            The generated password.
+	 * @param int    $length              The length of password to generate.
+	 * @param bool   $special_chars       Whether to include standard special characters.
+	 * @param bool   $extra_special_chars Whether to include other special characters.
 	 *
 	 * @return string
 	 */
-	public function reason( $evaluation ) {
-		return esc_html__( 'Due to site rules, a strong password is required for your account. Please choose a new password that rates as strong on the meter.', 'better-wp-security' );
-	}
-
-	/**
-	 * Evaluate the strength of a password.
-	 *
-	 * @param string  $password
-	 * @param WP_User $user
-	 *
-	 * @return int
-	 */
-	public function evaluate( $password, $user ) {
-		return $this->get_password_strength( $user, $password );
-	}
-
-	/**
-	 * Validate whether a password strength is acceptable for a given user.
-	 *
-	 * @param int              $strength
-	 * @param WP_User|stdClass $user
-	 * @param array            $settings
-	 * @param array            $args
-	 *
-	 * @return bool
-	 */
-	public function validate( $strength, $user, $settings, $args ) {
-
-		if ( (int) $strength === 4 ) {
-			return true;
+	public function make_random_password_strong( $password, $length = 12, $special_chars = true, $extra_special_chars = false ) {
+		// We can't guarantee that the correct number of arguments will be passed to this filter.
+		// If we don't have the extra context, bail.
+		if ( func_num_args() <= 1 ) {
+			return $password;
 		}
 
-		require_once( ITSEC_Core::get_core_dir() . '/lib/class-itsec-lib-canonical-roles.php' );
-
-		$role = isset( $args['canonical'] ) ? $args['canonical'] : ITSEC_Lib_Canonical_Roles::get_user_role( $user );
-
-		if ( ! ITSEC_Lib_Canonical_Roles::is_canonical_role_at_least( $settings['role'], $role ) ) {
-			return true;
+		if ( $length < 24 || ! $special_chars || ! ITSEC_Lib_Password_Requirements::is_requirement_enabled( 'strength' ) ) {
+			return $password;
 		}
 
-		return $this->make_error_message();
-	}
+		remove_filter( 'random_password', [ $this, 'make_random_password_strong' ] );
 
-	public function get_settings_config() {
-		return array(
-			'label'       => esc_html__( 'Strong Passwords', 'better-wp-security' ),
-			'description' => esc_html__( 'Force users to use strong passwords as rated by the WordPress password meter.', 'better-wp-security' ),
-			'render'      => array( $this, 'render_settings' ),
-			'sanitize'    => array( $this, 'sanitize_settings' ),
-		);
-	}
+		$tries = 0;
 
-	/**
-	 * Render the Settings Page.
-	 *
-	 * @param ITSEC_Form $form
-	 */
-	public function render_settings( $form ) {
-
-		$href = 'http://codex.wordpress.org/Roles_and_Capabilities';
-		$link = '<a href="' . $href . '" target="_blank" rel="noopener noreferrer">' . $href . '</a>';
-		?>
-		<tr>
-			<th scope="row">
-				<label for="itsec-password-requirements-requirement_settings-strength-role">
-					<?php esc_html_e( 'Minimum Role', 'better-wp-security' ); ?>
-				</label>
-			</th>
-			<td>
-				<?php $form->add_canonical_roles( 'role' ); ?>
-				<br/>
-				<label for="itsec-password-requirements-requirement_settings-strength-role"><?php _e( 'Minimum role at which a user must choose a strong password.', 'better-wp-security' ); ?></label>
-				<p class="description"><?php printf( __( 'For more information on WordPress roles and capabilities please see %s.', 'better-wp-security' ), $link ); ?></p>
-				<p class="warningtext description"><?php _e( 'Warning: If your site invites public registrations setting the role too low may annoy your members.', 'better-wp-security' ); ?></p>
-			</td>
-		</tr>
-		<?php
-	}
-
-	/**
-	 * Get a list of the sanitizer rules to apply.
-	 *
-	 * @param array $settings
-	 *
-	 * @return array
-	 */
-	public function sanitize_settings( $settings ) {
-		return array(
-			array( 'string', 'role', esc_html__( 'Minimum Role for Strong Passwords', 'better-wp-security' ) ),
-			array( 'canonical-roles', 'role', esc_html__( 'Minimum Role for Strong Passwords', 'better-wp-security' ) ),
-		);
-	}
-
-	/**
-	 * Get the strong password error message according to the given context.
-	 *
-	 * @return string
-	 */
-	private function make_error_message() {
-		$message = __( '<strong>Error</strong>: Due to site rules, a strong password is required. Please choose a new password that rates as <strong>Strong</strong> on the meter.', 'better-wp-security' );
-
-		return wp_kses( $message, array( 'strong' => array() ) );
-	}
-
-	/**
-	 * Calculate the strength of a password.
-	 *
-	 * @param WP_User $user
-	 * @param string  $password
-	 *
-	 * @return int
-	 */
-	private function get_password_strength( $user, $password ) {
-
-		$penalty_strings = array(
-			get_site_option( 'admin_email' )
-		);
-		$user_properties = array( 'user_login', 'first_name', 'last_name', 'nickname', 'display_name', 'user_email', 'user_url', 'description' );
-
-		foreach ( $user_properties as $user_property ) {
-			if ( isset( $user->$user_property ) ) {
-				$penalty_strings[] = $user->$user_property;
-			}
+		while ( $tries < 10 && ITSEC_Lib::get_password_strength_results( $password )->score < 4 ) {
+			$password = wp_generate_password( $length, $special_chars, $extra_special_chars );
+			$tries ++;
 		}
 
-		$results = ITSEC_Lib::get_password_strength_results( $password, $penalty_strings );
+		add_filter( 'random_password', [ $this, 'make_random_password_strong' ], 10, 4 );
 
-		return $results->score;
+		return $password;
 	}
 }
-
-new ITSEC_Strong_Passwords();

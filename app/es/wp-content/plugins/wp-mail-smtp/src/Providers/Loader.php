@@ -25,10 +25,11 @@ class Loader {
 	protected $providers = array(
 		'mail'        => 'WPMailSMTP\Providers\Mail\\',
 		'smtpcom'     => 'WPMailSMTP\Providers\SMTPcom\\',
-		'pepipostapi' => 'WPMailSMTP\Providers\PepipostAPI\\',
 		'sendinblue'  => 'WPMailSMTP\Providers\Sendinblue\\',
+		'pepipostapi' => 'WPMailSMTP\Providers\PepipostAPI\\',
 		'mailgun'     => 'WPMailSMTP\Providers\Mailgun\\',
 		'sendgrid'    => 'WPMailSMTP\Providers\Sendgrid\\',
+		'postmark'    => 'WPMailSMTP\Providers\Postmark\\',
 		'amazonses'   => 'WPMailSMTP\Providers\AmazonSES\\',
 		'gmail'       => 'WPMailSMTP\Providers\Gmail\\',
 		'outlook'     => 'WPMailSMTP\Providers\Outlook\\',
@@ -53,7 +54,7 @@ class Loader {
 	 */
 	public function get_providers() {
 
-		if ( ! Options::init()->is_pepipost_active() ) {
+		if ( ! Options::init()->is_mailer_active( 'pepipost' ) ) {
 			unset( $this->providers['pepipost'] );
 		}
 

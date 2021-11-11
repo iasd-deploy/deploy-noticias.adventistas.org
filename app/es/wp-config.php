@@ -16,22 +16,29 @@
 
 // ** MySQL settings - You can get this info from your web host ** //
 /** The name of the database for WordPress */
-define('DB_NAME', 'noticias_es');
+define('DB_NAME', $_ENV['WP_DB_NAME'] . "_pt");
 
 /** MySQL database username */
-define('DB_USER', 'root');
+define('DB_USER', $_ENV['WP_DB_USER']);
 
 /** MySQL database password */
-define('DB_PASSWORD', 'root');
+define('DB_PASSWORD', $_ENV['WP_DB_PASSWORD']);
 
- /** MySQL hostname */
-define('DB_HOST', 'localhost');
+/** MySQL hostname */
+define('DB_HOST', $_ENV['WP_DB_HOST']);
 
 /** Database Charset to use in creating database tables. */
-define('DB_CHARSET', 'utf8');
+define('DB_CHARSET', 'utf8mb4');
 
 /** The Database Collate type. Don't change this if in doubt. */
-define('DB_COLLATE', '');
+define('DB_COLLATE', 'utf8mb4_unicode_ci');
+
+define('AS3CF_SETTINGS', serialize(array(
+	'provider' => 'aws',
+	'access-key-id' => $_ENV['WP_S3_ACCESS_KEY'],
+	'secret-access-key' => $_ENV['WP_S3_SECRET_KEY'],
+	'bucket' => $_ENV['WP_S3_BUCKET']
+)));
 
 /** configuracoes personalizadas */
 define( 'WP_MAX_MEMORY_LIMIT' , '512M' );
@@ -50,10 +57,6 @@ define('DOMAIN_CURRENT_SITE', 'noticias.adventistas.org');
 define('PATH_CURRENT_SITE', '/es/');
 define('SITE_ID_CURRENT_SITE', 1);
 define('BLOG_ID_CURRENT_SITE', 1);
-
-define( 'AWS_ACCESS_KEY_ID', getenv("AWS_ACCESS_KEY_ID") );
-define( 'AWS_SECRET_ACCESS_KEY', getenv("AWS_SECRET_ACCESS_KEY") );
-define( 'MEDIA_TRASH', true );
 
 define('WP_POST_REVISIONS', false);
 

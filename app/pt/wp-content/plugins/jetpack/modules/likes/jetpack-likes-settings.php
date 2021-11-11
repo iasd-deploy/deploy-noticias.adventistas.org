@@ -1,5 +1,7 @@
 <?php
 
+use Automattic\Jetpack\Sync\Settings;
+
 class Jetpack_Likes_Settings {
 	function __construct() {
 		$this->in_jetpack = ! ( defined( 'IS_WPCOM' ) && IS_WPCOM );
@@ -43,7 +45,7 @@ class Jetpack_Likes_Settings {
 		 */
 		$title = apply_filters( 'likes_meta_box_title', __( 'Likes', 'jetpack' ) );
 		foreach( $post_types as $post_type ) {
-			add_meta_box( 'likes_meta', $title, array( $this, 'meta_box_content' ), $post_type, 'side', 'default' );
+			add_meta_box( 'likes_meta', $title, array( $this, 'meta_box_content' ), $post_type, 'side', 'default', array( '__back_compat_meta_box' => true ) );
 		}
 	}
 
@@ -148,7 +150,7 @@ class Jetpack_Likes_Settings {
 			( $this->is_enabled_sitewide() && ! empty( $_POST['wpl_enable_post_likes'] ) )
 		) {
 			// User wants to update the likes button status for an individual post, but the new status
-			// is the same as if they're asking for the default behaviour according to the current Likes setting.
+			// is the same as if they're asking for the default behavior according to the current Likes setting.
 			// So we delete the meta.
 			delete_post_meta( $post_id, 'switch_like_status' );
 		}
@@ -164,7 +166,7 @@ class Jetpack_Likes_Settings {
 		$disabled = get_post_meta( $post_id, 'sharing_disabled', true ); ?>
 		<p>
 			<label for="wpl_enable_post_sharing">
-				<input type="checkbox" name="wpl_enable_post_sharing" id="wpl_enable_post_sharing" value="1" <?php checked( !$disabled ); ?>>
+				<input type="checkbox" name="wpl_enable_post_sharing" id="wpl_enable_post_sharing" value="1" <?php checked( ! $disabled ); ?>>
 				<?php _e( 'Show sharing buttons.', 'jetpack' ); ?>
 			</label>
 			<input type="hidden" name="wpl_sharing_status_hidden" value="1" />
@@ -237,14 +239,63 @@ class Jetpack_Likes_Settings {
 	 */
 	function is_post_likeable( $post_id = 0 ) {
 		$post = get_post( $post_id );
-		if ( !$post || is_wp_error( $post ) ) {
+		if ( ! $post || is_wp_error( $post ) ) {
 			return false;
 		}
 
 		$sitewide_likes_enabled = (bool) $this->is_enabled_sitewide();
 		$post_likes_switched    = get_post_meta( $post->ID, 'switch_like_status', true );
 
-		return $post_likes_switched || ( $sitewide_likes_enabled && $post_likes_switched !== '0' );
+		/*
+		 * On WPCOM, headstart was inserting bad data for post_likes_switched.
+		 * it was wrapping the boolean value in an array. The array is always truthy regardless of its contents.
+		 * There was another bug where truthy values were ignored if the global like setting was false.
+		 * So in effect, the values for headstart never had an inpact.
+		 * Delete the $post_likes_switched flag in this case in order to keep the behaviour as it was.
+		 */
+		if ( is_array( $post_likes_switched ) ) {
+			$post_likes_switched = null;
+		}
+
+		/*
+		 * on WPCOM, we need to look at post edit date so we don't break old posts
+		 * if post edit date predates this code, stick with the former (buggy) behavior
+		 * see: p7DVsv-64H-p2
+		 */
+		$last_modified_time = strtotime( $post->post_modified_gmt );
+
+		$behavior_was_changed_at = strtotime( "2019-02-22 00:40:42" );
+
+		if ( $this->in_jetpack || $last_modified_time > $behavior_was_changed_at ) {
+			/*
+			 * the new and improved behavior on Jetpack and recent WPCOM posts:
+			 * $post_likes_switched is empty to follow site setting,
+			 * 0 if we want likes disabled, 1 if we want likes enabled.
+			 */
+			return $post_likes_switched || ( $sitewide_likes_enabled && $post_likes_switched !== '0' );
+		}
+
+		// implicit else (old behavior): $post_likes_switched simply inverts the global setting.
+		return ( (bool) $post_likes_switched ) xor $sitewide_likes_enabled;
+	}
+
+	/**
+	 * Is the like button itself visible (as opposed to the reblog button)
+	 *
+	 * If called from within The Loop or if called with a $post_id set, then the post will be checked.
+	 * Otherwise the sitewide setting will be used.
+	 *
+	 * @param int $post_id The ID of the post being rendered. Defaults to the current post if called from within The Loop.
+	 * @return bool
+	 */
+	public function is_likes_button_visible( $post_id = 0 ) {
+		if ( in_the_loop() || $post_id ) {
+			// If in The Loop, is_post_likeable will check the current post.
+			return $this->is_post_likeable( $post_id );
+		} else {
+			// Otherwise, check and see if likes are enabled sitewide.
+			return $this->is_enabled_sitewide();
+		}
 	}
 
 	/**
@@ -254,58 +305,56 @@ class Jetpack_Likes_Settings {
 	 * similar logic and filters apply here, too.
 	 */
 	function is_likes_visible() {
-		require_once JETPACK__PLUGIN_DIR . '/sync/class.jetpack-sync-settings.php';
-		if ( Jetpack_Sync_Settings::is_syncing() ) {
+		if ( Settings::is_syncing() ) {
 			return false;
 		}
 
-		global $wp_current_filter; // Used to apply 'sharing_show' filter
+		return $this->is_likes_button_visible() && $this->is_likes_module_enabled();
+	}
 
-		$post = get_post();
+	/**
+	 * Apply filters to determine if the likes module itself is enabled
+	 *
+	 * @return bool
+	 */
+	public function is_likes_module_enabled() {
+		global $wp_current_filter; // Used to apply 'sharing_show' filter.
 
-		// Never show on feeds or previews
+		$post    = get_post();
+		$enabled = true;
+
+		// Never show on feeds or previews.
 		if ( is_feed() || is_preview() ) {
 			$enabled = false;
-
 			// Not a feed or preview, so what is it?
 		} else {
-
-			if ( in_the_loop() ) {
-				// If in the loop, check if the current post is likeable
-				$enabled = $this->is_post_likeable();
-			} else {
-				// Otherwise, check and see if likes are enabled sitewide
-				$enabled = $this->is_enabled_sitewide();
-			}
-
-			if ( post_password_required() )
+			if ( post_password_required() ) {
 				$enabled = false;
+			}
 
 			if ( in_array( 'get_the_excerpt', (array) $wp_current_filter ) ) {
 				$enabled = false;
 			}
-
 			// Sharing Setting Overrides ****************************************
-
-			// Single post including custom post types
+			// Single post including custom post types.
 			if ( is_single() ) {
-				if ( ! $this->is_single_post_enabled( $post->post_type ) ) {
+				if ( ! $this->is_single_post_enabled( ( $post instanceof WP_Post ) ? $post->post_type : 'post' ) ) {
 					$enabled = false;
 				}
 
-				// Single page
+				// Single page.
 			} elseif ( is_page() && ! is_front_page() ) {
 				if ( ! $this->is_single_page_enabled() ) {
 					$enabled = false;
 				}
 
-				// Attachment
+				// Attachment.
 			} elseif ( is_attachment() ) {
 				if ( ! $this->is_attachment_enabled() ) {
 					$enabled = false;
 				}
 
-				// All other loops
+				// All other loops.
 			} elseif ( ! $this->is_index_enabled() ) {
 				$enabled = false;
 			}
@@ -323,7 +372,7 @@ class Jetpack_Likes_Settings {
 			}
 		}
 
-		// Run through the sharing filters
+		// Run through the sharing filters.
 		/** This filter is documented in modules/sharedaddy/sharing-service.php */
 		$enabled = apply_filters( 'sharing_show', $enabled, $post );
 
@@ -395,7 +444,7 @@ class Jetpack_Likes_Settings {
 		}
 
 		// Ensure it's always an array (even if not previously empty or scalar)
-		$setting['show'] = !empty( $sharing['global']['show'] ) ? (array) $sharing['global']['show'] : array();
+		$setting['show'] = ! empty( $sharing['global']['show'] ) ? (array) $sharing['global']['show'] : array();
 
 		/**
 		 * Filters where the Likes are displayed.
@@ -507,9 +556,25 @@ class Jetpack_Likes_Settings {
 							<input type="radio" class="code" name="jetpack_reblogs_enabled" value="off" <?php checked( $this->reblogs_enabled_sitewide(), false ); ?> />
 							<?php esc_html_e( 'Don\'t show the Reblog button on posts', 'jetpack' ); ?>
 						</label>
-						<div>
+					</div>
 				</td>
 			</tr>
+			<!-- WPCOM only: Comment Likes -->
+			<?php if ( ! $this->in_jetpack ) : ?>
+				<tr>
+					<th scope="row">
+						<label><?php esc_html_e( 'Comment Likes are', 'jetpack' ); ?></label>
+					</th>
+					<td>
+						<div>
+							<label>
+								<input type="checkbox" class="code" name="jetpack_comment_likes_enabled" value="1" <?php checked( $this->is_comments_enabled(), true ); ?> />
+								<?php esc_html_e( 'On for all comments', 'jetpack' ); ?>
+							</label>
+						</div>
+					</td>
+				</tr>
+			<?php endif; ?>
 		<?php endif; ?>
 		</tbody> <?php // closes the tbody attached to sharing_show_buttons_on_row_start... ?>
 	<?php
@@ -534,15 +599,34 @@ class Jetpack_Likes_Settings {
 	}
 
 	/**
+	 * Used for WPCOM ONLY. Comment likes are in their own module in Jetpack.
+	 * Returns if comment likes are enabled. Defaults to 'off'
+	 * @return boolean true if we should show comment likes, false if not
+	 */
+	function is_comments_enabled() {
+		/**
+		 * Filters whether Comment Likes are enabled.
+		 * true if enabled, false if not.
+		 *
+		 * @module comment-likes
+		 *
+		 * @since 2.2.0
+		 *
+		 * @param bool $option Are Comment Likes enabled sitewide.
+		 */
+		return (bool) apply_filters( 'jetpack_comment_likes_enabled', get_option( 'jetpack_comment_likes_enabled', false ) );
+	}
+
+	/**
 	 * Saves the setting in the database, bumps a stat on WordPress.com
 	 */
 	function admin_settings_callback() {
 		// We're looking for these, and doing a dance to set some stats and save
 		// them together in array option.
-		$new_state = !empty( $_POST['wpl_default'] ) ? $_POST['wpl_default'] : 'on';
+		$new_state = ! empty( $_POST['wpl_default'] ) ? $_POST['wpl_default'] : 'on';
 		$db_state  = $this->is_enabled_sitewide();
 
-		$reblogs_new_state = !empty( $_POST['jetpack_reblogs_enabled'] ) ? $_POST['jetpack_reblogs_enabled'] : 'on';
+		$reblogs_new_state = ! empty( $_POST['jetpack_reblogs_enabled'] ) ? $_POST['jetpack_reblogs_enabled'] : 'on';
 		$reblogs_db_state = $this->reblogs_enabled_sitewide();
 		/** Default State *********************************************************/
 
@@ -578,6 +662,20 @@ class Jetpack_Likes_Settings {
 				delete_option( 'disabled_reblogs' );
 				break;
 		}
+
+		// WPCOM only: Comment Likes
+		if ( ! $this->in_jetpack ) {
+			$new_comments_state = ! empty( $_POST['jetpack_comment_likes_enabled'] ) ? $_POST['jetpack_comment_likes_enabled'] : false;
+			switch( (bool) $new_comments_state ) {
+				case true:
+					update_option( 'jetpack_comment_likes_enabled', 1 );
+				break;
+				case false:
+				default:
+					update_option( 'jetpack_comment_likes_enabled', 0 );
+				break;
+			}
+		}
 	}
 
 	/**
@@ -598,8 +696,6 @@ class Jetpack_Likes_Settings {
 	 * If sharedaddy is not loaded, we don't have the "Show buttons on" yet, so we need to add that since it affects likes too.
 	 */
 	function admin_settings_showbuttonon_init() {
-		?>
-		<?php
 		/** This action is documented in modules/sharedaddy/sharing.php */
 		echo apply_filters( 'sharing_show_buttons_on_row_start', '<tr valign="top">' );
 		?>

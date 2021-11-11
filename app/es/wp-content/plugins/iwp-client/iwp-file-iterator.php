@@ -409,7 +409,12 @@ function IWP_is_dir($good_path){
 
 function skip_file($file){
     global $iwp_v_options, $archive;
-    $exclude_data = $iwp_v_options[IWP_PCLZIP_OPT_IWP_EXCLUDE];
+    if(!empty($iwp_v_options[IWP_PCLZIP_OPT_IWP_EXCLUDE])){
+        $exclude_data = $iwp_v_options[IWP_PCLZIP_OPT_IWP_EXCLUDE];
+    }else{
+        $exclude_data = array();
+    }
+
     if(!is_readable($file)){
         return true;
     }

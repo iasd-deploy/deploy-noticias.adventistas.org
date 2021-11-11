@@ -38,7 +38,7 @@ class Requests_Controller
 
 		$response = $request->update_remote_configs( $items );
 
-		if ( $response->status_code != 1 ) {
+		if ( ! $response || $response->status_code != 1 ) {
 			Utils::error_server_json( 'not_connected', __( 'Remote settings were not saved.', App::TEXTDOMAIN ) );
 			http_response_code( 500 );
 			exit(0);

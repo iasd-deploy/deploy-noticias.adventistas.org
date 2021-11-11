@@ -19,37 +19,27 @@ class Request
 			return false;
 		}
 
-		$this->header = array( 'GoCache-Token:' . $this->setting->api_key );
+		$this->header = [
+			'GoCache-Token' => $this->setting->api_key
+		];
+
 		$this->domain = $this->setting->domain;
 	}
 
-	public function verify_connection( $show_message = false )
+	public function verify_connection()
 	{
 		if ( ! $this->header ) {
 			return;
 		}
 
-		$curl = curl_init();
+		$url = 'https://api.gocache.com.br/v1/domain/' . $this->domain;
+		$args = [
+			'headers' => $this->header
+		];
 
-		curl_setopt( $curl, CURLOPT_URL, 'https://api.gocache.com.br/v1/domain/' . $this->domain );
-		curl_setopt( $curl, CURLOPT_RETURNTRANSFER, 1 );
-		curl_setopt( $curl, CURLOPT_HTTPHEADER, $this->header );
+		$result = wp_remote_get( $url, $args );
 
-		$result = curl_exec( $curl );
-
-		curl_close( $curl );
-
-		$result = json_decode( $result );
-
-		if ( $result->status_code == 1 ) {
-			update_option( $this->setting->get_option_name( 'external_configs' ), $result );
-			update_option( $this->setting->get_option_name( 'status' ), true );
-			return $show_message ? $result : true;
-		}
-
-		update_option( $this->setting->get_option_name( 'status' ), false );
-
-		if ( $show_message ) {
+		if ( ! is_wp_error( $result ) ) {
 			return $result;
 		}
 
@@ -62,38 +52,43 @@ class Request
 			return;
 		}
 
-		$curl = curl_init();
+		$url = 'https://api.gocache.com.br/v1/domain/' . $this->domain;
+		$args = [
+			'headers' => $this->header,
+			'method'  => 'PUT',
+			'body'    => $configs
+		];
 
-		curl_setopt( $curl, CURLOPT_URL, 'https://api.gocache.com.br/v1/domain/' . $this->domain );
-		curl_setopt( $curl, CURLOPT_CUSTOMREQUEST, 'PUT' );
-		curl_setopt( $curl, CURLOPT_HEADER, false ) ;
-		curl_setopt( $curl, CURLOPT_RETURNTRANSFER, 1 );
-		curl_setopt( $curl, CURLOPT_HTTPHEADER, $this->header );
-		curl_setopt( $curl, CURLOPT_POSTFIELDS, http_build_query( $configs ) );
+		$result = wp_remote_request( $url, $args );
 
-		$result = curl_exec( $curl );
+		if ( ! is_wp_error( $result ) ) {
+			return json_decode( $result['body'] );
 
-		curl_close( $curl );
+		} else {
+			return false;
+		}
 
-		return json_decode( $result );
 	}
 
 	public function delete_all_cache()
 	{
 		$domain = $this->domain;
-		$curl   = curl_init();
 
-		curl_setopt( $curl, CURLOPT_URL, "https://api.gocache.com.br/v1/cache/{$domain}/all" );
-		curl_setopt( $curl, CURLOPT_CUSTOMREQUEST, 'DELETE' );
-		curl_setopt( $curl, CURLOPT_HEADER, false ) ;
-		curl_setopt( $curl, CURLOPT_RETURNTRANSFER, 1 );
-		curl_setopt( $curl, CURLOPT_HTTPHEADER, $this->header );
+		$url = "https://api.gocache.com.br/v1/cache/{$domain}/all";
+		$args = [
+			'headers' => $this->header,
+			'method'  => 'DELETE'
+		];
 
-		$result = curl_exec( $curl );
+		$result = wp_remote_request( $url, $args );
 
-		curl_close( $curl );
+		if ( ! is_wp_error( $result ) ) {
+			return json_decode( $result['body'] );
 
-		return json_decode( $result );
+		} else {
+			return false;
+		}
+
 	}
 
 	public function delete_cache( $urls, $append_custom_strings = false )
@@ -102,7 +97,9 @@ class Request
 			return;
 		}
 
-		$data = array();
+		$data = [];
+
+		$urls = $this->override_urls_domain($urls);
 
 		foreach ( $urls as $key => $url ) {
 			$data['urls'][] = esc_url( trim( $url ) );
@@ -113,20 +110,21 @@ class Request
 		}
 
 		$domain = $this->domain;
-		$curl   = curl_init();
+		$url = "https://api.gocache.com.br/v1/cache/{$domain}";
+		$args = [
+			'headers' => $this->header,
+			'body'    => http_build_query( $data ),
+			'method'  => 'DELETE'
+		];
 
-		curl_setopt( $curl, CURLOPT_URL, "https://api.gocache.com.br/v1/cache/{$domain}" );
-		curl_setopt( $curl, CURLOPT_CUSTOMREQUEST, 'DELETE' );
-		curl_setopt( $curl, CURLOPT_HEADER, false ) ;
-		curl_setopt( $curl, CURLOPT_RETURNTRANSFER, 1 );
-		curl_setopt( $curl, CURLOPT_HTTPHEADER, $this->header );
-		curl_setopt( $curl, CURLOPT_POSTFIELDS, http_build_query( $data ) );
+		$result = wp_remote_request( $url, $args );
 
-		$result = curl_exec( $curl );
+		if ( ! is_wp_error( $result ) ) {
+			return json_decode( $result['body'] );
 
-		curl_close( $curl );
-
-		return json_decode( $result );
+		} else {
+			return false;
+		}
 	}
 
 	public function append_custom_strings( $urls )
@@ -146,10 +144,52 @@ class Request
 		
 		foreach( $list as $string ) {
 			foreach ( $urls as $url ) {
-				array_push( $modified_urls, $url . substr( $string, 0, 20 ) );
+
+				$count = strlen( $url );
+
+				if ( $url[$count - 1] == "/" ) {
+					array_push( $modified_urls, $url . substr( $string, 0, 20 ) );
+				}
 			}
 		}
 
 		return array_merge( $urls, $modified_urls );
+	}
+
+	public function override_urls_domain( $urls )
+	{
+		$overud = $this->setting->override_url_domain;
+		$new_urls = array();
+
+		if ( ! is_array( $urls ) ) {
+			$urls = [$urls];
+		}
+
+		if ( empty( $overud ) ) {
+			return $urls;
+		}
+
+		$list = preg_split( "/\\r\\n|\\r|\\n/", $overud );
+
+		if ( ! is_array( $list ) ) {
+			return $urls;
+		}
+
+		foreach ( $urls as $url ) {
+			foreach( $list as $domain ) {
+
+				if(strpos($domain, "/") !== false || strpos($domain, ".") === false ) {
+					continue;
+				}
+
+				array_push( $new_urls, preg_replace('/:\/\/[^\/]+/', "://".$domain, $url, 1) );
+			}
+		}
+
+		if( count($new_urls) == 0 ) {
+			return $urls;
+		}
+
+		return $new_urls;
 	}
 }

@@ -150,7 +150,7 @@ class IWP_MMB_Backup_Singlecall extends IWP_MMB_Core
 		global $iwp_mmb_activities_log;
 		
 		if (!empty($params)) {			
-        	
+            $historyID = '';
 			$this->statusLog($historyID, array('stage' => 'verification', 'status' => 'processing', 'statusMsg' => 'verificationInitiated'), $params);
 			
 			$this->set_resource_limit();
@@ -1093,14 +1093,31 @@ function delete_task_now($task_name){
             return $result;
         }
 
-        $result = $this->backup_db_dump($file); // try mysqldump always then fallback to php dump
-        return $result;
+        $func = $this->check_sys(); 
+        $db_result = true;
+        if($func == false){
+            $db_result = false;
+        }
+        if ($db_result) {
+           
+            $db_result =  $this->backup_db_dump($file);
+        }
+        
+        if ($db_result == false) {
+            
+            $db_result =  $this->backup_db_php($file);
+        }
+        return $db_result;  
     }
     
     function backup_db_dump($file)
     {
         global $wpdb;
         $paths   = $this->getMySQLPath();
+        if(empty($paths['mysqldump'])){
+            // Fallback to $this->backup_db_php($file);
+            return false;
+        }
         $brace   = (substr(PHP_OS, 0, 3) == 'WIN') ? '"' : '';
         $exclude_tables = $this->tasks['args']['exclude_tables'];
 		//$command = $brace . $paths['mysqldump'] . $brace . ' --force --host="' . DB_HOST . '" --user="' . DB_USER . '" --password="' . DB_PASSWORD . '" --add-drop-table --skip-lock-tables "' . DB_NAME . '" > ' . $brace . $file . $brace;
@@ -1126,12 +1143,13 @@ function delete_task_now($task_name){
             $full_table = $command0;
         }
         $wp_tables = join("\" \"",$full_table);
-        $command = $brace . $paths['mysqldump'] . $brace . ' --force --host="' . DB_HOST . '" --user="' . DB_USER . '" --password="' . DB_PASSWORD . '" --max_allowed_packet=8M --net_buffer_length=1M --skip-comments --skip-set-charset --allow-keywords --dump-date --add-drop-table --skip-lock-tables --extended-insert "' . DB_NAME . '" "'.$wp_tables.'" > ' . $brace . $file . $brace;
+        $msqld_max_allowed_packet = (defined('IWP_MYSQLDUMP_MAX_ALLOWED_PACKET') && (is_int(IWP_MYSQLDUMP_MAX_ALLOWED_PACKET) || is_string(IWP_MYSQLDUMP_MAX_ALLOWED_PACKET))) ? IWP_MYSQLDUMP_MAX_ALLOWED_PACKET : '8M';
+        $command = $brace . $paths['mysqldump'] . $brace . ' --force --host="' . DB_HOST . '" --user="' . DB_USER . '" --password="' . DB_PASSWORD . '" --max_allowed_packet='.$msqld_max_allowed_packet.' --net_buffer_length=1M --skip-comments --skip-set-charset --allow-keywords --dump-date --add-drop-table --skip-lock-tables --extended-insert "' . DB_NAME . '" "'.$wp_tables.'" > ' . $brace . $file . $brace;
 		iwp_mmb_print_flush('DB DUMP CMD: Start');
         ob_start();
         if (!empty($structure_only_table)) {
-            $wp_tables = join("\" \"",$structure_only_table);
-            $structure_command = $brace . $paths['mysqldump'] . $brace . ' --force --host="' . DB_HOST . '" --user="' . DB_USER . '" --password="' . DB_PASSWORD . '" --add-drop-table --skip-lock-tables --no-data "' . DB_NAME . '" "'.$wp_tables.'" >> ' . $brace . $file . $brace;
+            $structure_only_wp_table = join("\" \"",$structure_only_table);
+            $structure_command = $brace . $paths['mysqldump'] . $brace . ' --force --host="' . DB_HOST . '" --user="' . DB_USER . '" --password="' . DB_PASSWORD . '" --add-drop-table --skip-lock-tables --no-data "' . DB_NAME . '" "'.$structure_only_wp_table.'" >> ' . $brace . $file . $brace;
             // $result = $this->iwp_mmb_exec($structure_command);
             $command.=' && '.$structure_command;
 
@@ -1139,10 +1157,26 @@ function delete_task_now($task_name){
         $result = $this->iwp_mmb_exec($command);
         ob_get_clean();
 		iwp_mmb_print_flush('DB DUMP CMD: End');
+
+        if(!$result && !defined('IWP_MYSQLDUMP_MAX_ALLOWED_PACKET')){
+            // It will work when the Mysqldump comment available, but due to low max_allowed_packet size. Mysqldump not working, so we are manually increasing the max_allowed_packet size
+
+            global $iwp_mmb_core;
+            $msqld_max_allowed_packet = $iwp_mmb_core->get_max_allowed_packet();
+            $command = $brace . $paths['mysqldump'] . $brace . ' --force --host="' . DB_HOST . '" --user="' . DB_USER . '" --password="' . DB_PASSWORD . '" --max_allowed_packet='.$msqld_max_allowed_packet.' --net_buffer_length=1M --skip-comments --skip-set-charset --allow-keywords --dump-date --add-drop-table --skip-lock-tables --extended-insert "' . DB_NAME . '" "'.$wp_tables.'" > ' . $brace . $file . $brace;
+
+            iwp_mmb_print_flush('DB DUMP CMD RETRY: Start');
+            ob_start();
+            if (!empty($structure_only_table)) {
+                $command.=' && '.$structure_command;
+            }
+            $result = $this->iwp_mmb_exec($command);
+            ob_get_clean();
+            iwp_mmb_print_flush('DB DUMP CMD RETRY: End');
+        }
         
         if (!$result) { // Fallback to php
-            $result = $this->backup_db_php($file);
-            return $result;
+            return false;
         }
         
         if (iwp_mmb_get_file_size($file) == 0 || !is_file($file) || !$result) {
@@ -1210,8 +1244,9 @@ function delete_task_now($task_name){
                              $insert_sql .= "'', ";
                         }
                         else {
-
-                            $insert_sql .= "'" . esc_sql($final[$i]). "', ";
+                            $value = addslashes($final[$i]);
+                            $value = preg_replace("/\n/Ui", "\\n", $value);
+                            $insert_sql .= "'" .$value. "', ";
 						}
                        //mb_convert_encoding(esc_sql($final[$i] ), "HTML-ENTITIES", "ISO-8859-1")
 					}
@@ -1240,6 +1275,13 @@ function delete_task_now($task_name){
 			iwp_mmb_print_flush('DB DUMP PHP Normal: End');
 		}
 		else{
+            $max_row_limit = 100;
+            if(defined('IWP_PHP_DB_ROWS') && (is_int(IWP_PHP_DB_ROWS) || is_string(IWP_PHP_DB_ROWS))){
+                if(IWP_PHP_DB_ROWS > $max_row_limit ){
+                    $max_row_limit = IWP_PHP_DB_ROWS;
+                }
+            }
+
 			iwp_mmb_print_flush('DB DUMP PHP Fail-safe: Start');
 			file_put_contents($file, '');//safe  to reset any old data
 			//$tables = $wpdb->get_results('SHOW TABLES', ARRAY_N);
@@ -1268,15 +1310,15 @@ function delete_task_now($task_name){
             }
 				
 				$count = $wpdb->get_var("SELECT count(*) FROM $table[0]");
-				if ($count > 100)
-					$count = ceil($count / 100);
+				if ($count > $max_row_limit)
+					$count = ceil($count / $max_row_limit);
 				else if ($count > 0)            
 					$count = 1;                
 					
 				for ($i = 0; $i < $count; $i++) {
 					iwp_mmb_auto_print('backup_db_php_fail_safe');
-					$low_limit = $i * 100;
-					$qry       = "SELECT * FROM $table[0] LIMIT $low_limit, 100";
+					$low_limit = $i * $max_row_limit;
+					$qry       = "SELECT * FROM $table[0] LIMIT $low_limit, $max_row_limit";
 					$rows      = $wpdb->get_results($qry, ARRAY_A);
 					if (is_array($rows)) {
 						foreach ($rows as $row) {
@@ -1348,6 +1390,7 @@ function delete_task_now($task_name){
         global $wpdb;
         $query  = 'SHOW TABLE STATUS';
         $tables = $wpdb->get_results($query, ARRAY_A);
+        $table_string = '';
         foreach ($tables as $table) {
             if (in_array($table['Engine'], array(
                 'MyISAM',
@@ -1420,7 +1463,11 @@ function delete_task_now($task_name){
                 $paths['mysqldump'] = 'mysqldump.exe';
             }
         } else{
-            $mysqlPath = "/usr/bin/mysqldump,/bin/mysqldump,/usr/local/bin/mysqldump,/usr/sfw/bin/mysqldump,/usr/xdg4/bin/mysqldump,/opt/bin/mysqldump";
+            if(defined('IWP_MYSQLDUMP_EXECUTABLE') && IWP_MYSQLDUMP_EXECUTABLE){
+                $mysqlPath = IWP_MYSQLDUMP_EXECUTABLE;
+            }else{
+                $mysqlPath = iwp_mmb_build_mysqldump_list();
+            }
             $bin = explode(',' , $mysqlPath);
             $brace   = (substr(PHP_OS, 0, 3) == 'WIN') ? '"' : '';
             $db_folder = IWP_DB_DIR . '/';
@@ -1446,7 +1493,13 @@ function delete_task_now($task_name){
             }
             unlink($file);
         }
-
+        if (empty($paths['mysql'])){
+            $paths['mysql'] = $this->iwp_mmb_exec('which mysql', true);
+        }
+        
+        if (empty($paths['mysqldump'])){
+            $paths['mysqldump'] = $this->iwp_mmb_exec('which mysqldump', true);
+        }
         return $paths;
     }
     
@@ -1459,7 +1512,7 @@ function delete_task_now($task_name){
         if ($this->iwp_mmb_function_exists('system'))
             return 'system';
         
-        if ($this->iwp_mmb_function_exists('passhtru'))
+        if ($this->iwp_mmb_function_exists('passthru'))
             return 'passthru';
         
         return false;
@@ -1951,7 +2004,7 @@ function delete_task_now($task_name){
                 $no_low_quota = true;
             }
         }*/
-        $disk_free_space = @disk_free_space(IWP_BACKUP_DIR);
+        $disk_free_space = function_exists('disk_free_space') ? @disk_free_space(IWP_BACKUP_DIR) : false;
         if ($disk_free_space == false) {
             $quota_free = 'Unknown';
         } else {
@@ -2888,13 +2941,17 @@ function ftp_backup($args)
 		$table_name = $wpdb->base_prefix . "iwp_backup_status";
 		$rows = $wpdb->get_results("select * from ".$table_name);
 		$task_res = array();
-		foreach($rows as $key => $value){
-			$task_results = unserialize($value->taskResults);
-			$task_res[$value->taskName][$value->historyID] = $task_results['task_results'][$value->historyID];
-            if (!empty($task_results['backhack_status'])) {
-    			$task_res[$value->taskName][$value->historyID]['backhack_status'] = $task_results['backhack_status'];
-            }
-		}		
+        if(!empty($rows)){
+    		foreach($rows as $key => $value){
+    			$task_results = unserialize($value->taskResults);
+                if(!empty($task_results['task_results'])){
+        			$task_res[$value->taskName][$value->historyID] = $task_results['task_results'][$value->historyID];
+                }
+                if (!empty($task_results['backhack_status'])) {
+        			$task_res[$value->taskName][$value->historyID]['backhack_status'] = $task_results['backhack_status'];
+                }
+    		}		
+        }
         $stats = $task_res;
 		return $stats;
 		/*foreach ($rows as $obj) {
@@ -3072,7 +3129,9 @@ function ftp_backup($args)
 		//$requestParams = unserialize($tasks['requestParams']);
 		$requestParams = $this->getRequiredData($result_id, 'requestParams');
 		
-		$args = $requestParams['account_info'];
+		if(!empty($requestParams['account_info'])){
+            $args = $requestParams['account_info'];
+        }
 		
         if (isset($backup['server'])) {
 			$backup_file = $backup['server']['file_path'];
@@ -3343,7 +3402,7 @@ function ftp_backup($args)
 			$returnParams['backupID'] = $insertID;
 			$returnParams['stage'] = $statusArray['stage'] ;
 			$returnParams['status'] = $statusArray['status'];
-			$returnParams['nextFunc'] = $statusArray['nextFunc'];
+			$returnParams['nextFunc'] = isset($statusArray['nextFunc']) ? $statusArray['nextFunc']:NULL;
 			return array('success' => $returnParams);
 		}
 		else
@@ -3572,7 +3631,7 @@ if( !function_exists('upgradeOldDropBoxBackupList')){
         }
         foreach ($rows as $ID => $taskArray) {
             $requestParams = unserialize($taskArray['requestParams']);
-            $accountInfo = $requestParams['account_info'];
+            $accountInfo = isset($requestParams['account_info']) ? $requestParams['account_info']:array();
             if (isset($accountInfo['iwp_dropbox']) && isset($accountInfo['iwp_dropbox']['oauth_token']) && !empty($accountInfo['iwp_dropbox']['oauth_token'])) {
                 $requestParams['account_info']['iwp_dropbox']['consumer_key'] = '';
                 $requestParams['account_info']['iwp_dropbox']['consumer_secret'] = '';

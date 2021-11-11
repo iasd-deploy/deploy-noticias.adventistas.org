@@ -155,7 +155,7 @@ class IWP_Dropbox {
 		return $this->request($url, array('list' => ($listContents)? 'true' : 'false', 'file_limit' => $fileLimit));
 	}
 
-	public function search($path = '', $query , $fileLimit = 1000){
+	public function search($path = '', $query='' , $fileLimit = 1000){
 		if (strlen($query)>=3)
 			throw new IWP_DropboxException("Error: Query \"$query\" must three characters long.");
 		$url = self::API_URL.self::API_VERSION_URL.'search/'.$this->root.'/'.trim($path,'/');

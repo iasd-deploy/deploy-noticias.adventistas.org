@@ -267,7 +267,8 @@ class Meow_WPMC_Rest
 		$params = $request->get_json_params();
 		$limit = isset( $params['limit'] ) ? $params['limit'] : 0;
 		$limitsize = get_option( 'wpmc_medias_buffer', 100 );
-		$results = $this->engine->get_media_entries( $limit, $limitsize );
+		$unattachedOnly = get_option( 'wpmc_attach_is_use', false );
+		$results = $this->engine->get_media_entries( $limit, $limitsize, $unattachedOnly );
 		$finished = count( $results ) < $limitsize;
 		$message = sprintf( __( "Retrieved %d targets.", 'media-cleaner' ), count( $results ) );
 		return new WP_REST_Response( [ 

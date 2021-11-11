@@ -2,9 +2,9 @@
 **Contributors:** bradt, deliciousbrains, ianmjones  
 **Tags:** uploads, amazon, s3, amazon s3, digitalocean, digitalocean spaces, google cloud storage, gcs, mirror, admin, media, cdn, cloudfront  
 **Requires at least:** 4.9  
-**Tested up to:** 5.5  
+**Tested up to:** 5.8  
 **Requires PHP:** 5.5  
-**Stable tag:** 2.4.2  
+**Stable tag:** 2.5.5  
 **License:** GPLv3  
 
 Copies files to Amazon S3, DigitalOcean Spaces or Google Cloud Storage as they are uploaded to the Media Library. Optionally configure Amazon CloudFront or another CDN for faster delivery.
@@ -88,6 +88,50 @@ This is a major change, which ensures S3 URLs are no longer saved in post conten
 This version requires PHP 5.3.3+ and the Amazon Web Services plugin
 
 ## Changelog ##
+
+### WP Offload Media Lite 2.5.5 - 2021-07-19 ###
+* Bug fix: Signed GCS URLs broken when updating a post
+* Bug fix: Incorrect mime type set on scaled image's bucket object when thumbnail format differs from original file's format
+* Tested: WordPress 5.8
+
+### WP Offload Media Lite 2.5.3 - 2021-03-03 ###
+* New: Added DigitalOcean region San Francisco 3
+* Bug fix: Domain mapping not handled correctly when the local URL includes a port number
+* Bug fix: In some unusual configurations the upgrade routine uses incorrect name for multisite blogs table
+* Tested: WordPress 5.7
+
+### WP Offload Media Lite 2.5.2 - 2020-12-14 ###
+* New: AWS PHP SDK 3.168.0
+* New: Google Cloud Storage SDK 1.23.0
+* Improvement: Faster saving of posts with many external links
+* Improvement: Faster URL rewriting when Force HTTPS setting is being used but is not needed
+* Bug fix: PHP Fatal error on the settings page when using PHP 8.0
+
+### WP Offload Media Lite 2.5.1 - 2020-11-25 ###
+* New: WordPress 5.6 compatible
+* New: PHP 8.0 compatible
+* Bug fix: Unexpectedly asked to select bucket after saving settings when legacy access key named constants defined
+* Bug fix: srcset missing for some images
+* Bug fix: Error saving item during Metadata upgrade in some cases
+
+### WP Offload Media Lite 2.5 - 2020-11-11 ###
+* [Release Summary Blog Post](https://deliciousbrains.com/wp-offload-media-2-5-released/?utm_campaign=changelogs&utm_source=wordpress.org&utm_medium=free%2Bplugin%2Blisting)
+* Improvement: [Error notice shown](https://deliciousbrains.com/wp-offload-media/doc/missing-table-error-notice/?utm_campaign=changelogs&utm_source=wordpress.org&utm_medium=free%2Bplugin%2Blisting) when plugin's required custom table(s) missing
+* Improvement: [Diagnostic Info](https://deliciousbrains.com/wp-offload-media/doc/missing-table-error-notice/?utm_campaign=changelogs&utm_source=wordpress.org&utm_medium=free%2Bplugin%2Blisting#diagnostic-info) shows status of plugin's required custom tables
+* Bug fix: wp_get_original_image_path function does not return provider URL when local files removed
+* Bug fix: File missing notices recorded in debug.log when regenerating thumbnails and Remove Files From Server turned on
+
+### WP Offload Media Lite 2.4.4 - 2020-09-08 ###
+* Improvement: Updated AWS PHP SDK to v3.151.6
+* Bug fix: Files for duplicate thumbnail sizes not removed from server after initial offload
+* Bug fix: PHP Fatal error: Class 'DeliciousBrains\WP_Offload_Media\Aws3\Symfony\Polyfill\Intl\Idn\Idn' not found
+* Bug fix: PHP Recoverable fatal error: Object of class WP_Error could not be converted to string in .../wp-includes/post.php on line 504
+* Bug fix: PHP message: PHP Warning: is_readable(): open_basedir restriction in effect
+* Bug fix: URLs not rewritten for RSS feed enclosures
+
+### WP Offload Media Lite 2.4.3 - 2020-09-01 ###
+* Improvement: Updated AWS PHP SDK to v3.151.3
+* Bug fix: PHP Fatal error: Class 'DeliciousBrains\WP_Offload_Media\Aws3\Symfony\Polyfill\Intl\Idn\Idn' not found
 
 ### WP Offload Media Lite 2.4.2 - 2020-08-27 ###
 * Improvement: Updated AWS PHP SDK to v3.150.1

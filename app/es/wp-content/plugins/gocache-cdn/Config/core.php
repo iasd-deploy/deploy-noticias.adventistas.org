@@ -19,6 +19,7 @@ App::uses( 'view', 'View' );
 App::uses( 'settings', 'Controller' );
 App::uses( 'requests', 'Controller' );
 App::uses( 'cache', 'Controller' );
+App::uses( 'authentication', 'Controller' );
 
 class Core
 {
@@ -55,16 +56,46 @@ class Core
 		add_action( 'admin_enqueue_scripts', array( &$this, 'styles_admin' ) );
 
 		$this->load_controllers(
-			array(
+			[
 				'Settings',
 				'Requests',
+				'Authentication',
 				'Cache'
-			)
+			]
 		);
 	}
 
 	public function activate()
 	{
+
+		$sitemap_plugins = [
+			'yoast_seo'  			   => 'wordpress-seo/wp-seo.php',
+			'all_in_one'			   => 'all-in-one-seo-pack/all_in_one_seo_pack.php',
+			'google-sitemap-generator' => 'google-sitemap-generator/sitemap.php'
+		];
+		
+		include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+		foreach ( $sitemap_plugins as $sitemap_plugin ) {
+
+			if ( is_plugin_active( $sitemap_plugin ) ) {
+
+				if ( ! get_option( 'gocache_option-auto_clear_sitemap_url' ) ){
+					add_option('gocache_option-auto_clear_sitemap_url', 'yes' );
+
+				}else{
+					update_option( 'gocache_option-auto_clear_sitemap_url', 'yes' );
+				}
+			}
+		}
+		if ( is_plugin_active( 'amp/amp.php' ) ) {
+			
+			if ( ! get_option( 'gocache_option-auto_clear_amp_url' ) ){
+				add_option('gocache_option-amp', 'yes' );
+
+			}else{
+				update_option( 'gocache_option-auto_clear_amp_url', 'yes' );
+			}
+		}
 
 	}
 

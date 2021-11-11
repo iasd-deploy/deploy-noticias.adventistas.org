@@ -141,7 +141,6 @@ class IWP_MMB_Core extends IWP_MMB_Helper
 			'delete_links' => 'iwp_mmb_delete_links',
 			
 			'create_post' => 'iwp_mmb_post_create',
-			'change_post_status' => 'iwp_mmb_change_post_status',
 			'get_posts' => 'iwp_mmb_get_posts',
 			'delete_post' => 'iwp_mmb_delete_post',
 			'delete_posts' => 'iwp_mmb_delete_posts',
@@ -150,7 +149,7 @@ class IWP_MMB_Core extends IWP_MMB_Helper
 			'delete_page' => 'iwp_mmb_delete_page',
 			
 			'install_addon' => 'iwp_mmb_install_addon',
-			'add_link' => 'iwp_mmb_add_link',
+			
 			'add_user' => 'iwp_mmb_add_user',
 			'email_backup' => 'iwp_mmb_email_backup',
 			'check_backup_compat' => 'iwp_mmb_check_backup_compat',
@@ -285,7 +284,11 @@ class IWP_MMB_Core extends IWP_MMB_Helper
 								$data = call_user_func( $_callback, $params );
 							}
 							$iwp_mmb_filters[$_name] = isset($iwp_mmb_filters[$_name]) && !empty($iwp_mmb_filters[$_name]) ? array_merge($iwp_mmb_filters[$_name], $data) : $data;
-							add_filter( $_name, create_function( '$a' , 'global $iwp_mmb_filters; return array_merge($a, $iwp_mmb_filters["'.$_name.'"]);') );
+							add_filter( $_name, function($a) use ($_name){
+								global $iwp_mmb_filters;
+								return array_merge($a,$iwp_mmb_filters[$_name]);
+							});
+							// $_name closure variable, $a is an arg
 						}
 					}
 					
@@ -297,11 +300,32 @@ class IWP_MMB_Core extends IWP_MMB_Helper
 			call_user_func($this->action_call, $params);
 		}
 	}
+
+	function iwp_mmb_manual_wp_upgrade(){
+		/* in case database upgrade required, do database backup and perform upgrade ( wordpress wp_upgrade() function ) */
+		global $wp_db_version, $wpmu_version;
+		if( strlen(trim($wp_db_version)) && !defined('ACX_PLUGIN_DIR') ){
+			if ( get_option('db_version') != $wp_db_version ) {
+				/* in multisite network, please update database manualy */
+				if (empty($wpmu_version) || (function_exists('is_multisite') && !is_multisite())){
+					if( ! function_exists('wp_upgrade'))
+						include_once(ABSPATH.'wp-admin/includes/upgrade.php');
+					ob_clean();
+					@wp_upgrade();
+					@do_action('after_db_upgrade');
+					ob_end_clean();
+				}
+			}
+		}
+	}
 	
 	function register_action_params( $action = false, $params = array() ){
 		if ($action == 'get_stats' || $action == 'do_upgrade') {
 			add_action('wp_loaded', array( &$this, 'iwp_mmb_remote_action'), 2147483650);
 			add_action('wp_loaded', array( &$this, 'admin_wp_loaded_iwp'), 2147483649);
+			if($action == 'get_stats' && !isset( $_GET['step'])){
+				add_action('wp_loaded', array( &$this, 'iwp_mmb_manual_wp_upgrade'),2147483648);
+			}
 		}elseif ($action == 'install_addon') {
 			add_action('wp_loaded', array( &$this, 'iwp_mmb_remote_action'));
 		}elseif ($action == 'new_run_task' || $action == 'new_scheduled_backup') {
@@ -366,17 +390,19 @@ class IWP_MMB_Core extends IWP_MMB_Helper
 		}
 		
 		$notice_display_URL = rtrim($notice_display_URL, '/').'/';
+		$website_URL = rtrim(get_option('home'), '/').'/';
 		
 		
 		echo '<div class="updated" style="text-align: center; display:block !important; "><p style="color: green; font-size: 14px; font-weight: bold;">Add this site to IWP Admin panel</p><p>
 		<table border="0" align="center" cellpadding="5">';
 		if(!empty($iwp_client_activate_key)){
 			echo '<tr><td align="right">WP-ADMIN URL:</td><td align="left"><strong>'.$notice_display_URL.'</strong></td></tr>
+			<tr><td align="right">WEBSITE URL:</td><td align="left"><strong>'.$website_URL.'</strong></td></tr>
 			<tr><td align="right">ADMIN USERNAME:</td><td align="left"><strong>'.$username.'</strong> (or any admin id)</td></tr>
             <tr><td align="right">ACTIVATION KEY:</td><td align="left"><strong>'.$iwp_client_activate_key.'</strong></td></tr>
             <tr class="only_flash"><td></td><td align="left" style="position:relative;">
-            <tr id="copy_at_once"><td align="right">To quick add, copy this</td><td align="left" style="position:relative;"><input type="text" style="width:295px;" class="read_creds" readonly value="'.$notice_display_URL.'|^|'.$username.'|^|'.$iwp_client_activate_key.'" /></td></tr>
-            <tr class="only_flash"><td></td><td align="left" style="position:relative;"><div id="copy_details"  data-clipboard-text="'.$notice_display_URL.'|^|'.$username.'|^|'.$iwp_client_activate_key.'" style="background:#008000;display: inline-block;padding: 4px 10px;border-radius: 5px;color:#fff;font-weight:600;cursor:pointer;">Copy details</div><span class="copy_message" style="display:none;margin-left:10px;color:#008000;">Copied :)</span></td></tr>
+            <tr id="copy_at_once"><td align="right">To quick add, copy this</td><td align="left" style="position:relative;"><input type="text" style="width:295px;" class="read_creds" readonly value="'.$notice_display_URL.'|^|'.$username.'|^|'.$iwp_client_activate_key.'|^|'.$website_URL.'" /></td></tr>
+            <tr class="only_flash"><td></td><td align="left" style="position:relative;"><div id="copy_details"  data-clipboard-text="'.$notice_display_URL.'|^|'.$username.'|^|'.$iwp_client_activate_key.'|^|'.$website_URL.'" style="background:#008000;display: inline-block;padding: 4px 10px;border-radius: 5px;color:#fff;font-weight:600;cursor:pointer;">Copy details</div><span class="copy_message" style="display:none;margin-left:10px;color:#008000;">Copied :)</span></td></tr>
 
             <script type="text/javascript">
                   (function(){
@@ -1059,7 +1085,7 @@ EOF;
         $auto_login = isset($_GET['auto_login']) ? $_GET['auto_login'] : 0;
         $page       = isset($_GET['page']) ? '?page='.$_GET['page'] : '';
         $action     = isset($_GET['action']) ? '?action='.$_GET['action'] : '';
-        $post     = isset($_GET['action']) ? '&post='.$_GET['post'] : '';
+        $post     	= isset($_GET['post']) ? '&post='.$_GET['post'] : '';
         $_SERVER['HTTP_REFERER']='';
 		if( !function_exists('is_user_logged_in') )
 			include_once( ABSPATH.'wp-includes/pluggable.php' );
@@ -1461,9 +1487,74 @@ EOF;
 	    	$result['dbUser'] = DB_USER;
 	    	$result['dbPassword'] = DB_PASSWORD;
 	    	$result['db_table_prefix'] = $wpdb->base_prefix;
+	    	$result['site_url'] = site_url();
+	    	$result['home_url'] = home_url();
     	}
 
     	return $result;
+    }
+
+    function flush_redis_cache(){
+    	@include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+    	if ( is_plugin_active( 'redis-cache/redis-cache.php' ) ) {
+    		@include_once(WP_PLUGIN_DIR . '/redis-cache/redis-cache.php');
+    		if(method_exists( $GLOBALS[ 'wp_object_cache' ], 'redis_status' )) {
+    		    wp_cache_flush();
+    		}
+    	}
+    }
+
+    function iwp_delete_option($option_name){
+    	if(!empty($option_name)){
+	    	global $wpdb;
+
+	    	$delete_query = "DELETE FROM $wpdb->options WHERE option_name = '".$option_name."'";
+	    	$affected = $wpdb->query($delete_query);
+	    	if(!$affected){
+    		global $iwp_backup_core;
+			$iwp_backup_core->log("Failed to delete $option_name option");
+			$bt = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+			$log = $bt[0]['file'].'-- line--'.$bt[0]['line'].'--function--'.$bt[0]['function'];
+			$iwp_backup_core->log("$log");
+			$iwp_backup_core->log("Retry delete $option_name option");
+	    		// retry operation
+	    		$query  = "SELECT * FROM $wpdb->options WHERE option_name = '".$option_name."'";
+	    		$temp_row = $wpdb->get_row($query);
+	    		if(!empty($temp_row)){
+	    			$wpdb->query($delete_query);
+	    		}
+	    	}
+    	}
+    }
+
+    function iwp_update_option($option_name,$option_value){
+    	if(!empty($option_name)){
+	    	global $wpdb;
+	    	$sql = "INSERT INTO `$wpdb->options` (option_name,option_value) VALUES (%s,%s) ON DUPLICATE KEY UPDATE option_value = %s";
+	    	$sql = $wpdb->prepare($sql,$option_name,$option_value,$option_value);
+	    	$affected = $wpdb->query($sql);
+	    	if(!$affected){
+		    	global $iwp_backup_core;
+				$iwp_backup_core->log("Failed to update $option_name option and value $option_value");
+				$bt = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+				$log = $bt[0]['file'].'-- line--'.$bt[0]['line'].'--function--'.$bt[0]['function'];
+				$iwp_backup_core->log("$log");
+	    		// retry operation
+	    		$affected = $wpdb->query($sql);
+	    	}
+    	}
+    }
+
+    function get_max_allowed_packet(){
+    	global $wpdb;
+		$query  = "SHOW VARIABLES LIKE 'max_allowed_packet'";
+	    $temp_row = $wpdb->get_row($query);
+	    if(!empty($temp_row)){
+	    	return $temp_row->Value; //1048576 
+	    	// $temp_row->Value/(1024*1024); // 1M
+	    }else{
+	    	return '128M'; //Default 8M, so we tried with increase max_allowed_packet size
+	    }
     }
    
 }

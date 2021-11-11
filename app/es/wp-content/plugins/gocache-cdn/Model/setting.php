@@ -18,26 +18,35 @@ class Setting
 	 * @var array
 	 */
 	public $options = array(
-		'api_key' => array(
+		'api_key' => [
 			'default'  => '',
 			'sanitize' => 'esc_html',
-		),
-		'domain' => array(
+		],
+
+		'domain' => [
 			'sanitize' => 'strip_tags'
-		),
-		'external_configs' => array(
+		],
+
+		'external_configs' => [
 			'sanitize' => 'esc_html'
-		),
-		'status' => array(
+		],
+
+		'status' => [
 			'sanitize' => 'esc_html'
-		),
-		'auto_clear_cache' => array(
+		],
+
+		'auto_clear_cache' => [
 			'sanitize' => 'esc_html',
 			'default'  => 'yes',
-		),
-		'clear_cache_strings' => array(
+		],
+
+		'clear_cache_strings' => [
 			'sanitize' => ''
-		)
+		],
+		
+		'override_url_domain' => [
+			'sanitize' => ''
+		]
 	);
 
 	/**

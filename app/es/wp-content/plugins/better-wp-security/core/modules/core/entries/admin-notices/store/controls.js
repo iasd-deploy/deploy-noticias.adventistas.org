@@ -6,13 +6,16 @@ import { uniqueId } from 'lodash';
 /**
  * WordPress dependencies
  */
-import { select as selectData, dispatch as dispatchData } from '@wordpress/data';
+import {
+	select as selectData,
+	dispatch as dispatchData,
+} from '@wordpress/data';
 import { default as triggerApiFetch } from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
  */
-import responseToError from '@ithemes/security-utils';
+import { responseToError } from '@ithemes/security-utils';
 
 /**
  * Trigger an API Fetch request.
@@ -29,6 +32,7 @@ export function apiFetch( request ) {
 
 /**
  * Calls a selector using the current state.
+ *
  * @param {string} selectorName Selector name.
  * @param  {Array} args         Selector arguments.
  *
@@ -63,7 +67,7 @@ export function select( selectorName, ...args ) {
  *                                                       by automatically dismissed
  *                                                       after x milliseconds.
  *                                                       Defaults to `false`.
- * @param {?Array<WPNoticeAction>} options.actions       User actions to be
+ * @param {?Array<Object>} options.actions               User actions to be
  *                                                       presented with notice.
  *
  * @return {Object} control descriptor.
@@ -86,12 +90,21 @@ const controls = {
 	},
 
 	SELECT( { selectorName, args } ) {
-		return selectData( 'ithemes-security/admin-notices' )[ selectorName ]( ...args );
+		return selectData( 'ithemes-security/admin-notices' )[ selectorName ](
+			...args
+		);
 	},
 	CREATE_NOTICE( { status, content, options } ) {
 		if ( options.autoDismiss ) {
 			options.id = options.id || uniqueId( 'itsec-auto-dismiss-' );
-			setTimeout( () => dispatchData( 'core/notices' ).removeNotice( options.id, options.context ), options.autoDismiss );
+			setTimeout(
+				() =>
+					dispatchData( 'core/notices' ).removeNotice(
+						options.id,
+						options.context
+					),
+				options.autoDismiss
+			);
 		}
 
 		dispatchData( 'core/notices' ).createNotice( status, content, options );

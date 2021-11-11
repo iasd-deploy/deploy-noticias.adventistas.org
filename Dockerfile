@@ -4,8 +4,8 @@ COPY --chown=www-data:www-data app /var/www/html
 
 COPY --chown=www-data:www-data --from=internetdsa/pa-theme-sedes /var/www/build /var/www/html/pt/wp-content/themes/pa-theme-sedes
 COPY --chown=www-data:www-data --from=internetdsa/pa-theme-sedes /var/www/build /var/www/html/es/wp-content/themes/pa-theme-sedes
-COPY --chown=www-data:www-data --from=internetdsa/pa-theme-videos /var/www/build /var/www/html/pt/wp-content/themes/pa-theme-videos
-COPY --chown=www-data:www-data --from=internetdsa/pa-theme-videos /var/www/build /var/www/html/es/wp-content/themes/pa-theme-videos
+COPY --chown=www-data:www-data --from=internetdsa/pa-theme-noticias /var/www/build /var/www/html/pt/wp-content/themes/pa-theme-noticias
+COPY --chown=www-data:www-data --from=internetdsa/pa-theme-noticias /var/www/build /var/www/html/es/wp-content/themes/pa-theme-noticias
 
 COPY extras/init /usr/local/bin/docker-entrypoint.sh
 

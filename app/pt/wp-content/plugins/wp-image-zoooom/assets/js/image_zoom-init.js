@@ -15,8 +15,14 @@ jQuery(document).ready(function( $ ){
         return;
     }
 
+	var url = (window.location != window.parent.location) ? window.parent.location.href: window.location.href;
+
 	// Is this an Elementor editor iframe.
-	if ( $('body.elementor-editor-active').length > 0 || window.location.href.indexOf('vc_action=vc_inline') > 0 || window.location.href.indexOf('vc_editable=true') > 0 || window.location.href.indexOf('et_fb=') > 0 ) {
+	if ( $('body.elementor-editor-active').length > 0
+			|| $('body.fl-builder-edit').length > 0
+			|| url.indexOf('vc_action=vc_inline') > 0
+			|| url.indexOf('vc_editable=true') > 0
+			|| url.indexOf('et_fb=') > 0 ) {
 		return;
 	}
 
@@ -79,9 +85,9 @@ jQuery(document).ready(function( $ ){
 
 
     // Resize the zoom windows when resizing the page
-    $(window).bind('resize', function(e) {
+    $(window).on('resize', function(e) {
         window.resizeEvt;
-        $(window).resize(function() {
+        $(window).on('resize', function() {
             clearTimeout(window.resizeEvt);
             window.resizeEvt = setTimeout(function() {
                 $(".zoomContainer").remove();
@@ -100,13 +106,13 @@ jQuery(document).ready(function( $ ){
 
     // Remove the zoom when hovering on the submenu
     function restart_on_hover( elem ) {
-        elem.hover(function(){
+        elem.on('mouseenter', function(){
             if ( $('.zoomContainer').length === 0 ) {
                 $(this).image_zoom(IZ.options);
             }
         });
     };
-    $('.sub-menu li').hover(function(){
+    $('.sub-menu li').on('mouseenter', function(){
         $('.zoomContainer').remove();
     });
     restart_on_hover($('img.zoooom'));
@@ -118,7 +124,7 @@ jQuery(document).ready(function( $ ){
     restart_on_hover($('.attachment-shop_single'));
 
     $("a[data-rel^='zoomImage']").each(function(index){
-        $(this).click(function(event){
+        $(this).on('click', function(event){
             // If there are more than one WooCommerce gallery, exchange the thumbnail with the closest .attachment-shop_single
             var obj1 = $(".attachment-shop_single");
             if ( obj1.length > 1 ) {
@@ -231,7 +237,7 @@ jQuery(document).ready(function( $ ){
 
 
             // Resize the zoom windows when resizing the page
-            $(window).bind('resize', function(e) {
+            $(window).on('resize', function(e) {
                 window.resizeEvt;
                 $(window).resize(function() {
                     clearTimeout(window.resizeEvt);
@@ -243,7 +249,7 @@ jQuery(document).ready(function( $ ){
             });
 
             // Remove the click action on the images
-            $(".woocommerce-product-gallery img").click(function(e){
+            $(".woocommerce-product-gallery img").on('click', function(e){
                 e.preventDefault();
             });
 
@@ -262,7 +268,7 @@ jQuery(document).ready(function( $ ){
         restart_on_hover(first_img);
 
         // Remove the click action on the images
-        $('.woocommerce-product-gallery__image img').click(function(e){
+        $('.woocommerce-product-gallery__image img').on('click', function(e){
             e.preventDefault();
         });
 
@@ -277,7 +283,7 @@ jQuery(document).ready(function( $ ){
 
         // Switch the thumbnail with the main image
         $(".woocommerce-product-gallery__image:nth-child(n+2) img").each(function(i){
-            $(this).click(function(e){
+            $(this).on('click', function(e){
                 var this_thumb = $(this);
                 // Exchange the attributes
                 $.each(['alt', 'title', 'data-src'], function(key,attr) {

@@ -56,49 +56,49 @@ class IWP_WORDFENCE extends IWP_MMB_Core
     	switch ($type) {
     		case 'humans':
     			$query = "SELECT count('id')
-				FROM ".$wpdb->base_prefix."wfHits
+				FROM ".$wpdb->base_prefix."wfhits
 				WHERE jsRun = 1 AND ctime >= '$from' AND ctime <= '$to'";
     			break;
 
     		case 'registered_users':
     			$query = "SELECT count('id')
-				FROM ".$wpdb->base_prefix."wfHits
+				FROM ".$wpdb->base_prefix."wfhits
 				WHERE userID > 0 AND ctime >= '$from' AND ctime <= '$to'";
     			break;
     		case 'crawlers':
     			$query = "SELECT count('id')
-				FROM ".$wpdb->base_prefix."wfHits
+				FROM ".$wpdb->base_prefix."wfhits
 				WHERE jsRun = 0 AND ctime >= '$from' AND ctime <= '$to'";
     			break;
 
     		case 'google_crawlers':
     			$query = "SELECT count('id')
-				FROM ".$wpdb->base_prefix."wfHits
+				FROM ".$wpdb->base_prefix."wfhits
 				WHERE isGoogle = 1 AND ctime >= '$from' AND ctime <= '$to'";
     			break;
     		case 'four_oh_four':
     			$query = "SELECT count('id')
-				FROM ".$wpdb->base_prefix."wfHits
+				FROM ".$wpdb->base_prefix."wfhits
 				WHERE statusCode = '404' AND ctime >= '$from' AND ctime <= '$to'";
     			break;
     		case 'logins_logouts':
     			$query = "SELECT count('id')
-				FROM ".$wpdb->base_prefix."wfLogins
+				FROM ".$wpdb->base_prefix."wflogins
 				WHERE  ctime >= '$from' AND ctime <= '$to'";
     			break;
     		case 'locked_out':
     			$query = "SELECT count('IP')
-				FROM ".$wpdb->base_prefix."wfLockedOut
+				FROM ".$wpdb->base_prefix."wfblocks7
 				WHERE  blockedTime >= '$from' AND `blockedTime` <= '$to'";
     			break;
     		case 'blocked':
     		$query = "SELECT count('id')
-				FROM ".$wpdb->base_prefix."wfHits
+				FROM ".$wpdb->base_prefix."wfhits
 				WHERE action = 'blocked:wordfence' AND ctime >= '$from' AND ctime <= '$to'";
     			break;
     		case 'blocked_firewall':
     			$query = "SELECT count('id')
-				FROM ".$wpdb->base_prefix."wfHits
+				FROM ".$wpdb->base_prefix."wfhits
 				WHERE action = 'blocked:waf' AND ctime >= '$from' AND ctime <= '$to'";
     			break;
     		

@@ -19,6 +19,7 @@ class IZ_Compatibilities {
 		add_action( 'wp_head', 'IZ_Compatibilities::wp_head', 40 );
 		add_action( 'vc_after_init', 'IZ_Compatibilities::vc_after_init' );
 		add_action( 'after_setup_theme', 'IZ_Compatibilities::after_setup_theme' );
+		add_action( 'init', 'IZ_Compatibilities::admin_side' );
 	}
 
 
@@ -31,7 +32,7 @@ class IZ_Compatibilities {
 		$opt                       = get_option( 'zoooom_general' );
 		$opt['enable_woocommerce'] = isset( $opt['enable_woocommerce'] ) ? $opt['enable_woocommerce'] : true;
 
-		$style = '';
+		$style = 'img.zoooom,.zoooom img{padding:0!important;}';
 
 		// These themes add a wrapper on the whole page with index higher than the zoom.
 		$wrapper_themes = array(
@@ -41,7 +42,7 @@ class IZ_Compatibilities {
 			),
 			array(
 				'rule'   => '.qodef-wrapper { z-index: 200 !important; }',
-				'themes' => array( 'kloe', 'startit', 'kudos', 'moments', 'ayro', 'suprema', 'ultima', 'geko', 'target', 'coney', 'aton', 'ukiyo', 'zenit', 'mixtape', 'scribbler', 'alecta', 'cityrama', 'bazaar' ),
+				'themes' => array( 'kloe', 'startit', 'kudos', 'moments', 'ayro', 'suprema', 'ultima', 'geko', 'target', 'coney', 'aton', 'ukiyo', 'zenit', 'mixtape', 'scribbler', 'alecta', 'cityrama', 'bazaar', 'getaway', 'mizu', 'aoki', 'maggz', 'blush', 'synergia', 'vardo', 'ebullient', 'succulents', 'prowess', 'eiddo', 'ophelie', 'tonda', 'iver', 'peggi', 'arredo', 'dessau', 'wellexpo', 'bazz', 'maribel', 'byanca', 'blomma', 'setsail', 'sekko', 'brunn', 'aarhus', 'softwerk', 'diefinnhutte', 'arrosa', 'xtrail', 'cevian', 'sagen', 'nille', 'mildhill', 'fey', 'donpeppe', 'booth', 'struktur', 'waveride', 'querida' ),
 			),
 			array(
 				'rule'   => '.edgtf-wrapper { z-index: 40 !important; }',
@@ -151,6 +152,14 @@ class IZ_Compatibilities {
 			$style .= 'body.et_pb_pagebuilder_layout.et-fb .zoooom::before' . $zoom_class_in_editor;
 		}
 
+		if ( defined( 'FL_BUILDER_VERSION' ) ) {
+			$style .= 'body.fl-builder-edit .zoooom::before' . $zoom_class_in_editor;
+		}
+
+		if ( defined( 'BRIZY_VERSION' ) ) {
+			$style .= 'body.brz-ed .zoooom::before' . $zoom_class_in_editor;
+		}
+
 		$type = current_theme_supports( 'html5', 'style' ) ? '' : ' type="text/css"';
 		if ( ! empty( $style ) ) {
 			echo '<style' . $type . '>' . $style . '</style>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
@@ -184,6 +193,16 @@ class IZ_Compatibilities {
 			remove_action( 'woocommerce_product_thumbnails', 'avia_close_div', 21 );
 			remove_filter( 'woocommerce_single_product_image_thumbnail_html', 'avia_woocommerce_gallery_thumbnail_description', 10, 4 );
 		}
+
+		// Disable the Lazy Loading functionality for the LiteSpeed Cache plugin.
+		if ( defined( 'LSWCP_PLUGIN_URL' ) ) {
+			do_action( 'litespeed_conf_force', 'media-lazy', false );
+		}
+
+		// The Storefront theme adds "img{display:block}" CSS rule to the editor, so the Classic Editor sees no content selected in the editor.selection.getContent().
+		if ( strpos( $theme, 'storefront' ) !== false ) {
+			add_editor_style( array( IMAGE_ZOOM_URL . 'assets/css/editor-style.css' ) );
+		}
 	}
 
 
@@ -198,6 +217,17 @@ class IZ_Compatibilities {
 		if ( is_array( $param ) ) {
 			$param['value'][ __( 'WP Image Zoooom', 'wp-image-zoooom' ) ] = 'zoooom';
 			vc_update_shortcode_param( 'vc_single_image', $param );
+		}
+	}
+
+
+	/**
+	 * Admin side modifications.
+	 */
+	public static function admin_side() {
+		if ( ! is_admin() ) return;
+		if ( strpos( strtolower( get_template() ), 'enfold' ) !== false ) {
+			add_theme_support( 'avia_template_builder_custom_css' );
 		}
 	}
 }

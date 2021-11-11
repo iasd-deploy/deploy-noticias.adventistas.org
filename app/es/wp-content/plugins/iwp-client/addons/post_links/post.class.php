@@ -37,6 +37,16 @@ class IWP_MMB_Post extends IWP_MMB_Core
         include_once ABSPATH . 'wp-admin/includes/file.php';
         
         $post_struct = $args['post_data'];
+        if(function_exists('iwp_recursive_parse_args')){
+            $defaults = array(
+                'post_extras' => array(
+                    'post_upload_dir'   => array(),
+                    'post_checksum'     =>'', 
+                    'post_atta_images'  =>''
+                ),
+            );
+            $post_struct = iwp_recursive_parse_args($post_struct,$defaults);
+        }
         
 		
 		
@@ -51,47 +61,52 @@ class IWP_MMB_Post extends IWP_MMB_Core
         $upload = wp_upload_dir();
         
         // create dynamic url RegExp
-        $iwp_base_url   = parse_url($post_upload_dir['url']);
-        $iwp_regexp_url = $iwp_base_url['host'] . $iwp_base_url['path'];
-        $rep            = array(
-            '/',
-            '+',
-            '.',
-            ':',
-            '?'
-        );
-        $with           = array(
-            '\/',
-            '\+',
-            '\.',
-            '\:',
-            '\?'
-        );
-        $iwp_regexp_url = str_replace($rep, $with, $iwp_regexp_url);
+        $dot_match_count = 0;
+        $iwp_regexp_url = "";
         
-        // rename all src ../wp-content/ with hostname/wp-content/
-		
-        $iwp_mmb_dot_url     = '..' . $iwp_mmb_base_url['path'];
-        $iwp_mmb_dot_url     = str_replace($rep, $with, $iwp_mmb_dot_url);
-        $dot_match_count = preg_match_all('/(<a[^>]+href=\"([^"]+)\"[^>]*>)?(<\s*img.[^\/>]*src="([^"]*' . $iwp_mmb_dot_url . '[^\s]+\.(jpg|jpeg|png|gif|bmp))"[^>]*>)/ixu', $post_data['post_content'], $dot_get_urls, PREG_SET_ORDER);
+        if(!empty($post_upload_dir)){
+            $iwp_base_url   = parse_url($post_upload_dir['url']);
+            $iwp_regexp_url = $iwp_base_url['host'] . $iwp_base_url['path'];
+            $rep            = array(
+                '/',
+                '+',
+                '.',
+                ':',
+                '?'
+            );
+            $with           = array(
+                '\/',
+                '\+',
+                '\.',
+                '\:',
+                '\?'
+            );
+            $iwp_regexp_url = str_replace($rep, $with, $iwp_regexp_url);
+            
+            // rename all src ../wp-content/ with hostname/wp-content/
+    		
+            $iwp_mmb_dot_url     = '..' . $iwp_base_url['path'];
+            $iwp_mmb_dot_url     = str_replace($rep, $with, $iwp_mmb_dot_url);
+            $dot_match_count = preg_match_all('/(<a[^>]+href=\"([^"]+)\"[^>]*>)?(<\s*img.[^\/>]*src="([^"]*' . $iwp_mmb_dot_url . '[^\s]+\.(jpg|jpeg|png|gif|bmp))"[^>]*>)/ixu', $post_data['post_content'], $dot_get_urls, PREG_SET_ORDER);
+        }
 		
 				
         if ($dot_match_count > 0) {
             foreach ($dot_get_urls as $dot_url) {
                 $match_dot                 = '/' . str_replace($rep, $with, $dot_url[4]) . '/';
-                $replace_dot               = 'http://' . $iwp_mmb_base_url['host'] . substr($dot_url[4], 2, strlen($dot_url[4]));
+                $replace_dot               = 'http://' . $iwp_base_url['host'] . substr($dot_url[4], 2, strlen($dot_url[4]));
                 $post_data['post_content'] = preg_replace($match_dot, $replace_dot, $post_data['post_content']);
                 
                 if ($dot_url[1] != '') {
                     $match_dot_a               = '/' . str_replace($rep, $with, $dot_url[2]) . '/';
-                    $replace_dot_a             = 'http://' . $iwp_mmb_base_url['host'] . substr($dot_url[2], 2, strlen($dot_url[2]));
+                    $replace_dot_a             = 'http://' . $iwp_base_url['host'] . substr($dot_url[2], 2, strlen($dot_url[2]));
                     $post_data['post_content'] = preg_replace($match_dot_a, $replace_dot_a, $post_data['post_content']);
                 }
             }
         }
         
         //to find all the images
-        $match_count = preg_match_all('/(<a[^>]+href=\"([^"]+)\"[^>]*>)?(<\s*img.[^\/>]*src="([^"]+' . $iwp_mmb_regexp_url . '[^\s]+\.(jpg|jpeg|png|gif|bmp))"[^>]*>)/ixu', $post_data['post_content'], $get_urls, PREG_SET_ORDER);
+        $match_count = preg_match_all('/(<a[^>]+href=\"([^"]+)\"[^>]*>)?(<\s*img.[^\/>]*src="([^"]+' . $iwp_regexp_url . '[^\s]+\.(jpg|jpeg|png|gif|bmp))"[^>]*>)/ixu', $post_data['post_content'], $get_urls, PREG_SET_ORDER);
 		
 		///////////
 		//$html = $params['postContent'];
@@ -245,7 +260,7 @@ class IWP_MMB_Post extends IWP_MMB_Core
             $post_data['post_content'] = $post_content;
             
         }
-        if (count($post_atta_img)) {
+        if (!empty($post_atta_img) && is_array($post_atta_img)) {
             foreach ($post_atta_img as $img) {
                 $file_name             = basename($img['src']);
                  
@@ -351,7 +366,7 @@ class IWP_MMB_Post extends IWP_MMB_Core
         	
         }
         
-        if (count($attachments)) {
+        if (!empty($attachments) && is_array($attachments)) {
             foreach ($attachments as $atta_id => $featured_id) {
                 $result = wp_update_post(array(
                     'ID' => $atta_id,

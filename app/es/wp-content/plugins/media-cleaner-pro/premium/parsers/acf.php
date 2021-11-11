@@ -187,8 +187,29 @@ function wpmc_scan_postmeta_acf_field( $field, $id, $recursion_limit = -1 ) {
 	// ACF Gallery
 	else if ( $field['type'] == 'gallery' && !empty( $field['value'] ) ) {
 		foreach ( $field['value'] as $media ) {
-			if ( !empty( $media['id'] ) )
+
+			// From 6.2.5
+			if ( $format === 'url' ) {
+				array_push( $postmeta_images_acf_urls, $wpmc->clean_url( $media ) );
+			}
+			if ( $format === 'id' ) {
+				array_push( $postmeta_images_acf_ids, $media );
+			}
+			if ( $format === 'array' ) {
 				array_push( $postmeta_images_acf_ids, $media['id'] );
+			}
+
+			// Before 6.2.5
+			// if ( !empty( $media['id'] ) ) {
+			// 	array_push( $postmeta_images_acf_ids, $media['id'] );
+			// }
+		}
+	}
+	// ACF Wysiwyg
+	else if ( $field['type'] == 'wysiwyg' && !empty( $field['value'] ) ) {
+		$urls = $wpmc->get_urls_from_html( $field['value']  );
+		foreach ( $urls as $url ) {
+			array_push( $postmeta_images_acf_urls, $url );
 		}
 	}
 	// ACF File

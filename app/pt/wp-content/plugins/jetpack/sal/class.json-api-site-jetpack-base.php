@@ -26,6 +26,11 @@ abstract class Abstract_Jetpack_Site extends SAL_Site {
 
 	abstract protected function file_system_write_access();
 
+	/**
+	 * Fetch a list of active plugins that are using Jetpack Connection.
+	 */
+	abstract protected function get_connection_active_plugins();
+
 	function before_render() {
 	}
 
@@ -86,14 +91,16 @@ abstract class Abstract_Jetpack_Site extends SAL_Site {
 		) ) );
 
 		$options['file_mod_disabled'] = empty( $file_mod_disabled_reasons ) ? false : $file_mod_disabled_reasons;
+
+		$options['jetpack_connection_active_plugins'] = $this->get_connection_active_plugins();
 	}
 
 	function get_jetpack_modules() {
-		if ( is_user_member_of_blog() ) {
-			return array_values( Jetpack_Options::get_option( 'active_modules', array() ) );
-		}
+		return array_values( Jetpack_Options::get_option( 'active_modules', array() ) );
+	}
 
-		return null;
+	function is_module_active( $module ) {
+		return in_array ( $module, Jetpack_Options::get_option( 'active_modules', array() ), true );
 	}
 
 	function is_vip() {

@@ -1,19 +1,27 @@
 <?php
 
-add_action( 'wpcf7_init', 'wpcf7_constant_contact_register_service', 10, 0 );
+add_action(
+	'wpcf7_init',
+	'wpcf7_constant_contact_register_service',
+	5, 0
+);
 
 function wpcf7_constant_contact_register_service() {
 	$integration = WPCF7_Integration::get_instance();
 
 	$integration->add_category( 'email_marketing',
-		__( 'Email Marketing', 'contact-form-7' ) );
+		__( 'Email marketing', 'contact-form-7' ) );
 
 	$service = WPCF7_ConstantContact::get_instance();
 	$integration->add_service( 'constant_contact', $service );
 }
 
-add_action( 'wpcf7_save_contact_form',
-	'wpcf7_constant_contact_save_contact_form', 10, 1 );
+
+add_action(
+	'wpcf7_save_contact_form',
+	'wpcf7_constant_contact_save_contact_form',
+	10, 1
+);
 
 function wpcf7_constant_contact_save_contact_form( $contact_form ) {
 	$service = WPCF7_ConstantContact::get_instance();
@@ -55,6 +63,7 @@ function wpcf7_constant_contact_save_contact_form( $contact_form ) {
 
 	$service->update_contact_lists( array( $key => $list_names ) );
 }
+
 
 add_action( 'wpcf7_submit', 'wpcf7_constant_contact_submit', 10, 2 );
 
@@ -134,6 +143,7 @@ function wpcf7_constant_contact_submit( $contact_form, $result ) {
 
 	$service->create_contact( $request_builder->to_array() );
 }
+
 
 if ( ! class_exists( 'WPCF7_Service_OAuth2' ) ) {
 	return;
@@ -316,7 +326,10 @@ class WPCF7_ConstantContact extends WPCF7_Service_OAuth2 {
 
 	public function email_exists( $email ) {
 		$endpoint = add_query_arg(
-			array( 'email' => $email ),
+			array(
+				'email' => $email,
+				'status' => 'all',
+			),
 			'https://api.cc.email/v3/contacts'
 		);
 
@@ -456,20 +469,20 @@ class WPCF7_ConstantContact extends WPCF7_Service_OAuth2 {
 		switch ( $message ) {
 			case 'success':
 				echo sprintf(
-					'<div class="updated notice notice-success is-dismissible"><p>%s</p></div>',
+					'<div class="notice notice-success"><p>%s</p></div>',
 					esc_html( __( "Connection established.", 'contact-form-7' ) )
 				);
 				break;
 			case 'failed':
 				echo sprintf(
-					'<div class="error notice notice-error is-dismissible"><p><strong>%1$s</strong>: %2$s</p></div>',
-					esc_html( __( "ERROR", 'contact-form-7' ) ),
+					'<div class="notice notice-error"><p><strong>%1$s</strong>: %2$s</p></div>',
+					esc_html( __( "Error", 'contact-form-7' ) ),
 					esc_html( __( "Failed to establish connection. Please double-check your configuration.", 'contact-form-7' ) )
 				);
 				break;
 			case 'updated':
 				echo sprintf(
-					'<div class="updated notice notice-success is-dismissible"><p>%s</p></div>',
+					'<div class="notice notice-success"><p>%s</p></div>',
 					esc_html( __( "Configuration updated.", 'contact-form-7' ) )
 				);
 				break;
@@ -484,7 +497,7 @@ class WPCF7_ConstantContact extends WPCF7_Service_OAuth2 {
 					'https://contactform7.com/constant-contact-integration/',
 					'contact-form-7'
 				),
-				__( 'Constant Contact Integration', 'contact-form-7' )
+				__( 'Constant Contact integration', 'contact-form-7' )
 			)
 		) . '</p>';
 
@@ -533,7 +546,7 @@ class WPCF7_ConstantContact extends WPCF7_Service_OAuth2 {
 	<th scope="row"><label for="client_secret"><?php echo esc_html( __( 'App Secret', 'contact-form-7' ) ); ?></label></th>
 	<td><?php
 		if ( $this->is_active() ) {
-			echo esc_html( wpcf7_mask_password( $this->client_secret ) );
+			echo esc_html( wpcf7_mask_password( $this->client_secret, 4, 4 ) );
 			echo sprintf(
 				'<input type="hidden" value="%1$s" id="client_secret" name="client_secret" />',
 				esc_attr( $this->client_secret )
@@ -884,9 +897,10 @@ class WPCF7_ConstantContact_ContactPostRequest {
 	public function add_phone_number( $phone_number, $kind = 'home' ) {
 		$phone_number = trim( $phone_number );
 
-		if ( 2 <= count( $this->phone_numbers )
+		if ( empty( $phone_number )
 		or ! wpcf7_is_tel( $phone_number )
 		or 25 < $this->strlen( $phone_number )
+		or 2 <= count( $this->phone_numbers )
 		or ! in_array( $kind, array( 'home', 'work', 'other' ) ) ) {
 			return false;
 		}
@@ -937,7 +951,7 @@ class WPCF7_ConstantContact_ContactPostRequest {
 	}
 
 	protected function strlen( $string ) {
-		return wpcf7_count_code_units( stripslashes( $string ) );
+		return wpcf7_count_code_units( $string );
 	}
 
 }

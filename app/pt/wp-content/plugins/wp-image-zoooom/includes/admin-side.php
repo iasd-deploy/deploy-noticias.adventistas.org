@@ -109,7 +109,7 @@ class ImageZoooom_Admin {
 			'settings' => __( 'Zoom Settings', 'wp-image-zoooom' ),
 		);
 
-		$tab_current     = ( isset( $_GET['tab'] ) ) ? $_GET['tab'] : 'settings';
+		$tab_current     = ( isset( $_GET['tab'] ) && isset( $tabs[$_GET['tab']] ) ) ? $_GET['tab'] : 'settings';
 		$options_current = ( 'settings' === $tab_current ) ? 'zoooom_settings' : 'zoooom_general';
 
 		// Get the field settings.
@@ -266,6 +266,8 @@ class ImageZoooom_Admin {
 			'iz_dismiss_avada_woo_gallery',
 			'iz_dismiss_flatsome_theme',
 			'iz_dismiss_smart_image_resize',
+			'iz_dismiss_gallery_video',
+			'iz_dismiss_woo_product_gallery_slider',
 		);
 
 		$w = new SilkyPress_Warnings( $allowed_actions );
@@ -279,13 +281,13 @@ class ImageZoooom_Admin {
 
 		// Check if Jetpack Photon module is active
 		if ( defined( 'JETPACK__VERSION' ) ) {
-			$message = __( 'WP Image Zoom plugin is not compatible with the <a href="admin.php?page=jetpack">Jetpack Photon</a> module. If you find that the zoom is not working, try to deactivate the Photon module and see if that solves it.', 'wp-image-zoooom-pro' );
+			$message = sprintf( __('Under certain situations the <a href="%1$s">Lazy Loading</a> functionality from Jetpack can interfere with the image zooming. If you\'re expriencing issues with the zoom, please try deactivating this option. Since WordPress 5.5 the lazy-loading technique is used by default on all the website\'s images, also when the Lazy Loading option from Jetpack is disabled.', 'wp-image-zoooom' ), admin_url( 'admin.php?page=jetpack#/performance' ) );
 			$w->add_notice( 'iz_dismiss_jetpack', $message );
 		}
 
 		// Warning about BWF settings
 		if ( is_plugin_active( 'bwp-minify/bwp-minify.php' ) ) {
-			$message = __( '<b>If the zoom does not show up</b> on your website, it could be because you need to add the “image_zoooom-init” and the “image_zoooom” to the “Scripts to NOT minify” option in the BWP Minify settings, as shown in <a href="https://www.silkypress.com/wp-content/uploads/2016/09/image-zoom-bwp.png" target="_blank">this screenshot</a>.', 'wp-image-zoooom-pro' );
+			$message = sprintf( __( '<b>If the zoom does not show up</b> on your website, it could be because you need to add the "image_zoooom-init" and the "image_zoooom" to the "Scripts to NOT minify" option in the BWP Minify settings, as shown in <a href="%1$s" target="_blank">this screenshot</a>.', 'wp-image-zoooom' ), 'https://www.silkypress.com/wp-content/uploads/2016/09/image-zoom-bwp.png' );
 			$w->add_notice( 'iz_dismiss_bwp_minify', $message );
 		}
 
@@ -306,7 +308,7 @@ class ImageZoooom_Admin {
 
 		// Check if the Bridge theme is active
 		if ( strpos( strtolower( get_template() ), 'bridge' ) !== false && is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
-			$message = __( 'The <b>Bridge</b> theme replaces the default WooCommerce product gallery with its own. The <b>WP Image Zoom</b> plugin will not work with this replaced gallery. But if you set the "Enable Default WooCommerce Product Gallery Features" option to "Yes" on the <a href="' . admin_url( 'admin.php?page=qode_theme_menu_tab_woocommerce' ) . '">WP Admin -> Qode Options -> WooCommerce</a> page, then the zoom will work as expected on the product gallery.', 'wp-image-zoooom' );
+			$message = sprintf( __( 'The <b>Bridge</b> theme replaces the default WooCommerce product gallery with its own. The <b>WP Image Zoom</b> plugin will not work with this replaced gallery. But if you set the "Enable Default WooCommerce Product Gallery Features" option to "Yes" on the <a href="%1$s">%2$s</a> page, then the zoom will work as expected on the product gallery.', 'wp-image-zoooom' ), admin_url( 'admin.php?page=qode_theme_menu_tab_woocommerce' ), 'WP Admin -> Qode Options -> WooCommerce' );
 			// Note: This works for Bridge 16.7, but not for Bridge 14.1
 			$w->add_notice( 'iz_dismiss_bridge', $message, 'updated settings-error notice is-dismissible' );
 		}
@@ -315,7 +317,7 @@ class ImageZoooom_Admin {
 		if ( is_plugin_active( 'wooswipe/wooswipe.php' ) ) {
 			$pro_url      = 'https://www.silkypress.com/wp-image-zoom-plugin/?utm_source=wordpress&utm_campaign=iz_free&utm_medium=banner';
 			$wooswipe_url = 'https://wordpress.org/plugins/wooswipe/';
-			$message      = sprintf( __( 'WP Image Zoom plugin is <b>not compatible with the <a href="%1$s">WooSwipe WooCommerce Gallery</a> plugin</b>. You can try the zoom plugin with the default WooCommerce gallery by deactivating the WooSwipe plugin. Alternatively, you can upgrade to the WP Image Zoom Pro version, where the issue with the WooSwipe plugin is fixed.' ), $wooswipe_url, $pro_url );
+			$message      = sprintf( __( 'WP Image Zoom plugin is <b>not compatible with the <a href="%1$s">WooSwipe WooCommerce Gallery</a> plugin</b>. You can try the zoom plugin with the default WooCommerce gallery by deactivating the WooSwipe plugin. Alternatively, you can upgrade to the WP Image Zoom Pro version, where the issue with the WooSwipe plugin is fixed.', 'wp-image-zoooom' ), $wooswipe_url, $pro_url );
 			$w->add_notice( 'iz_dismiss_wooswipe', $message );
 		}
 
@@ -323,20 +325,20 @@ class ImageZoooom_Admin {
 		if ( strpos( strtolower( get_template() ), 'avada' ) !== false && is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
 			$avada_options = get_option( 'fusion_options' );
 			if ( isset( $avada_options['disable_woo_gallery'] ) && $avada_options['disable_woo_gallery'] == '1' ) {
-				$message = __( '<b>The zoom will work</b> on the WooCommerce products images only when having the <b>"Avada\'s WooCommerce Product Gallery Slider"</b> option <b>turned off</b> on the <a href="' . admin_url( 'themes.php?page=avada_options' ) . '">WP Admin -> Avada -> Theme Options -> WooCommerce -> General WooCommerce</a> page' );
+				$message = sprintf( __( '<b>The zoom will work</b> on the WooCommerce products images only when having the <b>"Avada\'s WooCommerce Product Gallery Slider"</b> option <b>turned off</b> on the <a href="%1$s">%2$s</a> page', 'wp-image-zoooom' ), admin_url( 'themes.php?page=avada_options' ), 'WP Admin -> Avada -> Theme Options -> WooCommerce -> General WooCommerce' );
 				$w->add_notice( 'iz_dismiss_avada_woo_gallery', $message );
 			}
 		}
 
         // Warning about Flatsome theme
         if ( strpos( strtolower(get_template()), 'flatsome') !== false && $w->is_url('zoooom_settings')) {
-            $message = __( 'The Flatsome theme replaces the default WooCommerce gallery with a Flickity carousel, which leads to the effects that it zooms only on the first image. Please check <a href="https://www.silkypress.com/wp-image-zoom/zoom-woocommerce-gallery-flatsome-theme/" target="_blank">this article</a> for a solution to the issue.', 'wp-image-zoooom-pro' );
+            $message = sprintf( __( 'The Flatsome theme replaces the default WooCommerce gallery with a Flickity carousel, which leads to the effects that it zooms only on the first image. Please check <a href="%1$s" target="_blank">this article</a> for a solution to the issue.', 'wp-image-zoooom' ), 'https://www.silkypress.com/wp-image-zoom/zoom-woocommerce-gallery-flatsome-theme/' );
             $w->add_notice( 'iz_dismiss_flatsome_theme', $message );
         }
 
 		// Warning about Smart Image Resize plugin.
 		if ( is_plugin_active( 'smart-image-resize/plugpix-smart-image-resize.php' ) && $w->is_url( 'zoooom_settings' ) ) {
-			$message = __( 'The <b>Smart Image Resize for WooCommerce</b> plugin modifies the WooCommerce product images, which will result in a distorted zoom lens on those images. Unfortunately, if you plan to use the <b>WP Image Zoom PRO</b> plugin on the WooCommerce product images, then, you\'ll need to deactivate the <b>Smart Image Resize</b> plugin.', 'wp-image-zoooom-pro' );
+			$message = __( 'The <b>Smart Image Resize for WooCommerce</b> plugin modifies the WooCommerce product images, which will result in a distorted zoom lens on those images. Unfortunately, if you plan to use the <b>WP Image Zoom</b> plugin on the WooCommerce product images, then, you\'ll need to deactivate the <b>Smart Image Resize</b> plugin.', 'wp-image-zoooom' );
 			$w->add_notice( 'iz_dismiss_smart_image_resize', $message );
 		}
 
@@ -345,8 +347,24 @@ class ImageZoooom_Admin {
 			$slick_url = 'http://kenwheeler.github.io/slick/';
 			$variation_plugin_url = 'https://wordpress.org/plugins/woo-variation-gallery/';
 			$pro_url        = 'https://www.silkypress.com/wp-image-zoom-plugin/?utm_source=wordpress&utm_campaign=iz_free&utm_medium=banner';
-			$message      = sprintf( __( 'The <a href="%1$s">Additional Variation Images Gallery for WooCommerce</a> plugin replaces the default WooCommerce gallery with a <a href="%2$s">Slick carousel</a> gallery. Unfortunately the <b>WP Image Zoom</b> plugin will not work with the <b>Slick carousel</b> gallery. You can try the zoom plugin with the default WooCommerce gallery by deactivating the <b>Additional Variation Images Gallery for WooCommerce</b> plugin. Alternatively, you can upgrade to the <a href="%3$s">WP Image Zoom Pro</a> version, which is compatible with the <b>Slick carousel</b> gallery, therefore compatible with the <b>Additional Variation Images Gallery for WooCommerce</b> plugin.' ), $variation_plugin_url, $slick_url, $pro_url );
+			$message      = sprintf( __( 'The <a href="%1$s" target="_blank">Additional Variation Images Gallery for WooCommerce</a> plugin replaces the default WooCommerce gallery with a <a href="%2$s" target="_blank">Slick carousel</a> gallery. Unfortunately the <b>WP Image Zoom</b> plugin will not work with the <b>Slick carousel</b> gallery. You can try the zoom plugin with the default WooCommerce gallery by deactivating the <b>Additional Variation Images Gallery for WooCommerce</b> plugin. Alternatively, you can upgrade to the <a href="%3$s">WP Image Zoom Pro</a> version, which is compatible with the <b>Slick carousel</b> gallery, therefore compatible with the <b>Additional Variation Images Gallery for WooCommerce</b> plugin.', 'wp-image-zoooom' ), $variation_plugin_url, $slick_url, $pro_url );
 			$w->add_notice( 'iz_dismiss_woo_variation', $message );
+		}
+
+		// Warning about Additional Variation Images Gallery for WooCommerce plugin.
+		if ( is_plugin_active( 'product-video-gallery-slider-for-woocommerce/product-video-gallery-slider-for-woocommerce.php' ) && $w->is_url( 'zoooom_settings' ) ) {
+			$slick_url = 'http://kenwheeler.github.io/slick/';
+			$gallery_plugin_url = 'https://wordpress.org/plugins/product-video-gallery-slider-for-woocommerce/';
+			$pro_url        = 'https://www.silkypress.com/wp-image-zoom-plugin/?utm_source=wordpress&utm_campaign=iz_free&utm_medium=banner';
+			$message      = sprintf( __( 'The <a href="%1$s" target="_blank">WooCommerce Product Video Gallery</a> plugin replaces the default WooCommerce gallery with a <a href="%2$s" target="_blank">Slick carousel</a> gallery. Unfortunately the <b>WP Image Zoom</b> plugin will not work with the <b>Slick carousel</b> gallery. You can try the zoom plugin with the default WooCommerce gallery by deactivating the <b>WooCommerce Product Video Gallery</b> plugin. Alternatively, you can upgrade to the <a href="%3$s">WP Image Zoom Pro</a> version, which is compatible with the <b>Slick carousel</b> gallery, therefore compatible with the <b>WooCommerce Product Video Gallery</b> plugin.', 'wp-image-zoooom' ), $gallery_plugin_url, $slick_url, $pro_url );
+			$w->add_notice( 'iz_dismiss_gallery_video', $message );
+		}
+
+		// Warning about the Product Gallery Slider for WooCommerce plugin.
+		if ( is_plugin_active( 'woo-product-gallery-slider/woo-product-gallery-slider.php' ) && $w->is_url( 'zoooom_settings' ) ) {
+			$gallery_plugin_url = 'https://wordpress.org/plugins/woo-product-gallery-slider/';
+			$message      = sprintf( __( 'The <a href="%1$s" target="_blank">Product Gallery Slider for WooCommerce</a> plugin replaces the default WooCommerce gallery with a custom implementation, which, unfortunately, is not compatible with the <b>WP Image Zoom</b> plugin. You can try the image zoom plugin with the default WooCommerce gallery by deactivating the <b>Product Gallery Slider for WooCommerce</b> plugin.', 'wp-image-zoooom' ), $gallery_plugin_url );
+			$w->add_notice( 'iz_dismiss_woo_product_gallery_slider', $message );
 		}
 
 		$w->show_warnings();

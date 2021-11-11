@@ -146,6 +146,11 @@ class IWP_MMB_Backup_Multicall extends IWP_MMB_Core
 			{
 				return $this->statusLog($datas['backupParentHID'], array('stage' => 'trigger_check', 'status' => 'error', 'statusMsg' => 'Error while fetching table data', 'statusCode' => 'error_while_fetching_table_data'));
 			}
+			$defaults = array (
+		 		'nextFunc' => NULL,
+		 		'status'  => NULL
+		 	);
+			$responseParams = wp_parse_args( $responseParams, $defaults );
 			$action = $responseParams['nextFunc'];
 			$status = $responseParams['status'];
 			if(empty($action))
@@ -421,41 +426,64 @@ class IWP_MMB_Backup_Multicall extends IWP_MMB_Core
 		$temp_sql_file_name = $file.".sql";
 		$file   = $db_folder . $temp_sql_file_name;
         global $wpdb;
-        $paths   = $this->getMySQLPath();
+        if(empty($responseParams['mysqldump'])){
+        	$paths   = $this->getMySQLPath();
+        }else{
+        	$paths['mysqldump'] = $responseParams['mysqldump'];
+        }
+        if(empty($paths['mysqldump'])){
+        	// Fallback to php
+        	return false;
+        }
         $brace   = (substr(PHP_OS, 0, 3) == 'WIN') ? '"' : '';
 		//$command = $brace . $paths['mysqldump'] . $brace . ' --force --host="' . DB_HOST . '" --user="' . DB_USER . '" --password="' . DB_PASSWORD . '" --add-drop-table --skip-lock-tables "' . DB_NAME . '" > ' . $brace . $file . $brace;
-        $command0 = $wpdb->get_col('SHOW TABLES LIKE "'.$wpdb->base_prefix.'%"');
-        $full_table = array();
-        $structure_only_table = array();
-		if (!empty($exclude_tables)) {
-			foreach ($command0 as $tk => $table) {
-				foreach ($exclude_tables as $ke => $exclude_table) {
-					$structure = false;
-					if (strpos($table, $exclude_table)) {
-						$structure = true;
-						break;
+        if(empty($responseParams['full_table'])){
+        	// Avoid getting exclude_table on mysqlDump retry call
+	        $command0 = $wpdb->get_col('SHOW TABLES LIKE "'.$wpdb->base_prefix.'%"');
+	        $full_table = array();
+	        $structure_only_table = array();
+			if (!empty($exclude_tables)) {
+				foreach ($command0 as $tk => $table) {
+					foreach ($exclude_tables as $ke => $exclude_table) {
+						$structure = false;
+						if (!empty($exclude_table) && strpos($table, $exclude_table)) {
+							$structure = true;
+							break;
+						}
 					}
+					if ($structure) {
+						$structure_only_table [] = $table;
+					}else{
+						$full_table [] = $table;
+	 				}
 				}
-				if ($structure) {
-					$structure_only_table [] = $table;
-				}else{
-					$full_table [] = $table;
- 				}
+			}else{
+				$full_table = $command0;
 			}
-		}else{
-			$full_table = $command0;
-		}
-        $wp_tables = join("\" \"",$full_table);
+        	$wp_tables = join("\" \"",$full_table);
+        	if(!empty($structure_only_table)){
+		        $structure_only_table = join("\" \"",$structure_only_table);
+        	}
+
+        }else{
+        	$wp_tables = $responseParams['full_table'];
+        	if(!empty($responseParams['structure_only_table'])){
+	        	$structure_only_table = $responseParams['structure_only_table'];
+        	}
+        }
         $skipThisTable = false;
-        $command = $brace . $paths['mysqldump'] . $brace . ' --force --host="' . DB_HOST . '" --user="' . DB_USER . '" --password="' . DB_PASSWORD . '" --max_allowed_packet=8M --net_buffer_length=1M --skip-comments --skip-set-charset --allow-keywords --dump-date --add-drop-table --skip-lock-tables --extended-insert "' . DB_NAME . '" "'.$wp_tables.'" > ' . $brace . $file . $brace;
-        
+        $msqld_max_allowed_packet = (defined('IWP_MYSQLDUMP_MAX_ALLOWED_PACKET') && (is_int(IWP_MYSQLDUMP_MAX_ALLOWED_PACKET) || is_string(IWP_MYSQLDUMP_MAX_ALLOWED_PACKET))) ? IWP_MYSQLDUMP_MAX_ALLOWED_PACKET : '8M';
+        if(!empty($responseParams['max_allowed_packet'])){
+        	$msqld_max_allowed_packet = $responseParams['max_allowed_packet'];
+        }
+
+        $command = $brace . $paths['mysqldump'] . $brace . ' --force --host="' . DB_HOST . '" --user="' . DB_USER . '" --password="' . DB_PASSWORD . '" --max_allowed_packet='.$msqld_max_allowed_packet.' --net_buffer_length=1M --skip-comments --skip-set-charset --allow-keywords --dump-date --add-drop-table --skip-lock-tables --extended-insert "' . DB_NAME . '" "'.$wp_tables.'" > ' . $brace . $file . $brace;
 
 		iwp_mmb_print_flush('DB DUMP CMD: Start');
         ob_start();
         update_option('iwp_multical_db_dump_flag', 1);
         if (!empty($structure_only_table)) {
-        	$wp_tables = join("\" \"",$structure_only_table);
-        	$structure_command = $brace . $paths['mysqldump'] . $brace . ' --force --host="' . DB_HOST . '" --user="' . DB_USER . '" --password="' . DB_PASSWORD . '" --add-drop-table --skip-lock-tables --no-data "' . DB_NAME . '" "'.$wp_tables.'" >> ' . $brace . $file . $brace;
+        	$structure_command = $brace . $paths['mysqldump'] . $brace . ' --force --host="' . DB_HOST . '" --user="' . DB_USER . '" --password="' . DB_PASSWORD . '" --add-drop-table --skip-lock-tables --no-data "' . DB_NAME . '" "'.$structure_only_table.'" >> ' . $brace . $file . $brace;
         	// $result = $this->iwp_mmb_exec($structure_command);
         	$command.=' && '.$structure_command;
 
@@ -466,6 +494,43 @@ class IWP_MMB_Backup_Multicall extends IWP_MMB_Core
 		$time = microtime(true);
 		$finish_part = $time;
 		$total_time_part = $finish_part - $this->iwpScriptStartTime;
+		if(!$result && !defined('IWP_MYSQLDUMP_MAX_ALLOWED_PACKET')){
+			// It will work when the Mysqldump comment available, but due to low max_allowed_packet size. Mysqldump not working, so we are manually increasing the max_allowed_packet size
+			// the call triggered from trigger_check via nextFunc
+			if(!empty($responseParams['max_allowed_packet'])){
+				delete_option('iwp_multical_db_dump_flag');
+				return $this->backupDBPHP($historyID);
+			}
+			if(empty($responseParams['max_allowed_packet'])){
+				global $iwp_mmb_core;
+				$db_final_response['success']['max_allowed_packet'] = $iwp_mmb_core->get_max_allowed_packet();
+
+			}
+			$db_final_response['success']['response_data'] = array();
+			$db_final_response['success']['backup_file'] = $responseParams['backup_file'];
+			$db_final_response['success']['backup_url'] = $responseParams['backup_url'];
+			$db_final_response['success']['parentHID'] = $historyID;
+			$db_final_response['success']['backupParentHID'] = $historyID;
+			$db_final_response['success']['nextFunc'] = 'backup_db_dump_multi';
+			$db_final_response['success']['account_info'] = $responseParams['account_info'];
+			$db_final_response['success']['status'] = 'partiallyCompleted';
+			$db_final_response['success']['full_table'] = $wp_tables;
+			$db_final_response['success']['mysqldump'] = $paths['mysqldump'];
+			if(!empty($structure_only_table)){
+				$db_final_response['success']['structure_only_table'] = $structure_only_table;
+			}
+
+			$backupStage = 'backupDBMultiCall';
+			$this->statusLog($historyID, array('stage' => $backupStage, 'status' => 'partiallyCompleted', 'statusMsg' => 'backupDBMultiCallRetry','nextFunc' => 'backup_db_dump_multi', 'responseParams' => $db_final_response['success']));
+
+			$db_res_array = array();
+			$db_res_array['status'] = 'partiallyCompleted';
+			$db_res_array['statusMsg'] = 'backupDBMultiCallRetry';
+			$db_res_array['backupParentHID'] = $historyID;
+			$db_res_array['parentHID'] = $historyID;
+			$db_res_array['max_allowed_packet'] = $db_final_response['success']['max_allowed_packet'];
+			return $db_res_array;
+		}
         
         if (!$result) { // Fallback to php
             // $result = $this->backup_db_php($file);
@@ -556,7 +621,12 @@ class IWP_MMB_Backup_Multicall extends IWP_MMB_Core
                 $paths['mysqldump'] = 'mysqldump.exe';
             }
         } else{
-	    	$mysqlPath = "/usr/bin/mysqldump,/bin/mysqldump,/usr/local/bin/mysqldump,/usr/sfw/bin/mysqldump,/usr/xdg4/bin/mysqldump,/opt/bin/mysqldump";
+	    	if(defined('IWP_MYSQLDUMP_EXECUTABLE') && IWP_MYSQLDUMP_EXECUTABLE){
+	    	    $mysqlPath = IWP_MYSQLDUMP_EXECUTABLE;
+	    	}else{
+	    	    $mysqlPath = iwp_mmb_build_mysqldump_list();
+	    	}
+
 			$bin = explode(',' , $mysqlPath);
 			$brace   = (substr(PHP_OS, 0, 3) == 'WIN') ? '"' : '';
 			$db_folder = IWP_DB_DIR . '/';
@@ -577,12 +647,19 @@ class IWP_MMB_Backup_Multicall extends IWP_MMB_Core
 			        'mysql' => $value,
 			        'mysqldump' => $value
 			    );
-
+				 
 				 return $paths;
 			}
 			unlink($file);
         }
 
+        if (empty($paths['mysql'])){
+        	$paths['mysql'] = $this->iwp_mmb_exec('which mysql', true);
+        }
+        
+        if (empty($paths['mysqldump'])){
+        	$paths['mysqldump'] = $this->iwp_mmb_exec('which mysqldump', true);
+        }
         return $paths;
 	}
 	
@@ -745,13 +822,15 @@ class IWP_MMB_Backup_Multicall extends IWP_MMB_Core
 			$res_arr = array();
 			$res_arr['response_data'] = array();
 			$res_arr['file_name'] = DB_NAME;
-			$res_arr['response_data'] = array();
 			$res_arr['backup_file'] = $backup_file;
 			$res_arr['backup_url'] = $this -> backup_url;
 			$res_arr['account_info'] = $account_info;
 			$this->statusLog($historyID, array('stage' => 'backupDB', 'status' => 'initiating', 'statusMsg' => 'createdFileNameAndSent','responseParams' => $res_arr));
 			$func = $this->check_sys();	
 			$db_result = true;
+			if($func == false){
+				$db_result = false;
+			}
 			if ($db_result) {
 				$db_result = $this->backup_db_dump_multi($historyID);
 			}
@@ -920,7 +999,13 @@ class IWP_MMB_Backup_Multicall extends IWP_MMB_Core
 		//$tables = $wpdb->get_results('SHOW TABLES', ARRAY_N);
 			$this_prefix = $wpdb->base_prefix;
 			$tables = $wpdb->get_results('SHOW TABLES LIKE "'.$this_prefix.'%"', ARRAY_N);
-		
+			
+		$max_row_limit = 100;
+		if(defined('IWP_PHP_DB_ROWS') && (is_int(IWP_PHP_DB_ROWS) || is_string(IWP_PHP_DB_ROWS))){
+			if(IWP_PHP_DB_ROWS > $max_row_limit ){
+				$max_row_limit = IWP_PHP_DB_ROWS;
+			}
+		}
 		foreach ($tables as $table) {
 			$is_continue = '';
 			foreach($response_array as $k => $v)
@@ -988,9 +1073,9 @@ class IWP_MMB_Backup_Multicall extends IWP_MMB_Core
 			{
 				$breakingCount = 0;
 			}
-			if ($count > 100)
+			if ($count > $max_row_limit)
 			{
-				$count = ceil($count / 100);
+				$count = ceil($count / $max_row_limit);
 				if($left_out_count > 0)
 				{
 					$temp_left_count = $left_out_count;
@@ -1019,14 +1104,14 @@ class IWP_MMB_Backup_Multicall extends IWP_MMB_Core
 				{
 					if($done_count > ($i))
 					{
-						$count_field += 100 * $no_of_cols;
+						$count_field += $max_row_limit * $no_of_cols;
 						continue;
 					}
 				}
 				
 				iwp_mmb_auto_print('backup_db_php_fail_safe');
-				$low_limit = $i * 100;
-				$qry       = "SELECT * FROM $table[0] LIMIT $low_limit, 100";
+				$low_limit = $i * $max_row_limit;
+				$qry       = "SELECT * FROM $table[0] LIMIT $low_limit, $max_row_limit";
 				$rows      = $wpdb->get_results($qry, ARRAY_A);
 				
 				$number_data_types = 'tinyint, smallint, mediumint, bigint, int, decimal, numeric, real, float, double';
@@ -1797,6 +1882,9 @@ class IWP_MMB_Backup_Multicall extends IWP_MMB_Core
 		}
 				manual_debug('', 'afterHeaderWrite', 0);
 		$v_size = @ftell($archive->zip_fd)-$v_offset;
+		if(empty($v_comment)){
+			$v_comment = '';
+		}
 		$archive->privWriteCentralHeader($v_count, $v_size, $v_offset, $v_comment);
 		$archive->privCloseFd();
 				echo 'iwpmsg next Count -'.$nextCount;
@@ -1848,6 +1936,9 @@ class IWP_MMB_Backup_Multicall extends IWP_MMB_Core
 			$nextFunc = 'error';
 			$status = 'error';
 			return array('error' => 'Must be error');
+		}
+		if(!isset($p_filedescr_list)){
+			$p_filedescr_list = array();
 		}
 		if($status == 'partiallyCompleted')
 		{
@@ -2077,7 +2168,7 @@ class IWP_MMB_Backup_Multicall extends IWP_MMB_Core
 					unset($p_filedescr_list);
 					unset($p_filedescr_list_array['p_filedescr_list']);
 					$result_arr['response_data']['next_file_index'] = $p_filedescr_list_array['next_file_index'];
-					$result_arr['response_data']['complete_folder_list'] = $p_filedescr_list_array['complete_folder_list'];
+					$result_arr['response_data']['complete_folder_list'] = isset($p_filedescr_list_array['complete_folder_list']) ? $p_filedescr_list_array['complete_folder_list'] : array(); 
 					
 					$this->statusLog($this -> hisID, array('stage' => 'gettingFileList', 'status' => 'processing', 'statusMsg' => 'gettingFileListInMultiCall','responseParams' => $result_arr));
 					unset($p_filedescr_list_array);
@@ -2151,6 +2242,9 @@ class IWP_MMB_Backup_Multicall extends IWP_MMB_Core
 		{
 			$v_read_size = ($actualFileSize < IWP_PCLZIP_READ_BLOCK_SIZE ? $actualFileSize : IWP_PCLZIP_READ_BLOCK_SIZE);
 			$v_buffer = fread($archive->zip_fd, $v_read_size);
+			if (empty($v_buffer)) {
+				break;
+			}
 			@fwrite($v_zip_temp_fd, $v_buffer, $v_read_size);
 			$actualFileSize -= $v_read_size;
 		}
@@ -3914,7 +4008,7 @@ class IWP_MMB_Backup_Multicall extends IWP_MMB_Core
         if ($this->iwp_mmb_function_exists('system'))
             return 'system';
         
-        if ($this->iwp_mmb_function_exists('passhtru'))
+        if ($this->iwp_mmb_function_exists('passthru'))
             return 'passthru';
         
         return false;
@@ -4400,7 +4494,7 @@ function ftp_backup($historyID,$args = '')
 		}
 	}
 	
-	function postUploadS3VerificationBwdComp($backup_file, $destFile, $type = "", $as3_bucket = "", $as3_access_key = "", $as3_secure_key = "", $as3_bucket_region = "", &$obj, $actual_file_size, $size1, $size2, $return_size = false){
+	function postUploadS3VerificationBwdComp($backup_file, $destFile, $type = "", $as3_bucket = "", $as3_access_key = "", $as3_secure_key = "", $as3_bucket_region = "", &$obj = "", $actual_file_size = "", $size1 = 0 , $size2 = 0, $return_size = false){
 		$response = $obj -> if_object_exists($as3_bucket, $destFile);
 		if($response == true)
 		{
@@ -4631,8 +4725,8 @@ function ftp_backup($historyID,$args = '')
 			
 			$args = $responseParams['dropboxArgs'];
 			$prevChunkResults = $responseParams['response_data'];
-			$uploadid = $prevChunkResults['upload_id'];
-			$offset = $prevChunkResults['offset'];
+			$uploadid = isset($prevChunkResults['upload_id']) ? $prevChunkResults['upload_id'] : 0;
+			$offset = isset($prevChunkResults['offset']) ? $prevChunkResults['offset'] : 0;
 			$current_file_num = $responseParams['current_file_num'];
 		}
 		
@@ -6255,7 +6349,7 @@ function ftp_backup($historyID,$args = '')
 												
 			$deleteRes = $wpdb->query($delete_query);
 		}
-		if ($fromNewBackup) {
+		if (!empty($fromNewBackup) && $fromNewBackup) {
 			return ($deleted)?true:false;
 		}else{
 			return true;
@@ -6625,6 +6719,7 @@ function ftp_backup($historyID,$args = '')
 			$cpuUsageLog	 = 'DE_clCPUUsage.'.$iwp_multicall_hisID.'.txt';
 			$debug_count = 0;
 			$every_count = 0;
+			$current_cpu_load = 0;
 			if (function_exists('sys_getloadavg')) {
 				$cpu_load = sys_getloadavg();
 				$current_cpu_load = $cpu_load[0];
@@ -6634,11 +6729,10 @@ function ftp_backup($historyID,$args = '')
 			$this_memory_in_mb = memory_get_usage();
 			$this_memory_in_mb = $this_memory_in_mb / 1048576;
 			$this_time_taken = microtime(true) - $GLOBALS['IWP_MMB_PROFILING']['ACTION_START'];
-			
-			file_put_contents(IWP_BACKUP_DIR . '/'.$memoryPeakLog,$debug_count . $printText . "  " . round($this_memory_peak_in_mb, 2) ."\n");
-			file_put_contents(IWP_BACKUP_DIR . '/'.$memoryUsageLog,$debug_count . $printText . "  " . round($this_memory_in_mb, 2) ."\n");
-			file_put_contents(IWP_BACKUP_DIR . '/'.$timeTakenLog,$debug_count . $printText . "  " . round($this_time_taken, 2) ."\n");
-			file_put_contents(IWP_BACKUP_DIR . '/'.$cpuUsageLog,$debug_count . $printText . "  " . $current_cpu_load ."\n");
+			file_put_contents(IWP_BACKUP_DIR . '/'.$memoryPeakLog,$debug_count . "  " . round($this_memory_peak_in_mb, 2) ."\n");
+			file_put_contents(IWP_BACKUP_DIR . '/'.$memoryUsageLog,$debug_count . "  " . round($this_memory_in_mb, 2) ."\n");
+			file_put_contents(IWP_BACKUP_DIR . '/'.$timeTakenLog,$debug_count . "  " . round($this_time_taken, 2) ."\n");
+			file_put_contents(IWP_BACKUP_DIR . '/'.$cpuUsageLog,$debug_count . "  " . $current_cpu_load ."\n");
 }
 	}
 	
@@ -6683,7 +6777,9 @@ function ftp_backup($historyID,$args = '')
 			$cpuUsageLog	 = 'DE_clCPUUsage.'.$iwp_multicall_hisID.'.txt';
 			if (function_exists('sys_getloadavg')) {
 				$cpu_load = sys_getloadavg();
-				$current_cpu_load = $cpu_load[0];
+				if(!empty($cpu_load)){
+					$current_cpu_load = $cpu_load[0];
+				}
 			}
 
 			if($conditions == 'printOnly'){
@@ -6722,9 +6818,10 @@ function ftp_backup($historyID,$args = '')
 			$result = true;
                         
 			$IWP_FILE_LIST_TABLE_VERSION =	iwp_mmb_get_site_option('iwp_file_list_table_version');
-			
+			$this_table_name_from_db = $wpdb->get_var("SHOW TABLES LIKE '$this_table_name'");
+			$this_table_name = check_iwp_file_list_table($this_table_name_from_db,$this_table_name);
 			//write in db and refresh for_every_count,  all_files_detail;
-			if($wpdb->get_var("SHOW TABLES LIKE '$this_table_name'") == $this_table_name) {
+			if($this_table_name_from_db == $this_table_name) {
 				$result = $wpdb->query('TRUNCATE TABLE ' . $this_table_name );
 				$error_msg = 'Unable to empty File list table : <span style="font-weight:700;">' . $wpdb->last_error.'</span>' ;
 				if(version_compare($IWP_FILE_LIST_TABLE_VERSION, '1.1') == -1){
@@ -6780,7 +6877,9 @@ function ftp_backup($historyID,$args = '')
 				if($wpdb->last_error !== '') {
 					$iwp_db_upgrade_error = $wpdb->last_error;
 				}
-				if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") == $table_name){
+				$this_table_name_from_db = $wpdb->get_var("SHOW TABLES LIKE '$table_name'");
+				$table_name = check_iwp_file_list_table($this_table_name_from_db,$table_name);
+				if($this_table_name_from_db == $table_name){
 					$table_created = true;
 					update_option( "iwp_file_list_table_version", '1.1');
 				}
@@ -6994,7 +7093,9 @@ function ftp_backup($historyID,$args = '')
 			}	
 			$table_name = $wpdb->base_prefix . "iwp_file_list";
 
-			if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") == $table_name) {
+			$this_table_name_from_db = $wpdb->get_var("SHOW TABLES LIKE '$table_name'");
+			$table_name = check_iwp_file_list_table($this_table_name_from_db,$table_name);
+			if($this_table_name_from_db == $table_name) {
 				if (!empty($charset_collate)){
 					$cachecollation = str_ireplace('DEFAULT ', '', $charset_collate);
 				}
@@ -7067,6 +7168,16 @@ if( !function_exists('upgradeOldDropBoxBackupList')){
 				$update = $wpdb->update($table_name,array( 'requestParams' => serialize($requestParams)),array( 'ID' => $taskArray['ID']),array('%s'),array('%d'));
 			}
 		}
+	}
+}
+
+function check_iwp_file_list_table($this_table_name_from_db,$this_table_name_from_config){
+	if(!empty($this_table_name_from_db)){
+		$table_name = $this_table_name_from_db == $this_table_name_from_config ? $this_table_name_from_config : ($this_table_name_from_db == strtolower($this_table_name_from_config) ? strtolower($this_table_name_from_config) : strtoupper($this_table_name_from_config));
+		return $table_name;
+	}else{
+		return $this_table_name_from_config;
+		// the first time $this_table_name_from_db is NULL so we are try to create a table based on config file prefix
 	}
 }
 /*if( function_exists('add_filter') ){

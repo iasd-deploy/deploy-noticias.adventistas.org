@@ -18,15 +18,15 @@ class Settings_View extends View
 				<div class="main-content">
 
 					<div class="gocache-logo">
-						<img src="<?php echo App::plugins_url( 'assets/images/logo-gocache.png' ); ?>">
+						<img src="<?php echo esc_url( App::plugins_url( 'assets/images/logo-gocache.png' )); ?>">
 					</div>
 
 					<h3><?php _e( 'Start', App::TEXTDOMAIN ); ?></h3>
 
 					<p>
-						Conecta seu WordPress com a GoCache, CDN de última geração, que acelera de forma inteligente as páginas e arquivos estáticos do site, reduzindo o consumo de recursos no servidor web e banco de dados.
+						<?php _e( 'Conecta seu WordPress com a GoCache, CDN de última geração, que acelera de forma inteligente as páginas e arquivos estáticos do site, reduzindo o consumo de recursos no servidor web e banco de dados.
 
-						Para mais informações sobre a instalação e configuração do plugin, <a target="_blank" href="https://gocache.zendesk.com/hc/pt-br/articles/226255027">clique aqui</a>.
+						Para mais informações sobre a instalação e configuração do plugin', App::TEXTDOMAIN); ?>, <a target="_blank" href="https://gocache.zendesk.com/hc/pt-br/articles/226255027"><?php _e('clique aqui', App::TEXTDOMAIN); ?></a>.
 					</p>
 
 				</div>
@@ -39,12 +39,14 @@ class Settings_View extends View
 	}
 	public static function render_authenticate_page()
 	{
-		$setting   = new Setting();
-		$request   = new Request();
-		$response  = $request->verify_connection( true );
-		$connected = ( $response && $response->status_code == 1 ) ? true : false;
+		$setting  = new Setting();		
 
-		self::_render_notice( $connected, $response );
+		$authentication = new Authentication_Controller();
+		$response       = $authentication->authentication();
+		
+		$connected = ( $response && $response['status'] == 1 ) ? true : false;
+
+		self::_render_notice( $connected, $response['message'] );
 
 		?>
 
@@ -55,7 +57,7 @@ class Settings_View extends View
 				<div class="main-content">
 
 					<div class="gocache-logo">
-						<img src="<?php echo App::plugins_url( 'assets/images/logo-gocache.png' ); ?>">
+						<img src="<?php echo esc_url( App::plugins_url( 'assets/images/logo-gocache.png' )); ?>">
 					</div>
 
 					<form action="options.php" method="post">
@@ -92,10 +94,10 @@ class Settings_View extends View
 									<input type="password" class="regular-text"
 										   placeholder="<?php _e( 'Your GoCache API key', App::TEXTDOMAIN ); ?>"
 										   id="gocache_api_key"
-										   name="<?php echo $setting->get_option_name( 'api_key' ); ?>"
-										   value="<?php echo $setting->api_key; ?>" />
+										   name="<?php _e( $setting->get_option_name( 'api_key' ),App::TEXTDOMAIN ); ?>"
+										   value="<?php _e( $setting->api_key, App::TEXTDOMAIN ); ?>" />
 									<p class="help">
-										Digite sua API Token(Chave da API) para conectar com a sua conta na GoCache.
+										<?php _e( 'Digite sua API Token(Chave da API) para conectar com a sua conta na GoCache.', App::TEXTDOMAIN ); ?>
 										<a target="_blank" href="https://gocache.zendesk.com/hc/pt-br/articles/115001135087)">Ajuda?</a>
 									</p>
 								</td>
@@ -105,11 +107,11 @@ class Settings_View extends View
 								<th scope="row"><label for="gocache_domain"><?php _e( 'Domain', App::TEXTDOMAIN ); ?></label></th>
 								<td>
 									<?php $domain = preg_replace( '(https?://)', '', Utils::get_domain() ); ?>
-									<p class="description"><?php echo ! $domain ? '—' : $domain; ?></p>
+									<p class="description"><?php ! $domain ? _e( '—', App::TEXTDOMAIN) : _e( $domain, App::TEXTDOMAIN ); ?></p>
 
 									<input type="hidden"
-										   name="<?php echo $setting->get_option_name( 'domain' ); ?>"
-										   value="<?php echo $domain ?>" />
+										   name="<?php _e( $setting->get_option_name( 'domain' ), App::TEXTDOMAIN ); ?>"
+										   value="<?php _e( $domain, App::TEXTDOMAIN) ?>" />
 								</td>
 						</table>
 
@@ -129,9 +131,10 @@ class Settings_View extends View
 	public static function render_general_page()
 	{
 		$setting = new Setting();
-		$request = new Request();
 
-		$connected = $request->verify_connection();
+		$authentication = new Authentication_Controller();
+		$authentication->authentication();
+
 		$configs   = get_option( 'gocache_option-external_configs' );
 
 		?>
@@ -140,7 +143,7 @@ class Settings_View extends View
 			<div class="main-content">
 
 				<div class="gocache-logo">
-					<img src="<?php echo App::plugins_url( 'assets/images/logo-gocache.png' ); ?>">
+					<img src="<?php echo esc_url( App::plugins_url( 'assets/images/logo-gocache.png' )); ?>">
 				</div>
 
 				<form action="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>"
@@ -167,7 +170,7 @@ class Settings_View extends View
 									   value="true"
 									   <?php checked( $configs->response->smart_status, 'true' ); ?> />
 
-								<p class="description">​Marque para habilitar o cache de conteúdo dinâmico</p>
+								<p class="description">​<?php _e( 'Marque para habilitar o cache de conteúdo dinâmico', App::TEXTDOMAIN ); ?></p>
 							</td>
 						</tr>
 						<?php
@@ -195,7 +198,7 @@ class Settings_View extends View
 									endforeach;
 								?>
 								</select>
-								<p class="description">​​Defina o tempo de expiração de cache na CDN</p>
+								<p class="description"><?php _e( '​​Defina o tempo de expiração de cache na CDN', App::TEXTDOMAIN ); ?></p>
 							</td>
 						</tr>
 
@@ -207,7 +210,7 @@ class Settings_View extends View
 									   name="gzip_status"
 									   value="true"
 									   <?php checked( $configs->response->gzip_status, 'true' ); ?> />
-								<p class="description">​​Marque para habilitar a compressão GZIP</p>
+								<p class="description"><?php _e( '​​Marque para habilitar a compressão GZIP', App::TEXTDOMAIN ); ?></p>
 							</td>
 						</tr>
 						<?php
@@ -238,7 +241,7 @@ class Settings_View extends View
 									endforeach;
 								?>
 								</select>
-								<p class="description">​​​Defina o tempo de cache no navegador</p>
+								<p class="description"><?php _e( '​​​Defina o tempo de cache no navegador', App::TEXTDOMAIN ); ?></p>
 							</td>
 						</tr>
 
@@ -250,7 +253,7 @@ class Settings_View extends View
 									   name="deploy_mode"
 									   value="true"
 									   <?php checked( $configs->response->deploy_mode, 'true' ); ?> />
-								<p class="description">​​Marque para habilitar o modo de desenvolvimento</p>
+								<p class="description">​​<?php _e( 'Marque para habilitar o modo de desenvolvimento', App::TEXTDOMAIN ); ?></p>
 							</td>
 						</tr>
 
@@ -274,13 +277,16 @@ class Settings_View extends View
 	{
 		$setting = new Setting();
 
+		$authentication = new Authentication_Controller();
+		$authentication->authentication();
+
 		?>
 		<div id="gocache-admin" class="wrap gocache-settings">
 
 			<div class="main-content">
 
 				<div class="gocache-logo">
-					<img src="<?php echo App::plugins_url( 'assets/images/logo-gocache.png' ); ?>">
+					<img src="<?php echo esc_url( App::plugins_url( 'assets/images/logo-gocache.png' )); ?>">
 				</div>
 
 				<form action="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>" data-component="gocache-ajax">
@@ -297,20 +303,22 @@ class Settings_View extends View
 					<table data-component="clear" class="form-table">
 
 						<tr valign="top">
-							<th scope="row"><label for="gocache_clear_cache"><?php _e( 'Automatically clean cache for each published content', App::TEXTDOMAIN ); ?></label></th>
+							<th scope="row"><label for="gocache_clear_cache"><?php _e( 'Limpar automaticamente o cache a cada novo conteúdo publicado ou alterado', App::TEXTDOMAIN ); ?></label></th>
 							<td>
 								<input type="radio"
 									   id="gocache_clear_cache_yes"
-									   name="<?php echo $setting->get_option_name( 'auto_clear_cache' ); ?>"
+									   name="<?php _e( $setting->get_option_name( 'auto_clear_cache' ), App::TEXTDOMAIN); ?>"
 									   value="yes"
-									   <?php checked( $setting->auto_clear_cache, 'yes' ); ?> />
+									   data-action="auto-clear-yes"
+									   <?php _e( checked( $setting->auto_clear_cache, 'yes' ). App::TEXTDOMAIN); ?> />
 								<label for="gocache_clear_cache_yes"><?php _e( 'Yes', App::TEXTDOMAIN ); ?>&nbsp;&nbsp;</label>
 
 								<input type="radio"
 									   id="gocache_clear_cache_no"
-									   name="<?php echo $setting->get_option_name( 'auto_clear_cache' ); ?>"
+									   name="<?php _e( $setting->get_option_name( 'auto_clear_cache' ), App::TEXTDOMAIN); ?>"
 									   value="no"
-									   <?php checked( $setting->auto_clear_cache, 'no' ); ?> />
+									   data-action="auto-clear-no"
+									   <?php _e( checked( $setting->auto_clear_cache, 'no' ), App::TEXTDOMAIN); ?> />
 								<label for="gocache_clear_cache_no"><?php _e( 'No', App::TEXTDOMAIN ); ?></label>
 
 								<p class="help">
@@ -318,39 +326,82 @@ class Settings_View extends View
 								</p>
 							</td>
 						</tr>
+						<div id="optionsSection">
+							<tr valign="top" class="optionsSection">
+								<th scope="row"> <?php _e( 'Purge Sitemap: ', App::TEXTDOMAIN ) ?></label></th>
+								<td>
+								<?php $checked = get_option( 'gocache_option-auto_clear_sitemap_url' ); ?>
+									<input  type="checkbox" 
+											name="sitemap_checkbox" 
+											id="gocache_sitemap_checkbox"
+											data-action="sitemap-auto-clear"
+											data-element="sitemap"
+											<?php _e( $checked == 'yes' ? 'checked' : '', App::TEXTDOMAIN); ?> /> 
+									<label for="gocache_sitemap_checkbox"><?php _e( 'Limpar automaticamente cache do sitemap quando um post for alterado.', App::TEXTDOMAIN ); ?></label>
+									
+								</td>
+							</tr>
+
+							<tr valign="top" class="optionsSection">
+								<th scope="row"> <?php _e( 'Purge AMP Post: ', App::TEXTDOMAIN ) ?></label></th>
+								<td>
+								<?php $checked = get_option( 'gocache_option-auto_clear_amp_url' ); ?>
+									<input  type="checkbox" 
+											name="amp_checkbox" 
+											id="gocache_amp_checkbox"
+											data-action="amp-auto-clear"
+											data-element="amp"
+											<?php _e( $checked == 'yes' ? 'checked' : '', App::TEXTDOMAIN); ?> /> 
+									<label for="gocache_amp_checkbox"><?php _e( 'Limpar automaticamente cache de URLs AMPs quando um post for alterado.', App::TEXTDOMAIN ); ?></label>
+									
+								</td>
+							</tr>
+							
+						</div>
 
 						<tr valign="top">
-							<th scope="row"><label for="gocache_clear_strings">Customizar chave de cache com uma string</label></th>
+							<th scope="row"><label for="gocache_clear_strings"><?php _e( 'Customizar chave de cache com uma string', App::TEXTDOMAIN) ?></label></th>
 							<td>
 								<textarea class="large-text"
-										  name="<?php echo $setting->get_option_name( 'clear_cache_strings' ); ?>"
-										  id="gocache_clear_strings" rows="5"><?php echo $setting->clear_cache_strings; ?></textarea>
-								<p class="description">Insira uma string por linha (máximo de 3)</p>
+										  name="<?php _e( $setting->get_option_name( 'clear_cache_strings' ), App::TEXTDOMAIN); ?>"
+										  id="gocache_clear_strings" rows="5"><?php _e( $setting->clear_cache_strings, App::TEXTDOMAIN ); ?></textarea>
+								<p class="description"><?php _e( 'Insira uma string por linha (máximo de 3).', App::TEXTDOMAIN ); ?></p>
 							</td>
 						</tr>
 
 						<tr valign="top">
-							<th scope="row"><?php _e( 'Clear all cache', App::TEXTDOMAIN ); ?></th>
+							<th scope="row"><?php _e( 'Limpar todo cache', App::TEXTDOMAIN ); ?></th>
 							<td>
 								<input type="button" class="button button-secondary" data-action="all" value="<?php _e( 'Clear', App::TEXTDOMAIN ); ?>"/>
 							</td>
 						</tr>
 
 						<tr valign="top">
-							<th scope="row"><label for="gocache_clear_by_url"><?php _e( 'Clear by URL', App::TEXTDOMAIN ); ?></label></th>
+							<th scope="row"><label for="gocache_clear_by_url"><?php _e( 'Limpar cache por URL', App::TEXTDOMAIN ); ?></label></th>
 							<td>
-								<textarea class="large-text" placeholder="http://www.example.com" data-element="textarea" id="gocache_clear_by_url" rows="5"></textarea>
-								<p class="description"><?php _e( 'Enter one URL per line', App::TEXTDOMAIN );  ?></p>
+								<textarea class="large-text" placeholder="https://www.gocache.com.br" data-element="textarea" id="gocache_clear_by_url" rows="5"></textarea>
+								<p class="description"><?php _e( 'Insira uma URL por linha.', App::TEXTDOMAIN ); ?></p>
 								<p>
 									<input type="button" class="button button-secondary" data-action="by-url" value="<?php _e( 'Clear', App::TEXTDOMAIN ); ?>"/>
 								</p>
 							</td>
 						</tr>
 
+						<tr valign="top">
+							<th scope="row"><label for="gocache_override_url_domain"><?php _e( 'Sobrescrever URL do domínio', App::TEXTDOMAIN ); ?></label></th>
+							<td>
+								<textarea class="large-text"
+										  name="<?php _e( $setting->get_option_name( 'override_url_domain' ), App::TEXTDOMAIN); ?>"
+										  placeholder="www.gocache.com.br"
+										  id="gocache_override_url_domain" rows="5"><?php _e($setting->override_url_domain, App::TEXTDOMAIN); ?></textarea>
+								<p class="description"><?php _e( 'Insira um domínio/subdomínio por linha.', App::TEXTDOMAIN );  ?></p>
+							</td>
+						</tr>
+
 					</table>
 
 					<p class="submit">
-						<?php $setting->the_nonce_field(); ?>
+						<?php _e( $setting->the_nonce_field(), App::TEXTDOMAIN); ?>
 						<input type="hidden" name="action" value="settings_gocache_save">
 						<input type="submit" class="button button-primary" value="<?php _e( 'Save settings', App::TEXTDOMAIN ); ?>" data-element="submit">
 					</p>
@@ -393,10 +444,10 @@ class Settings_View extends View
 		}
 
 		?>
-		<div id="message" class="notice <?php echo $type; ?> is-dismissible">
-			<p><?php echo esc_html( $message ); ?></p>
+		<div id="message" class="notice <?php _e( $type, App::TEXTDOMAIN ); ?> is-dismissible">
+			<p><?php _e( $message, App::TEXTDOMAIN ); ?></p>
 			<button type="button" class="notice-dismiss">
-			<span class="screen-reader-text">Dispensar este aviso.</span>
+			<span class="screen-reader-text"><?php _e( 'Dispensar este aviso.', App::TEXTDOMAIN ); ?></span>
 			</button>
 		</div>
 		<?php

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * The base configurations of the WordPress.
  *
@@ -16,45 +17,47 @@
 
 // ** MySQL settings - You can get this info from your web host ** //
 /** The name of the database for WordPress */
-define('DB_NAME', 'noticias_pt');
+define('DB_NAME', $_ENV['WP_DB_NAME'] . "_pt");
 
 /** MySQL database username */
-define('DB_USER', 'root');
+define('DB_USER', $_ENV['WP_DB_USER']);
 
 /** MySQL database password */
-define('DB_PASSWORD', 'root');
+define('DB_PASSWORD', $_ENV['WP_DB_PASSWORD']);
 
- /** MySQL hostname */
-define('DB_HOST', 'localhost');
+/** MySQL hostname */
+define('DB_HOST', $_ENV['WP_DB_HOST']);
 
 /** Database Charset to use in creating database tables. */
-define('DB_CHARSET', 'utf8');
+define('DB_CHARSET', 'utf8mb4');
 
 /** The Database Collate type. Don't change this if in doubt. */
-define('DB_COLLATE', '');
+define('DB_COLLATE', 'utf8mb4_unicode_ci');
+
+define('AS3CF_SETTINGS', serialize(array(
+	'provider' => 'aws',
+	'access-key-id' => $_ENV['WP_S3_ACCESS_KEY'],
+	'secret-access-key' => $_ENV['WP_S3_SECRET_KEY'],
+	'bucket' => $_ENV['WP_S3_BUCKET']
+)));
 
 /** configuracoes personalizadas */
-define( 'WP_MAX_MEMORY_LIMIT' , '512M' );
-define( 'SITE', 'noticias' );
-define( 'DISALLOW_FILE_EDIT', true );
-define( 'WP_AUTO_UPDATE_CORE', false );
-define( 'FORCE_SSL', true );
-define( 'FORCE_SSL_ADMIN',true );
-$_SERVER['HTTPS']='on';
+define('WP_MAX_MEMORY_LIMIT', '512M');
+define('SITE', 'noticias');
+define('DISALLOW_FILE_EDIT', true);
+define('WP_AUTO_UPDATE_CORE', false);
+define('FORCE_SSL', true);
+define('FORCE_SSL_ADMIN', true);
+$_SERVER['HTTPS'] = 'on';
 
 /* Multisite */
-define('WP_ALLOW_MULTISITE', true );
+define('WP_ALLOW_MULTISITE', true);
 define('MULTISITE', true);
 define('SUBDOMAIN_INSTALL', false);
 define('DOMAIN_CURRENT_SITE', 'noticias.adventistas.org');
 define('PATH_CURRENT_SITE', '/pt/');
 define('SITE_ID_CURRENT_SITE', 1);
 define('BLOG_ID_CURRENT_SITE', 1);
-
-define( 'AWS_ACCESS_KEY_ID', getenv("AWS_ACCESS_KEY_ID") );
-define( 'AWS_SECRET_ACCESS_KEY', getenv("AWS_SECRET_ACCESS_KEY") );
-define( 'MEDIA_TRASH', true );
-
 
 define('WP_POST_REVISIONS', false);
 
@@ -105,20 +108,20 @@ define('WPLANG', 'pt_BR');
  * It is strongly recommended that plugin and theme developers use WP_DEBUG
  * in their development environments.
  */
-ini_set('display_errors','Off');
-ini_set('error_reporting', E_ALL );
+ini_set('display_errors', 'Off');
+ini_set('error_reporting', E_ALL);
 define('WP_DEBUG', false);
 define('WP_DEBUG_DISPLAY', false);
 
 /** Enable Cache */
- // Added by WP Rocket
+// Added by WP Rocket
 
 //define( 'PB_BACKUPBUDDY_MULTISITE_EXPERIMENT', true );
 
 /* That's all, stop editing! Happy blogging. */
 
 /** Absolute path to the WordPress directory. */
-if ( !defined('ABSPATH') )
+if (!defined('ABSPATH'))
 	define('ABSPATH', dirname(__FILE__) . '/');
 
 /** Sets up WordPress vars and included files. */

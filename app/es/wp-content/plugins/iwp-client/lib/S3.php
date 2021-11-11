@@ -2258,7 +2258,7 @@ final class IWP_MMB_S3Request
 			elseif (strtolower($header) == 'content-type')
 				$this->response->headers['type'] = $value;
 			elseif (strtolower($header) == 'etag')
-				$this->response->headers['hash'] = $value{0} == '"' ? substr($value, 1, -1) : $value;
+				$this->response->headers['hash'] = $value[0] == '"' ? substr($value, 1, -1) : $value;
 			elseif (preg_match('/^x-amz-meta-.*$/i', $header))
 				$this->response->headers[strtolower($header)] = $value;
 		}

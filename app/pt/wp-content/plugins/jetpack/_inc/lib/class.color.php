@@ -9,7 +9,7 @@
  *
  * @author Harold Asbridge <hasbridge@gmail.com>
  * @author Matt Wiebe <wiebe@automattic.com>
- * @license http://www.opensource.org/licenses/MIT
+ * @license https://www.opensource.org/licenses/MIT
  */
 
 class Jetpack_Color {
@@ -125,7 +125,7 @@ class Jetpack_Color {
 
 	/**
 	 * Converts an HSL color value to RGB. Conversion formula
-	 * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
+	 * adapted from https://en.wikipedia.org/wiki/HSL_color_space.
 	 * @param  int $h Hue. [0-360]
 	 * @param  in $s Saturation [0, 100]
 	 * @param  int $l Lightness [0, 100]
@@ -321,13 +321,13 @@ class Jetpack_Color {
 	}
 
 	/**
- * Converts an RGB color value to HSL. Conversion formula
- * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
- * Assumes r, g, and b are contained in the set [0, 255] and
- * returns h in [0, 360], s in [0, 100], l in [0, 100]
- *
- * @return  Array		   The HSL representation
- */
+	 * Converts an RGB color value to HSL. Conversion formula
+	 * adapted from https://en.wikipedia.org/wiki/HSL_color_space.
+	 * Assumes r, g, and b are contained in the set [0, 255] and
+	 * returns h in [0, 360], s in [0, 100], l in [0, 100]
+	 *
+	 * @return  Array		   The HSL representation
+	 */
 	public function toHsl() {
 		list( $r, $g, $b ) = array_values( $this->toRgbInt() );
 		$r /= 255; $g /= 255; $b /= 255;
@@ -689,7 +689,11 @@ class Jetpack_Color {
 
 	public function incrementLightness( $amount ) {
 		$hsl = $this->toHsl();
-		extract( $hsl );
+
+		$h = isset( $hsl['h'] ) ? $hsl['h'] : 0;
+		$s = isset( $hsl['s'] ) ? $hsl['s'] : 0;
+		$l = isset( $hsl['l'] ) ? $hsl['l'] : 0;
+
 		$l += $amount;
 		if ( $l < 0 ) $l = 0;
 		if ( $l > 100 ) $l = 100;
@@ -706,7 +710,11 @@ class Jetpack_Color {
 
 	public function incrementSaturation( $amount ) {
 		$hsl = $this->toHsl();
-		extract( $hsl );
+
+		$h = isset( $hsl['h'] ) ? $hsl['h'] : 0;
+		$s = isset( $hsl['s'] ) ? $hsl['s'] : 0;
+		$l = isset( $hsl['l'] ) ? $hsl['l'] : 0;
+
 		$s += $amount;
 		if ( $s < 0 ) $s = 0;
 		if ( $s > 100 ) $s = 100;
@@ -715,8 +723,11 @@ class Jetpack_Color {
 
 	public function toGrayscale() {
 		$hsl = $this->toHsl();
-		extract( $hsl );
+
+		$h = isset( $hsl['h'] ) ? $hsl['h'] : 0;
 		$s = 0;
+		$l = isset( $hsl['l'] ) ? $hsl['l'] : 0;
+
 		return $this->fromHsl( $h, $s, $l );
 	}
 
@@ -746,7 +757,11 @@ class Jetpack_Color {
 
 	public function incrementHue( $amount ) {
 		$hsl = $this->toHsl();
-		extract( $hsl );
+
+		$h = isset( $hsl['h'] ) ? $hsl['h'] : 0;
+		$s = isset( $hsl['s'] ) ? $hsl['s'] : 0;
+		$l = isset( $hsl['l'] ) ? $hsl['l'] : 0;
+
 		$h = ( $h + $amount ) % 360;
 		if ( $h < 0 ) $h = 360 - $h;
 		return $this->fromHsl( $h, $s, $l );

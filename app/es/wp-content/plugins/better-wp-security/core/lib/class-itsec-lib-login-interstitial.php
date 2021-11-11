@@ -190,7 +190,7 @@ class ITSEC_Lib_Login_Interstitial {
 	 */
 	public function get_async_action_url( ITSEC_Login_Interstitial_Session $session, $action ) {
 
-		$url = $this->get_base_wp_login_url();
+		$url = ITSEC_Lib::get_login_url( '', '', 'login_post' );
 		$url = add_query_arg( array(
 			'action'             => "itsec-{$session->get_current_interstitial()}",
 			self::R_USER         => $session->get_user()->ID,
@@ -456,7 +456,7 @@ class ITSEC_Lib_Login_Interstitial {
 
 		if ( isset( $_REQUEST[ self::R_SAME_BROWSER_DENY ] ) ) {
 			$session->delete();
-			wp_redirect( wp_login_url() );
+			wp_safe_redirect( ITSEC_Lib::get_login_url() );
 			die;
 		}
 
@@ -570,7 +570,7 @@ class ITSEC_Lib_Login_Interstitial {
 		$session      = $this->get_and_verify_session();
 
 		if ( ! $interstitial->show_to_user( $session->get_user(), $session->is_current_requested() ) ) {
-			wp_safe_redirect( set_url_scheme( wp_login_url(), 'login_post' ) );
+			wp_safe_redirect( ITSEC_Lib::get_login_url() );
 			die;
 		}
 
@@ -591,8 +591,7 @@ class ITSEC_Lib_Login_Interstitial {
 		$action       = $session->get_current_interstitial();
 		$interstitial = $this->registered[ $action ];
 
-		$wp_login_url = $this->get_base_wp_login_url();
-		$wp_login_url = add_query_arg( 'action', "itsec-{$action}", $wp_login_url );
+		$wp_login_url = ITSEC_Lib::get_login_url( "itsec-{$action}", '', 'login_post' );
 
 		$interstitial->pre_render( $session );
 
@@ -608,7 +607,9 @@ class ITSEC_Lib_Login_Interstitial {
 		wp_enqueue_script( 'itsec-login-interstitial-util' );
 		?>
 
-		<?php if ( $this->error ) : ?>
+		<?php if ( $this->error && $this->error->get_error_data() === 'message' ) : ?>
+			<p class="message"><?php echo $this->error->get_error_message(); ?></p>
+		<?php elseif ( $this->error ): ?>
 			<div id="login-error" class="message" style="border-left-color: #dc3232;">
 				<?php echo $this->error->get_error_message(); ?>
 			</div>
@@ -658,7 +659,7 @@ class ITSEC_Lib_Login_Interstitial {
 			wp_enqueue_script( 'customize-base' );
 		}
 
-		login_header( '', '<p class="message">' . __( 'You have logged in successfully.' ) . '</p>' );
+		login_header( '', '<p class="message">' . __( 'You have logged in successfully.', 'better-wp-security' ) . '</p>' );
 		?>
 		</div>
 		<?php
@@ -894,21 +895,6 @@ class ITSEC_Lib_Login_Interstitial {
 	}
 
 	/**
-	 * Get the base wp login URL.
-	 *
-	 * @return string
-	 */
-	private function get_base_wp_login_url() {
-		$wp_login_url = set_url_scheme( wp_login_url(), 'login_post' );
-
-		if ( isset( $_GET['wpe-login'] ) && ! preg_match( '/[&?]wpe-login=/', $wp_login_url ) ) {
-			$wp_login_url = add_query_arg( 'wpe-login', $_GET['wpe-login'], $wp_login_url );
-		}
-
-		return $wp_login_url;
-	}
-
-	/**
 	 * Get the next interstitial to be displayed.
 	 *
 	 * @param ITSEC_Login_Interstitial_Session $session
@@ -1056,8 +1042,8 @@ class ITSEC_Lib_Login_Interstitial {
 			die;
 		}
 
-		$redirect = add_query_arg( self::R_EXPIRED, 1, wp_login_url() );
-		wp_safe_redirect( set_url_scheme( $redirect, 'login_post' ) );
+		$redirect = add_query_arg( self::R_EXPIRED, 1, ITSEC_Lib::get_login_url( '', '', 'login_post' ) );
+		wp_safe_redirect( $redirect );
 		die;
 	}
 

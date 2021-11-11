@@ -316,7 +316,7 @@ class IWP_MMB_UploadModule_s3 extends IWP_MMB_UploadModule {
 				$orig_file_size = filesize($fullpath);
 				
 				if (!file_exists($fullpath)) {
-					$iwp_backup_core->log("File not found: $file: $whoweare: ".$e->getMessage().' (line: '.$e->getLine().', file: '.$e->getFile());
+					$iwp_backup_core->log("File not found: $file: $whoweare: ");
 					$iwp_backup_core->log("$file: ".sprintf(__('Error: %s', 'InfiniteWP'), __('File not found', 'InfiniteWP')), 'error');
 					continue;
 				}

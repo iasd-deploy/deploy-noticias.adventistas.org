@@ -39,7 +39,7 @@ class ITSEC_Brute_Force {
 			// Failed authentication.
 
 			$details = ITSEC_Lib::get_login_details();
-			$SERVER  = $_SERVER;
+			$SERVER  = ITSEC_Lib::get_server_snapshot();
 
 			if ( 'admin' === $username && $this->settings['auto_ban_admin'] ) {
 				ITSEC_Log::add_notice( 'brute_force', 'auto-ban-admin-username', compact( 'details', 'user', 'username', 'SERVER' ) );
@@ -57,7 +57,7 @@ class ITSEC_Brute_Force {
 				} else {
 					ITSEC_Lib::load( 'login' );
 					$found_user = ITSEC_Lib_Login::get_user( $username );
-					$user_id = $found_user ? $found_user->ID : 0;
+					$user_id    = $found_user ? $found_user->ID : 0;
 
 					if ( ! $user_id ) {
 						$context->set_login_username( $username );
@@ -97,14 +97,16 @@ class ITSEC_Brute_Force {
 		$lockout_modules['brute_force'] = array(
 			'type'   => 'brute_force',
 			'reason' => __( 'too many bad login attempts', 'better-wp-security' ),
+			'label'  => __( 'Brute Force', 'better-wp-security' ),
 			'host'   => $this->settings['max_attempts_host'],
 			'user'   => $this->settings['max_attempts_user'],
 			'period' => $this->settings['check_period'],
 		);
 
 		$lockout_modules['brute_force_admin_user'] = array(
-			'type'   => 'brute_force',
+			'type'   => 'brute_force_admin_user',
 			'reason' => __( 'user tried to login as "admin."', 'better-wp-security' ),
+			'label'  => __( 'Brute Force "admin" Username', 'better-wp-security' ),
 			'host'   => 1,
 			'user'   => 1,
 			'period' => $this->settings['check_period']

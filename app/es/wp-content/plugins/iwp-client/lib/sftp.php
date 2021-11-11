@@ -294,7 +294,7 @@ class IWP_MMB_RemoteStorage_sftp extends IWP_MMB_RemoteStorage_Extension {
 	 * @param Boolean $debug       - debugging mode: will ask phpseclib to log (which, being controlled by constants, may not be possible if they are already set)
 	 * @return WP_Error|Net_SSH2|Net_SCP
 	 */
-	public function connect($host, $port = 22, $fingerprint, $user, $pass = '', $key = '', $scp = false, $debug = false) {
+	public function connect($host, $port = 22, $fingerprint='', $user='', $pass = '', $key = '', $scp = false, $debug = false) {
 
 		global $iwp_backup_core;
 		$this->scp = $scp;

@@ -100,7 +100,7 @@ class Jetpack_Widgets {
 		// Grab all numbers from the end of the id.
 		preg_match('/(\d+)$/', $widget_id, $matches );
 
-		return intval( $matches[0] );
+		return (int) $matches[0];
 	}
 
 	/**
@@ -352,8 +352,8 @@ class Jetpack_Widgets {
 		$last_position = 0;
 		foreach ( $widgets as $widget_id ) {
 			$widget = self::get_widget_by_id( $widget_id );
-			if ( intval( $widget['position'] ) > intval( $last_position ) ) {
-				$last_position = intval( $widget['position'] );
+			if ( (int) $widget['position'] > (int) $last_position ) {
+				$last_position = (int) $widget['position'];
 			}
 		}
 		return $last_position;
@@ -557,11 +557,15 @@ class Jetpack_Widgets {
 
 		// Add a Tracks event for non-Headstart activity.
 		if ( ! defined( 'HEADSTART' ) ) {
-			jetpack_require_lib( 'tracks/client' );
-			jetpack_tracks_record_event( wp_get_current_user(), 'wpcom_widgets_activate_widget', array(
-				'widget' => $id_base,
-				'settings' => json_encode( $settings ),
-			) );
+			$tracking = new Automattic\Jetpack\Tracking();
+			$tracking->tracks_record_event(
+				wp_get_current_user(),
+				'wpcom_widgets_activate_widget',
+				array(
+					'widget'   => $id_base,
+					'settings' => wp_json_encode( $settings ),
+				)
+			);
 		}
 
 		return self::get_widget_by_id( $widget_id );
@@ -605,7 +609,7 @@ class Jetpack_Widgets {
 			usort( $similar_widgets, __CLASS__ . '::sort_widgets' );
 
 			$last_widget = array_pop( $similar_widgets );
-			$last_val = intval( self::get_widget_instance_key( $last_widget['id'] ) );
+			$last_val = (int) self::get_widget_instance_key( $last_widget['id'] );
 
 			return $last_val;
 		}
@@ -624,8 +628,8 @@ class Jetpack_Widgets {
 	 * @return int
 	 */
 	public static function sort_widgets( $a, $b ) {
-		$a_val = intval( self::get_widget_instance_key( $a['id'] ) );
-		$b_val = intval( self::get_widget_instance_key( $b['id'] ) );
+		$a_val = (int) self::get_widget_instance_key( $a['id'] );
+		$b_val = (int) self::get_widget_instance_key( $b['id'] );
 		if ( $a_val > $b_val ) {
 			return 1;
 		}

@@ -278,6 +278,40 @@ abstract class WPCOM_JSON_API_Post_v1_1_Endpoint extends WPCOM_JSON_API_Endpoint
 		return $response;
 	}
 
+	function filter_response( $response ) {
+
+		// Do minimal processing if the caller didn't request it
+		if ( ! isset( $_REQUEST['meta_fields'] ) ) {
+			return $response;
+		}
+
+		// Retrieve an array of field paths, such as: [`autosave.modified`, `autosave.post_ID`]
+		$fields = explode( ',', $_REQUEST['meta_fields'] );
+
+		foreach ( $response['posts'] as $post ) {
+
+			if ( ! isset( $post['meta'] ) || ! isset( $post['meta']->data ) || (! is_array( $post['meta']->data ) && ! is_object( $post['meta']->data ) ) ) {
+				continue;
+			}
+			
+			$newmeta = [];
+			foreach ( $post['meta']->data as $field_key => $field_value ) {
+
+				foreach ( $field_value as $subfield_key => $subfield_value ) {
+					$key_path = $field_key . '.' . $subfield_key;
+
+					if ( in_array( $key_path, $fields ) ) {
+						$newmeta[ $field_key ][ $subfield_key ] = $subfield_value;
+					}
+				}
+			}
+
+			$post['meta']->data = $newmeta;
+		}
+
+		return $response;
+	}
+	
 	// TODO: factor this out
 	function get_blog_post( $blog_id, $post_id, $context = 'display' ) {
 		$blog_id = $this->api->get_blog_id( $blog_id );
@@ -305,40 +339,77 @@ abstract class WPCOM_JSON_API_Post_v1_1_Endpoint extends WPCOM_JSON_API_Endpoint
 				unset( $attr['orderby'] );
 		}
 
-		extract( shortcode_atts( array(
-			'order'     => 'ASC',
-			'orderby'   => 'menu_order ID',
-			'id'        => $post->ID,
-			'include'   => '',
-			'exclude'   => '',
-			'slideshow' => false
-		), $attr, 'gallery' ) );
+		$atts = shortcode_atts(
+			array(
+				'order'     => 'ASC',
+				'orderby'   => 'menu_order ID',
+				'id'        => $post->ID,
+				'include'   => '',
+				'exclude'   => '',
+				'slideshow' => false,
+			),
+			$attr,
+			'gallery'
+		);
+		$id   = ! empty( $atts['id'] ) ? (int) $atts['id'] : 0;
 
-		// Custom image size and always use it
+		// Custom image size and always use it.
 		add_image_size( 'win8app-column', 480 );
 		$size = 'win8app-column';
 
-		$id = intval( $id );
-		if ( 'RAND' === $order )
+		if ( 'RAND' === $atts['order'] ) {
 			$orderby = 'none';
+		} else {
+			$orderby = $atts['orderby'];
+		}
 
-		if ( !empty( $include ) ) {
-			$include      = preg_replace( '/[^0-9,]+/', '', $include );
-			$_attachments = get_posts( array( 'include' => $include, 'post_status' => 'inherit', 'post_type' => 'attachment', 'post_mime_type' => 'image', 'order' => $order, 'orderby' => $orderby ) );
+		if ( ! empty( $atts['include'] ) ) {
+			$include      = preg_replace( '/[^0-9,]+/', '', $atts['include'] );
+			$_attachments = get_posts(
+				array(
+					'include'        => $include,
+					'post_status'    => 'inherit',
+					'post_type'      => 'attachment',
+					'post_mime_type' => 'image',
+					'order'          => $atts['order'],
+					'orderby'        => $orderby,
+				)
+			);
 			$attachments  = array();
 			foreach ( $_attachments as $key => $val ) {
-				$attachments[$val->ID] = $_attachments[$key];
+				$attachments[ $val->ID ] = $_attachments[ $key ];
 			}
-		} elseif ( !empty( $exclude ) ) {
-			$exclude     = preg_replace( '/[^0-9,]+/', '', $exclude );
-			$attachments = get_children( array( 'post_parent' => $id, 'exclude' => $exclude, 'post_status' => 'inherit', 'post_type' => 'attachment', 'post_mime_type' => 'image', 'order' => $order, 'orderby' => $orderby ) );
+		} elseif ( ! empty( $atts['exclude'] ) ) {
+			$exclude     = preg_replace( '/[^0-9,]+/', '', $atts['exclude'] );
+			$attachments = get_children(
+				array(
+					'post_parent'    => $id,
+					'exclude'        => $exclude,
+					'post_status'    => 'inherit',
+					'post_type'      => 'attachment',
+					'post_mime_type' => 'image',
+					'order'          => $atts['order'],
+					'orderby'        => $orderby,
+				)
+			);
 		} else {
-			$attachments = get_children( array( 'post_parent' => $id, 'post_status' => 'inherit', 'post_type' => 'attachment', 'post_mime_type' => 'image', 'order' => $order, 'orderby' => $orderby ) );
+			$attachments = get_children(
+				array(
+					'post_parent'    => $id,
+					'post_status'    => 'inherit',
+					'post_type'      => 'attachment',
+					'post_mime_type' => 'image',
+					'order'          => $atts['order'],
+					'orderby'        => $orderby,
+				)
+			);
 		}
 
 		if ( ! empty( $attachments ) ) {
 			foreach ( $attachments as $id => $attachment ) {
-				$link = isset( $attr['link'] ) && 'file' === $attr['link'] ? wp_get_attachment_link( $id, $size, false, false ) : wp_get_attachment_link( $id, $size, true, false );
+				$link = isset( $attr['link'] ) && 'file' === $attr['link']
+					? wp_get_attachment_link( $id, $size, false, false )
+					: wp_get_attachment_link( $id, $size, true, false );
 
 				if ( $captiontag && trim($attachment->post_excerpt) ) {
 					$output .= "<div class='wp-caption aligncenter'>$link

@@ -1,6 +1,20 @@
 <?php
 
 final class ITSEC_Schema {
+	const TABLES = [
+		'itsec_logs',
+		'itsec_lockouts',
+		'itsec_temp',
+		'itsec_distributed_storage',
+		'itsec_geolocation_cache',
+		'itsec_fingerprints',
+		'itsec_opaque_tokens',
+		'itsec_user_groups',
+		'itsec_mutexes',
+		'itsec_bans',
+		'itsec_dashboard_events',
+	];
+
 	/**
 	 * Creates appropriate database tables.
 	 *
@@ -8,7 +22,7 @@ final class ITSEC_Schema {
 	 *
 	 * @since 3.9.0
 	 *
-	 * @return void
+	 * @return true|WP_Error
 	 */
 	public static function create_database_tables() {
 		global $wpdb;
@@ -21,7 +35,7 @@ CREATE TABLE {$wpdb->base_prefix}itsec_logs (
 	parent_id bigint(20) unsigned NOT NULL default '0',
 	module varchar(50) NOT NULL default '',
 	code varchar(100) NOT NULL default '',
-	data longtext NOT NULL default '',
+	data longtext NOT NULL,
 	type varchar(20) NOT NULL default 'notice',
 	timestamp datetime NOT NULL default '0000-00-00 00:00:00',
 	init_timestamp datetime NOT NULL default '0000-00-00 00:00:00',
@@ -36,13 +50,14 @@ CREATE TABLE {$wpdb->base_prefix}itsec_logs (
 	KEY code (code),
 	KEY type (type),
 	KEY timestamp (timestamp),
+	KEY init_timestamp (init_timestamp),
 	KEY user_id (user_id),
 	KEY blog_id (blog_id)
 ) $charset_collate;
 
 CREATE TABLE {$wpdb->base_prefix}itsec_lockouts (
 	lockout_id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-	lockout_type varchar(20) NOT NULL,
+	lockout_type varchar(25) NOT NULL,
 	lockout_start datetime NOT NULL,
 	lockout_start_gmt datetime NOT NULL,
 	lockout_expire datetime NOT NULL,
@@ -62,7 +77,7 @@ CREATE TABLE {$wpdb->base_prefix}itsec_lockouts (
 
 CREATE TABLE {$wpdb->base_prefix}itsec_temp (
 	temp_id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-	temp_type varchar(20) NOT NULL,
+	temp_type varchar(25) NOT NULL,
 	temp_date datetime NOT NULL,
 	temp_date_gmt datetime NOT NULL,
 	temp_host varchar(40),
@@ -125,21 +140,83 @@ CREATE TABLE {$wpdb->base_prefix}itsec_opaque_tokens (
     PRIMARY KEY  (token_id),
     UNIQUE KEY token_hashed (token_hashed)
 ) $charset_collate;
+
+CREATE TABLE {$wpdb->base_prefix}itsec_user_groups (
+    group_id char(36) NOT NULL,
+    group_label varchar(255) NOT NULL default '',
+    group_roles TEXT,
+    group_canonical TEXT,
+    group_users TEXT,
+    group_min_role varchar(255),
+    group_created_at DATETIME,
+    PRIMARY KEY  (group_id)
+) $charset_collate;
+
+CREATE TABLE {$wpdb->base_prefix}itsec_mutexes (
+    mutex_id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+    mutex_name varchar(100) NOT NULL,
+    mutex_expires int(11) UNSIGNED NOT NULL,
+    PRIMARY KEY  (mutex_id),
+    UNIQUE KEY mutex_name (mutex_name)
+) $charset_collate;
+
+CREATE TABLE {$wpdb->base_prefix}itsec_bans (
+    id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+    host varchar(64) NOT NULL,
+    type varchar(20) NOT NULL default 'ip',
+    created_at datetime NOT NULL,
+    actor_type varchar(20),
+    actor_id varchar(128),
+    comment varchar(255) NOT NULL default '',
+    PRIMARY KEY  (id),
+    UNIQUE KEY host (host),
+    KEY actor (actor_type,actor_id)                         
+) $charset_collate;
+
+CREATE TABLE {$wpdb->base_prefix}itsec_dashboard_events (
+  event_id int(11) unsigned NOT NULL AUTO_INCREMENT,
+  event_slug varchar(128) NOT NULL DEFAULT '',
+  event_time datetime NOT NULL,
+  event_count int(11) unsigned NOT NULL DEFAULT '1',
+  event_consolidated tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY  (`event_id`),
+  UNIQUE KEY `event_slug__time__consolidated` (event_slug,event_time,event_consolidated)
+) $charset_collate;
 ";
 
-		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
-		dbDelta( $tables );
+		$wp_error = new WP_Error();
+		ITSEC_Lib::add_to_wp_error( $wp_error, ITSEC_Lib::db_delta_with_error_handling( $tables ) );
+
+		foreach ( self::TABLES as $table ) {
+			if ( ! count( $wpdb->get_results( "SHOW TABLES LIKE '{$wpdb->base_prefix}{$table}'" ) ) ) {
+				$wp_error->add(
+					'missing_table',
+					sprintf( __( 'The %s table is not installed.', 'better-wp-security' ), $table )
+				);
+			}
+		}
+
+		/**
+		 * Fires when the DB schema is installed or updated.
+		 *
+		 * @param WP_Error $wp_error
+		 */
+		do_action( 'itsec_install_schema', $wp_error );
+
+		if ( $wp_error->has_errors() ) {
+			return $wp_error;
+		}
+
+		return true;
 	}
 
 	public static function remove_database_tables() {
 		global $wpdb;
 
-		$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->base_prefix}itsec_logs;" );
+		foreach ( self::TABLES as $table ) {
+			$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->base_prefix}{$table};" );
+		}
+
 		$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->base_prefix}itsec_log;" );
-		$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->base_prefix}itsec_lockouts;" );
-		$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->base_prefix}itsec_temp;" );
-		$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->base_prefix}itsec_distributed_storage;" );
-		$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->base_prefix}itsec_geolocation_cache;" );
-		$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->base_prefix}itsec_fingerprints;" );
 	}
 }

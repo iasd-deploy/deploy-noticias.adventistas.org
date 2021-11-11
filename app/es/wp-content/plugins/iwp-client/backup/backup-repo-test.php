@@ -3,6 +3,7 @@
 class IWP_BACKUP_REPO_TEST {
 
 	public function repositoryTestConnection($account_info){
+		$return = array();
 		if(isset($account_info['iwp_ftp']) && !empty($account_info)) {
 			$return = $this->FTPTestConnection($account_info['iwp_ftp']);
 		}
@@ -188,7 +189,6 @@ class IWP_BACKUP_REPO_TEST {
 			$uploadFilePath = IWP_BACKUP_DIR; 
 			$uploadTestFile = $sftp->put(basename($backup_file),$backup_file,NET_SFTP_LOCAL_FILE);
 			@unlink($backup_file);
-			$appPathFile = APP_ROOT.$testFile;
 			if ($uploadTestFile === false) {
 				return array('status' => 'error', 
 					'errorMsg' => 'FTP upload failed.',

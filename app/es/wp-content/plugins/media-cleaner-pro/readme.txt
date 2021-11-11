@@ -5,7 +5,7 @@ Donate link: https://meowapps.com/donation/
 Requires at least: 5.0
 Tested up to: 5.8.1
 Requires PHP: 7.0
-Stable tag: 6.2.1
+Stable tag: 6.2.5
 
 Clean your WordPress from unused files, broken media entries. Powerful engine and beautiful UI!
 
@@ -74,6 +74,20 @@ Better to be safe than sorry. This plugin deletes files! Therefore, backup is no
 1. Media -> Media Cleaner
 
 == Changelog ==
+
+= 6.2.5 (2021/10/19) =
+* Fix: Avoid JS issues with a certain version of React used by WP.
+* Fix: Avoid some notices and warnings.
+* Add: Support fort wysizyg ACF field.
+
+= 6.2.4 (2021/09/23) =
+* Add: Option to consider Attached Images as In Use.
+* Update: Sanitized output for admin.
+* Update: Admin 3.6.
+
+= 6.2.2 (2021/09/16) =
+* Add: Option to consider Attached Images as In Use.
+* Update: Sanitized output for admin.
 
 = 6.2.1 (2021/09/11) =
 * Fix: Images Only now includes PNG, GIF, ICO and BMP on top of the JPGs.

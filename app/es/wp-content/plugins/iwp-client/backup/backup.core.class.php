@@ -439,7 +439,7 @@ class IWP_MMB_Backup_Core {
 			$quota_free = '';
 		}
 
-		$disk_free_space = @disk_free_space($iwp_backup_dir);
+		$disk_free_space = function_exists('disk_free_space') ? @disk_free_space($iwp_backup_dir) : false;
 		# == rather than === here is deliberate; support experience shows that a result of (int)0 is not reliable. i.e. 0 can be returned when the real result should be false.
 		if ($disk_free_space == false) {
 			call_user_func($logging_function, "Free space on disk containing InfiniteWP's temporary directory: Unknown".$quota_free);
@@ -1435,6 +1435,7 @@ class IWP_MMB_Backup_Core {
 	}
 
 	public function backup_resume($resumption_no, $bnonce, $first_call = false) {
+		global $iwp_mmb_core;
 
 		set_error_handler(array($this, 'php_error'), E_ALL & ~E_STRICT);
 		if ($first_call) {
@@ -1554,12 +1555,12 @@ class IWP_MMB_Backup_Core {
 		// Argh. In fact, this has limited effect, as apparently (at least on another install seen), the saving of the updated transient via jobdata_set() also took no effect. Still, it does not hurt.
 		if ($resumption_no >= 1 && 'finished' == $this->jobdata_get('jobstatus')) {
 			$this->log('Terminate: This backup job is already finished (1).');
-			delete_option('IWP_backup_status');
+			$iwp_mmb_core->iwp_delete_option('IWP_backup_status');
 			die;
 		} elseif ('backup' == $job_type && !empty($this->backup_is_already_complete)) {
 			$this->jobdata_set('jobstatus', 'finished');
 			$this->log('Terminate: This backup job is already finished (2).');
-			delete_option('IWP_backup_status');
+			$iwp_mmb_core->iwp_delete_option('IWP_backup_status');
 			die;
 		}
 
@@ -2002,6 +2003,7 @@ class IWP_MMB_Backup_Core {
 	// This procedure initiates a backup run
 	// $backup_files/$backup_database: true/false = yes/no (over-write allowed); 1/0 = yes/no (force)
 	public function boot_backup($backup_files, $backup_database, $restrict_files_to_override = false, $one_shot = false, $service = false, $options = array()) {
+		global $iwp_mmb_core;
 
 		@ignore_user_abort(true);
 		@set_time_limit(IWP_SET_TIME_LIMIT);
@@ -2010,7 +2012,7 @@ class IWP_MMB_Backup_Core {
 		// Generate backup information
 		$use_nonce = (empty($options['use_nonce'])) ? false : $options['use_nonce'];
 		$this->backup_time_nonce($use_nonce);
-		update_option('IWP_running_backupID',$this->nonce);
+		$iwp_mmb_core->iwp_update_option($option_name = 'IWP_running_backupID',$this->nonce);
 		// The current_resumption is consulted within logfile_open()
 		$this->current_resumption = 0;
 		$this->logfile_open($this->nonce);
@@ -2018,7 +2020,8 @@ class IWP_MMB_Backup_Core {
 		if (!is_file($this->logfile_name)) {
 			$this->log('Failed to open log file ('.$this->logfile_name.') - the directory ('.$iwp_backup_dir.') for creating files in is not writable, or you ran out of disk space). Backup aborted.');
 			$this->log(__('Could not create files in the backup directory. Backup aborted','InfiniteWP'), 'error');
-			delete_option('IWP_running_backupID');
+			$this->save_last_backup($our_files = array());
+			$iwp_mmb_core->iwp_delete_option('IWP_running_backupID');
 			return false;
 		}
 
@@ -2067,7 +2070,7 @@ class IWP_MMB_Backup_Core {
 			if (!IWP_MMB_Backup_Options::get_iwp_backup_option('IWP_debug_mode') && !empty($this->logfile_name) && file_exists($this->logfile_name)) {
 				unlink($this->logfile_name);
 			}
-			delete_option('IWP_running_backupID');
+			$iwp_mmb_core->iwp_delete_option('IWP_running_backupID'); 
 			return $ret;
 		}
 
@@ -2075,13 +2078,13 @@ class IWP_MMB_Backup_Core {
 		// doing_action() was added in WP 3.9
 		// wp_cron() can be called from the 'init' action
 		
-		if (function_exists('doing_action') && (doing_action('init') || @constant('DOING_CRON')) && (doing_action('IWP_backup_database') || doing_action('IWP_backup'))) {
+		if (function_exists('doing_action') && (doing_action('init') || defined('DOING_CRON') && DOING_CRON) && (doing_action('IWP_backup_database') || doing_action('IWP_backup'))) {
 			$last_scheduled_action_called_at = get_option("IWP_last_scheduled_$semaphore");
 			// 11 minutes - so, we're assuming that they haven't custom-modified their schedules to run scheduled backups more often than that. If they have, they need also to use the filter to over-ride this check.
 			$seconds_ago = time() - $last_scheduled_action_called_at;
 			if ($last_scheduled_action_called_at && $seconds_ago < 660 && apply_filters('IWP_check_repeated_scheduled_backups', true)) {
 				$this->log(sprintf('Scheduled backup aborted - another backup of this type was apparently invoked by the WordPress scheduler only %d seconds ago - the WordPress scheduler invoking events multiple times usually indicates a very overloaded server (or other plugins that mis-use the scheduler)', $seconds_ago));
-				delete_option('IWP_running_backupID');
+				$iwp_mmb_core->iwp_delete_option('IWP_running_backupID');
 				return;
 			}
 		}
@@ -2433,6 +2436,7 @@ class IWP_MMB_Backup_Core {
 	}
 
 	private function backup_finish($cancel_event, $do_cleanup, $allow_email, $resumption_no, $force_abort = false) {
+		global $wpdb,$iwp_mmb_core;
 
 		if (!empty($this->semaphore)) $this->semaphore->unlock();
 
@@ -2508,7 +2512,7 @@ class IWP_MMB_Backup_Core {
 					$this->log('The backup apparently succeeded and is now complete');
 				}
 				delete_option('IWP_jobdata_'.$this->nonce);
-				update_option('IWP_backup_status', '0');
+				$iwp_mmb_core->iwp_update_option($option_name = 'IWP_backup_status',$option_value = '0');
 				$GLOBALS['iwp_mmb_activities_log']->iwp_mmb_save_iwp_activities('backup', 'multiCallNow', 'direct', array('what' => $what), $userid);
 			} else {
 				$final_message = __('The backup apparently succeeded (with warnings) and is now complete','InfiniteWP');
@@ -2517,7 +2521,7 @@ class IWP_MMB_Backup_Core {
 				}
 				$GLOBALS['iwp_mmb_activities_log']->iwp_mmb_save_iwp_activities('backup', 'multiCallNow', 'direct', array('what' => $what), $userid);
 				delete_option('IWP_jobdata_'.$this->nonce);
-				update_option('IWP_backup_status', '0');
+				$iwp_mmb_core->iwp_update_option($option_name = 'IWP_backup_status',$option_value = '0');
 			}
 			if ($remote_sent && !$force_abort) $final_message .= '. '.__('To complete your migration/clone, you should now log in to the remote site and restore the backup set.', 'InfiniteWP');
 			if ($do_cleanup) $delete_jobdata = apply_filters('IWP_backup_complete', $delete_jobdata);
@@ -2544,7 +2548,7 @@ class IWP_MMB_Backup_Core {
 		// This is left until last for the benefit of the front-end UI, which then gets maximum chance to display the 'finished' status
 		if ($delete_jobdata) {
 			delete_option('IWP_jobdata_'.$this->nonce);
-			update_option('IWP_backup_status', '0');
+			$iwp_mmb_core->iwp_update_option($option_name = 'IWP_backup_status',$option_value = '0');
 		}
 
 	}
@@ -2874,12 +2878,12 @@ class IWP_MMB_Backup_Core {
 
 	// Add backquotes to tables and db-names in SQL queries. Taken from phpMyAdmin.
 	public function backquote($a_name) {
-		if (!empty($a_name) && $a_name != '*') {
+		if (!empty($a_name) && '*' != $a_name) {
 			if (is_array($a_name)) {
 				$result = array();
-				reset($a_name);
-				while(list($key, $val) = each($a_name)) 
+				foreach ($a_name as $key => $val) {
 					$result[$key] = '`'.$val.'`';
+				}
 				return $result;
 			} else {
 				return '`'.$a_name.'`';
@@ -3685,8 +3689,8 @@ CREATE TABLE $wpdb->signups (
 		$result = get_option('IWP_backup_status');
 		$job_id = $params['params']['backup_id'];
 		$job_data = $this->jobdata_getarray($job_id);
+		$cron_disable = false;
 		if ($result == '1') {
-			$cron_disable = false;
 			$cron_params = array();
 			if (( defined('DISABLE_WP_CRON') && DISABLE_WP_CRON )) {
 				$cron_disable = true;
@@ -3923,6 +3927,11 @@ CREATE TABLE $wpdb->signups (
 		if (!empty($params['args']['exclude_extensions']) && !defined('IWP_EXCLUDE_EXTENSIONS')) {
 			define('IWP_EXCLUDE_EXTENSIONS', $params['args']['exclude_extensions']);
 		}
+		if (!empty($params['args']['exclude_file_size']) && !defined('IWP_SKIP_FILE_OVER_SIZE')) {
+			$exclude_file_size = $params['args']['exclude_file_size'] * 1048576;   // 10*1048576
+			define('IWP_SKIP_FILE_OVER_SIZE',$exclude_file_size);
+		}
+
 		if (!empty($params['args']['IWP_encryptionphrase'])) {
 			IWP_MMB_Backup_Options::update_iwp_backup_option('IWP_encryptionphrase', $params['args']['IWP_encryptionphrase']);
 		}else{
@@ -4499,6 +4508,9 @@ CREATE TABLE $wpdb->signups (
 				$dropbox_destination .=  '/'.$backup_instance->site_name;
 			}
 			$folders = explode('/',$dropbox_destination);
+			if(!isset($path)){
+				$path = '';
+			}
 			foreach ($folders as $key => $name) {
 			    $path.=trim($name).'/';
 			}
@@ -4514,6 +4526,12 @@ CREATE TABLE $wpdb->signups (
 			
 		}elseif ($type == 's3') {
 			extract($args['iwp_amazon_s3']);
+			if(!isset($destination)){
+				$destination = '';
+			}
+			if(!isset($path)){
+				$path = '';
+			}
 			if (isset($as3_site_folder) && $as3_site_folder == true){
 				$destination .=  '/'.$backup_instance->site_name;
 			}
@@ -4530,6 +4548,12 @@ CREATE TABLE $wpdb->signups (
 					require_once($GLOBALS['iwp_mmb_plugin_dir'].'/lib/amazon/autoload.php');
 				}
 				$new_s3_obj = new IWP_MMB_S3_MULTICALL();
+				if(!isset($size1)){
+					$size1 = 0;
+				}
+				if(!isset($size2)){
+					$size2 = 0;
+				}
 				return $new_s3_obj->postUploadS3Verification($backup_file, $destFile, $type, $as3_bucket, $as3_access_key, $as3_secure_key, $as3_bucket_region, $size1, $size2, $return_size = true);
 			}
 			else{
@@ -4541,6 +4565,9 @@ CREATE TABLE $wpdb->signups (
 			$destination = trim($ftp_remote_folder, '/');
 			if (isset($ftp_site_folder) && $ftp_site_folder == true){
 				$destination .=  '/'.$backup_instance->site_name;
+			}
+			if(!isset($path)){
+				$path = '';
 			}
 			$folders = explode('/',$destination);
 			foreach ($folders as $key => $name) {
@@ -4836,11 +4863,12 @@ CREATE TABLE $wpdb->signups (
 	}
 
 	public function kill_new_backup($params){
+		global $iwp_mmb_core;
 		$this->activejobs_delete($params['result_id']);
 		$backups = $this->get_backup_history();
 		$this->delete_backup_by_id($params['result_id']);
 		delete_option('IWP_jobdata_'.$params['result_id']);
-		delete_option('IWP_backup_status', '0');
+		$iwp_mmb_core->iwp_delete_option('IWP_backup_status');
 		delete_option('IWP_semaphore_fd');
 		delete_option('IWP_locked_fd');
 		delete_option('IWP_unlocked_fd');

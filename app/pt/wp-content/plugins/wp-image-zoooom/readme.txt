@@ -4,8 +4,8 @@ Contributors: diana_burduja
 Email: diana@burduja.eu
 Tags: e-commerce, featured image, hover over image zoom, image, image zoom, image zoom plugin, image magnification, image magnifier, jquery picture zoom, magnifier, magnify image, magnifying glass, mouse over image zoom, panorama, picture zoom, product image, product zoom, product magnification, product magnifier, responsive, woocommerce product zoom, woocommerce zoom, woocommerce  magnifying glass, zoom, zoom image, zoom plugin, woocommerce image zoom, woocommerce product image zoom, woocommerce zoom magnifier
 Requires at least: 3.0.1
-Tested up to: 5.5 
-Stable tag: 1.43
+Tested up to: 5.9 
+Stable tag: 1.49
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Requires PHP: 5.2.4
@@ -40,8 +40,9 @@ For applying the zoom on an image on a page/post from within a page builder, you
 * Beaver Builder - [screenshot](https://www.silkypress.com/wp-content/uploads/2020/04/beaver-builder-zoooom.png)
 * Divi Builder - [screenshot](https://www.silkypress.com/wp-content/uploads/2016/09/divi-builder.png) (used by the Divi theme)
 * Avia Layout Builder - [screenshot](https://www.silkypress.com/wp-content/uploads/2019/04/enfold-apply-zoooom.png) (used by the Enfold theme)
-* Fusion Page Builder - [screenshot](https://www.silkypress.com/wp-content/uploads/2020/04/fusion-zoooom.png)
+* Fusion Page Builder - [screenshot](https://www.silkypress.com/wp-content/uploads/2021/06/fusion-zoooom.png)
 * Brizy Page Builder - [screenshot](https://www.silkypress.com/wp-content/uploads/2019/01/zoom-brizy.png)
+* Tatsu Page Builder - [screencast](https://www.dropbox.com/h?preview=tatsu-builder-zoom.flv)
 The zoom works alright only with Image elements. Unfortunately, trying to apply the zoom on an image gallery will make the zoom work only on the first image of the gallery. With the WP Image Zoom Pro the zoom can also be applied on image galleries. 
 
 = Why should you upgrade to WP Image Zoom Pro? =
@@ -153,6 +154,38 @@ Alternatively you can upgrade to the Pro version, as there the zoom lens is buil
 8. Apply the zoom from Page Builder by SiteOrigin, the Image Widget
 
 == Changelog ==
+
+= 1.49 =
+* 11/02/2021
+* Fix: remove the "wc-product-gallery-slider" theme support for themes without a slider
+* Fix: on websites built with Beaver Builder the zoom effect was not shown on the frontend 
+
+= 1.48 =
+* 10/14/2021
+* Feature: support select-themes.com which add a wrapper on top of the page
+* Fix: the zoom was making it hard to select the image element in Beaver and Brizy page builders
+* Fix: the zoom couldn't be applied with the Classic Editor if the Storefront theme was enabled
+
+= 1.47.1 =
+* 06/21/2021
+* Fix: check $_GET variables against an array of allowed values
+* Fix: use "window.parent" instead of "document.parent" when checking if the page is within a page builder or not
+
+= 1.46 =
+* 03/10/2021
+* Fix: remove zoom in Divi Visual Builder for newer versions of Divi
+* The largest image wasn't chosen from the "srcset" attribute
+
+= 1.45 =
+* 12/18/2020
+* Enable the "Custom CSS" field for the Avia page builder elements
+* Declare incompatibility with the Product Gallery Slider for WooCommerce plugin
+* Test with PHP 8.0, WordPress 5.6, WooCommerce 4.8, jQuery 3.5.1
+
+= 1.44 =
+* 09/26/2020
+* Disable the Images Lazy Loading functionality from the Litespeed Cache plugin
+* Warning for the Additional Variation Images Gallery for WooCommerce plugin
 
 = 1.43 =
 * 08/12/2020

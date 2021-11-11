@@ -93,6 +93,7 @@ class IWP_MMB_Installer extends IWP_MMB_Core
         // $password = parse_url($url, PHP_URL_PASS);
         // $r['headers'] = array('Authorization'=>'Basic'. base64_encode( $username . ':' . $password ) );
         $r['reject_unsafe_urls'] = false;
+        $r['sslverify'] = false;
         return $r;
     }
     
@@ -283,7 +284,7 @@ class IWP_MMB_Installer extends IWP_MMB_Core
                 $plugin_name = $plugin['name'];
                 if (isset($file_path)) {
 					$plugin_details[] = $plugin;
-                    $plugin_files[$file_path] = $plugin->old_version;
+                    $plugin_files[$file_path] = $plugin['old_version'];
                 } else {
 					$premium_plugin_details[] = $plugin;
                     $premium_upgrades[md5($plugin_name)] = $plugin;
@@ -531,7 +532,7 @@ class IWP_MMB_Installer extends IWP_MMB_Core
         }
     }
     
-    function upgrade_plugins($plugins = false,$plugin_details = false,$userid)
+    function upgrade_plugins($plugins = false,$plugin_details = false,$userid = false)
     {
 		global $iwp_activities_log_post_type, $iwp_mmb_activities_log;
         if (!$plugins || empty($plugins))
@@ -634,7 +635,7 @@ class IWP_MMB_Installer extends IWP_MMB_Core
         }
     }
     
-    function upgrade_themes($themes = false,$theme_details = false,$userid)
+    function upgrade_themes($themes = false,$theme_details = false,$userid = false)
     {
 		global $iwp_activities_log_post_type, $iwp_mmb_activities_log;
         if (!$themes || empty($themes))
@@ -700,7 +701,7 @@ class IWP_MMB_Installer extends IWP_MMB_Core
         }
     }
     
-    function upgrade_premium($premium = false,$premium_plugin_details = false,$premium_theme_details = false,$userid)
+    function upgrade_premium($premium = false,$premium_plugin_details = false,$premium_theme_details = false,$userid = false)
     {
 		global $iwp_mmb_plugin_url;
 		
