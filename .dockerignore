@@ -2,7 +2,7 @@
 .github
 task-definition.json
 **/*.git
-**/*.e*
+# **/*.e*
 //*.sh
 
 **/pa-theme*
