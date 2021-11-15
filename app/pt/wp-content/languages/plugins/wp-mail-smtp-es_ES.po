@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the Plugins - WP Mail SMTP by WPForms - Stable (latest release) package.
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2021-11-12 17:41:19+0000\n"
+"PO-Revision-Date: 2021-11-15 13:11:16+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -15,6 +15,10 @@ msgstr ""
 #: src/Providers/SparkPost/Options.php:151
 msgid "<a href=\"%s\" rel=\"\" target=\"_blank\">More information</a> on SparkPost."
 msgstr "<a href=\"%s\" rel=\"\" target=\"_blank\">Más información</a> sobre SparkPost."
+
+#: src/Providers/SparkPost/Options.php:146
+msgid "Select your SparkPost account region."
+msgstr "Selecciona tu región de SparkPost."
 
 #. translators: %s - API Key link.
 #: src/Providers/SparkPost/Options.php:105
@@ -29,6 +33,11 @@ msgstr "SparkPost"
 #: src/Providers/SparkPost/Options.php:33
 msgid "To get started, read our <a href=\"%2$s\" target=\"_blank\" rel=\"noopener noreferrer\">SparkPost documentation</a>."
 msgstr "Para empezar lee nuestra <a href=\"%2$s\" target=\"_blank\" rel=\"noopener noreferrer\">documentación de SparkPost</a>."
+
+#. translators: %1$s - URL to SparkPost website.
+#: src/Providers/SparkPost/Options.php:30
+msgid "<a href=\"%1$s\" target=\"_blank\" rel=\"noopener noreferrer\">SparkPost</a> is a transactional email provider that's trusted by big brands and small businesses. It sends more than 4 trillion emails each year and reports 99.9%% uptime. You can get started with the free test account that lets you send up to 500 emails per month."
+msgstr "<a href=\"%1$s\" target=\"_blank\" rel=\"noopener noreferrer\">SparkPost</a> es un proveedor de correo electrónico transaccional en el que confían grandes marcas y pequeños negocios. Envía más de 4 billones de correos electrónicos cada año e informa de un tiempo de actividad del 99,9%%. Puedes empezar con la cuenta gratuita de prueba que te permite enviar hasta 500 correos electrónicos por mes."
 
 #: src/Providers/SparkPost/Mailer.php:497
 msgid "Region:"
@@ -46,6 +55,60 @@ msgstr "365 / Outlook"
 msgid "Google / Gmail"
 msgstr "Google / Gmail"
 
+#: src/Admin/Pages/TestTab.php:1201
+msgid "Verify that your SparkPost account region is selected in WP Mail SMTP settings."
+msgstr "Verifica que tu región de la cuenta de SparkPost está seleccionada en los ajustes de WP Mail SMTP."
+
+#: src/Admin/Pages/TestTab.php:1198
+msgid "Typically this error occurs because there is an issue with your SparkPost settings, in many cases an incorrect region."
+msgstr "Este error ocurre habitualmente debido a que hay un problema con tus ajustes de SparkPost, en la mayoría de los casos por una región incorrecta."
+
+#: src/Admin/Pages/TestTab.php:1187
+msgid "Verify that your API key has \"Transmissions: Read/Write\" permission."
+msgstr "Verifica que tu clave API tenga permisos de «Transmisiones: Lectura/escritura»."
+
+#. translators: %1$s - SparkPost API Keys area URL, %1$s - SparkPost EU API
+#. Keys area URL.
+#: src/Admin/Pages/TestTab.php:1174
+msgid "Go to your <a href=\"%1$s\" target=\"_blank\" rel=\"noopener noreferrer\">SparkPost account</a> or <a href=\"%2$s\" target=\"_blank\" rel=\"noopener noreferrer\">SparkPost EU account</a> and verify that your API key is correct."
+msgstr "Ve a tu <a href=\"%1$s\" target=\"_blank\" rel=\"noopener noreferrer\">cuenta de SparkPost</a> o <a href=\"%2$s\" target=\"_blank\" rel=\"noopener noreferrer\">cuenta de SparkPost EU</a> y verifica que tu clave API sea correcta."
+
+#: src/Admin/Pages/TestTab.php:1169
+msgid "Typically this error occurs because there is an issue with your SparkPost settings, in many cases an incorrect API key."
+msgstr "Normalmente este error ocurre debido a que hay un problema con tus ajustes de SparkPost, en muchos casos por una clave API incorrecta."
+
+#: src/Admin/Pages/TestTab.php:1167 src/Admin/Pages/TestTab.php:1196
+msgid "SparkPost API failed."
+msgstr "La API de SparkPost falló."
+
+#: assets/languages/wp-mail-smtp-vue.php:835
+msgid "Your mailer is already configured in a WP Mail SMTP constant, so the options below have been disabled. To change your mailer, please edit or remove the <code>WPMS_MAILER</code> constant in your <code>wp-config.php</code> file."
+msgstr "Tu servidor de correo ya está configurado en una constante de WP Mail SMTP, así que las siguientes opciones se han desactivado. Para cambiar tu servidor de correo, por favor, edita o elimina la constante <code>WPMS_MAILER</code> en tu archivo <code>wp-config.php</code>."
+
+#: assets/languages/wp-mail-smtp-vue.php:832
+msgid "License Key is already configured with the WP Mail SMTP constant. To change it, please edit or remove the <code>WPMS_LICENSE_KEY</code> constant in your <code>wp-config.php</code> file."
+msgstr "La clave de licencia ya está configurada con la constante de WP Mail SMTP. Para cambiarla, por favor, edita o elimina la constante de tu archivo <code>WPMS_LICENSE_KEY</code> constant in your <code>wp-config.php</code>."
+
+#: assets/languages/wp-mail-smtp-vue.php:829
+msgid "This setting is already configured with the WP Mail SMTP constant. To change it, please edit or remove the <code></code> constant in your <code>wp-config.php</code> file."
+msgstr "Este ajuste ya está configurado con la constante de WP Mail SMTP. Para cambiarlo, por favor, edita o elimina la constante de tu archivo <code></code> constant in your <code>wp-config.php</code>."
+
+#: assets/languages/wp-mail-smtp-vue.php:826
+msgid "Mailer is already configured with the WP Mail SMTP constant. Options below are disabled. To change it, please edit or remove the <code>WPMS_MAILER</code> constant in your <code>wp-config.php</code> file."
+msgstr "Tu servidor de correo ya está configurado en una constante de WP Mail SMTP. Las siguientes opciones se han desactivado. Para cambiarlo, por favor, edita o elimina la constante <code>WPMS_MAILER</code> en tu archivo <code>wp-config.php</code>."
+
+#: assets/languages/wp-mail-smtp-vue.php:823
+msgid "Mailer is already configured with WP Mail SMTP constant. Options below are disabled. To change it, please edit or remove the %1$s constant in your %2$s file."
+msgstr "Tu servidor de correo ya está configurado en una constante de WP Mail SMTP. Las siguientes opciones se han desactivado. Para cambiarlo, por favor, edita o elimina la constante %1$s en tu archivo %2$s."
+
+#: assets/languages/wp-mail-smtp-vue.php:820
+msgid "Mailer is already configured with WP Mail SMTP constant. Options below are disabled. To change it, please edit or remove the <code>WPMS_MAILER</code> constant in your <code>wp-config.php</code> file."
+msgstr "El servidor de correo ya está configurado en una constante de WP Mail SMTP. Las siguientes opciones se han desactivado. Para cambiarlo, por favor, edita o elimina la constante <code>WPMS_MAILER</code> en tu archivo <code>wp-config.php</code>."
+
+#: assets/languages/wp-mail-smtp-vue.php:817
+msgid "You are using the WP Mail SMTP constant for setting your mailer. Settings below are disabled. If you want to change it, please change the WPMS_MAILER constant in your wp-config.php file."
+msgstr "Estás usando la constante de WP Mail SMTP para configurar tu servidor de correo. Los ajustes siguientes están desactivadas. Si quieres cambiarlo, por favor, edita o elimina la constante WPMS_MAILER en tu archivo wp-config.php."
+
 #: assets/languages/wp-mail-smtp-vue.php:814
 msgid "FluentSMTP"
 msgstr "FluentSMTP"
@@ -53,6 +116,25 @@ msgstr "FluentSMTP"
 #: assets/languages/wp-mail-smtp-vue.php:811
 msgid "Microsoft 365 / Outlook"
 msgstr "Microsoft 365 / Outlook"
+
+#. Translators: Link to the SparkPost documentation.
+#: assets/languages/wp-mail-smtp-vue.php:808
+msgid "Select your SparkPost account region. %1$sMore information%2$s on SparkPost."
+msgstr "Selecciona tu región de la cuenta de SparkPost. %1$sMás información%2$s en SparkPost."
+
+#: assets/languages/wp-mail-smtp-vue.php:792
+msgid "Read how to set up SparkPost"
+msgstr "Lee cómo configurar SparkPost"
+
+#. Translators: Link to the SparkPost documentation.
+#: assets/languages/wp-mail-smtp-vue.php:789
+msgid "Define which endpoint you want to use for sending messages. %1$sMore information%2$s on SparkPost."
+msgstr "Define qué variable quieres usar para enviar mensajes. %1$sMás información%2$s en SparkPost."
+
+#. Translators: Link to the SparkPost Account API section.
+#: assets/languages/wp-mail-smtp-vue.php:785
+msgid "%1$sFollow this link%2$s to get an API Key for SparkPost."
+msgstr "%1$sSigue este enlace%2$s para conseguir una clave API para SparkPost."
 
 #. translators: %s - URL to wpmailsmtp.com doc page for stmp.com.
 #: src/Providers/SMTPcom/Options.php:50
@@ -1255,6 +1337,10 @@ msgstr "AIOSEO"
 #: src/Admin/Pages/AboutTab.php:285 src/Admin/Pages/AboutTab.php:291
 msgid "The leading WordPress analytics plugin that shows you how people find and use your website, so you can make data driven decisions to grow your business. Properly set up Google Analytics without writing code."
 msgstr "El plugin líder de analítica para WordPress, que te muestra cómo la gente encuentra y usa tu web, para que puedas tomar decisiones basadas en datos para hacer crecer tu negocio. Configura correctamente Google Analytics sin tener que escribir código."
+
+#: src/Admin/Pages/AboutTab.php:271 src/Admin/Pages/AboutTab.php:277
+msgid "The best drag & drop WordPress form builder. Easily create beautiful contact forms, surveys, payment forms, and more with our 100+ form templates. Trusted by over 5 million websites as the best forms plugin."
+msgstr "El mejor maquetador de formularios de arrastrar y soltar para WordPress. Crea fácilmente bonitos formularios de contacto, encuestas, formularios de pago y más con nuestras más de 100 plantillas de formularios. Con la confianza de más de 4 millones de webs como el mejor plugin de formularios"
 
 #: src/Admin/Pages/AboutTab.php:264
 msgid "Instantly get more subscribers, leads, and sales with the #1 conversion optimization toolkit. Create high converting popups, announcement bars, spin a wheel, and more with smart targeting and personalization."
@@ -3756,6 +3842,10 @@ msgstr "Debería ser algo como esto: %1$s. Estos valores son incorrectos: %2$s."
 msgid "Check the \"Send To\" email address used and confirm it is a valid email and was not empty."
 msgstr "Revisa la dirección de correo electrónico para \"Enviar a\" usada y confirmarla si no está vacía y es un correo electrónico válido."
 
+#: src/Admin/Pages/TestTab.php:982
+msgid "Typically this error occurs because the address to which the email was sent to is invalid or was empty."
+msgstr "Normalmente este error ocurre debido a que la dirección a la que se envía el correo electrónico no es válida o está vacía."
+
 #. translators: %s - Google support article URL.
 #: src/Admin/Pages/TestTab.php:959
 msgid "if you are using G Suite, please <a href=\"%s\" target=\"_blank\" rel=\"noopener noreferrer\">read this article</a> to proceed."
@@ -3802,6 +3892,10 @@ msgstr "Completa los pasos en la sección \"2. Verifica tu dominio\"."
 msgid "Go to our how-to guide for setting up <a href=\"%s\" target=\"_blank\" rel=\"noopener noreferrer\">Mailgun with WP Mail SMTP</a>."
 msgstr "Ve a nuestra guía de cómos para configurar <a href=\"%s\" target=\"_blank\" rel=\"noopener noreferrer\">Mailgun con WP Mail SMTP</a>."
 
+#: src/Admin/Pages/TestTab.php:906
+msgid "Typically this error occurs because you have not set up and/or complete domain name verification for your Mailgun account."
+msgstr "Normalmente este error es debido a que no has configurado y/o completado la verificación del nombre de dominio en tu cuenta de Mailgun."
+
 #: src/Admin/Pages/TestTab.php:905
 msgid "Your Mailgun account does not have access to send emails."
 msgstr "Tu cuenta de Mailgun no tiene acceso a enviar correos electrónicos."
@@ -3817,6 +3911,10 @@ msgstr "Ve a tu cuenta de Mailgun y ve tu clave API."
 #: src/Admin/Pages/TestTab.php:892
 msgid "Verify your API key is correct."
 msgstr "Verifica que tu clave API sea correcta."
+
+#: src/Admin/Pages/TestTab.php:889
+msgid "Typically this error occurs because there is an issue with your Mailgun settings, in many cases the API key."
+msgstr "Este error ocurre habitualmente debido a que hay un problema con tus ajustes de Mailgun, en la mayoría de los casos por la clave API."
 
 #: src/Admin/Pages/TestTab.php:872 src/Admin/Pages/TestTab.php:887
 #: src/Admin/Pages/TestTab.php:903
