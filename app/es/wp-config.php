@@ -16,7 +16,7 @@
 
 // ** MySQL settings - You can get this info from your web host ** //
 /** The name of the database for WordPress */
-define('DB_NAME', $_ENV['WP_DB_NAME'] . "_pt");
+define('DB_NAME', $_ENV['WP_DB_NAME'] . "_es");
 
 /** MySQL database username */
 define('DB_USER', $_ENV['WP_DB_USER']);
