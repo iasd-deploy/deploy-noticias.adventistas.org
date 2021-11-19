@@ -1,4 +1,5 @@
 <?php
+
 /**
  * The base configurations of the WordPress.
  *
@@ -25,7 +26,7 @@ define('DB_USER', $_ENV['WP_DB_USER']);
 define('DB_PASSWORD', $_ENV['WP_DB_PASSWORD']);
 
 /** MySQL hostname */
-define('DB_HOST', $_ENV['WP_DB_HOST'] .':3306');
+define('DB_HOST', $_ENV['WP_DB_HOST'] . ':3306');
 
 /** Database Charset to use in creating database tables. */
 define('DB_CHARSET', 'utf8mb4');
@@ -41,16 +42,16 @@ define('AS3CF_SETTINGS', serialize(array(
 )));
 
 /** configuracoes personalizadas */
-define( 'WP_MAX_MEMORY_LIMIT' , '512M' );
-define( 'SITE', 'noticias' );
-define( 'DISALLOW_FILE_EDIT', true );
-define( 'WP_AUTO_UPDATE_CORE', false );
-define( 'FORCE_SSL', true );
-define( 'FORCE_SSL_ADMIN',true );
-$_SERVER['HTTPS']='on';
+define('WP_MAX_MEMORY_LIMIT', '512M');
+define('SITE', 'noticias');
+define('DISALLOW_FILE_EDIT', true);
+define('WP_AUTO_UPDATE_CORE', false);
+define('FORCE_SSL', true);
+define('FORCE_SSL_ADMIN', true);
+$_SERVER['HTTPS'] = 'on';
 
 /* Multisite */
-define('WP_ALLOW_MULTISITE', true );
+define('WP_ALLOW_MULTISITE', true);
 define('MULTISITE', true);
 define('SUBDOMAIN_INSTALL', false);
 define('DOMAIN_CURRENT_SITE', 'noticias.adventistas.org');
@@ -59,6 +60,12 @@ define('SITE_ID_CURRENT_SITE', 1);
 define('BLOG_ID_CURRENT_SITE', 1);
 
 define('WP_POST_REVISIONS', false);
+
+header('X-Frame-Options: SAMEORIGIN');
+@ini_set('session.cookie_httponly', true);
+@ini_set('session.cookie_secure', true);
+@ini_set('session.use_only_cookies', true);
+
 
 # define('DISABLE_WP_CRON', true);
 
@@ -107,20 +114,20 @@ define('WPLANG', 'es_ES');
  * It is strongly recommended that plugin and theme developers use WP_DEBUG
  * in their development environments.
  */
-ini_set('display_errors','Off');
-ini_set('error_reporting', E_ALL );
+ini_set('display_errors', 'Off');
+ini_set('error_reporting', E_ALL);
 define('WP_DEBUG', false);
 define('WP_DEBUG_DISPLAY', false);
 
 /** Enable Cache */
- // Added by WP Rocket
+// Added by WP Rocket
 
 //define( 'PB_BACKUPBUDDY_MULTISITE_EXPERIMENT', true );
 
 /* That's all, stop editing! Happy blogging. */
 
 /** Absolute path to the WordPress directory. */
-if ( !defined('ABSPATH') )
+if (!defined('ABSPATH'))
 	define('ABSPATH', dirname(__FILE__) . '/');
 
 /** Sets up WordPress vars and included files. */

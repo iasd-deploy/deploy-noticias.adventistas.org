@@ -1,7 +1,7 @@
 <?php 
 ob_start();
 
-setcookie("LangRedirect", TRUE);
+setcookie("LangRedirect", "TRUE", "", "", "", "true", "true");
 
 function redirect()
 	{

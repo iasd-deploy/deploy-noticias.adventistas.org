@@ -26,7 +26,7 @@ define('DB_USER', $_ENV['WP_DB_USER']);
 define('DB_PASSWORD', $_ENV['WP_DB_PASSWORD']);
 
 /** MySQL hostname */
-define('DB_HOST', $_ENV['WP_DB_HOST'] .':3306');
+define('DB_HOST', $_ENV['WP_DB_HOST'] . ':3306');
 
 /** Database Charset to use in creating database tables. */
 define('DB_CHARSET', 'utf8mb4');
@@ -60,6 +60,11 @@ define('SITE_ID_CURRENT_SITE', 1);
 define('BLOG_ID_CURRENT_SITE', 1);
 
 define('WP_POST_REVISIONS', false);
+
+header('X-Frame-Options: SAMEORIGIN');
+@ini_set('session.cookie_httponly', true);
+@ini_set('session.cookie_secure', true);
+@ini_set('session.use_only_cookies', true);
 
 # define('DISABLE_WP_CRON', false);
 
