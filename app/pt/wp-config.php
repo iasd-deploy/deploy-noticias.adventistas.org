@@ -61,6 +61,11 @@ define('BLOG_ID_CURRENT_SITE', 1);
 
 define('WP_POST_REVISIONS', false);
 
+header('X-Frame-Options: SAMEORIGIN');
+@ini_set('session.cookie_httponly', true);
+@ini_set('session.cookie_secure', true);
+@ini_set('session.use_only_cookies', true);
+
 # define('DISABLE_WP_CRON', false);
 
 /**#@+
