@@ -15,7 +15,7 @@
                     global $exclude; 
                     $args = '_fields=featured_media_url.pa-block-render,title,excerpt,link,terms&exclude=' . implode(',', $exclude);
                     if (!empty($sede)){
-                        $args .= "&pa-sede=". $sede->slug;
+                        $args .= "&xtt-pa-sedes-tax=". $sede->slug;
                     }
                 ?>
 
