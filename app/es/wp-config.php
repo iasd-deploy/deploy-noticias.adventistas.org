@@ -48,6 +48,7 @@ define( 'WP_AUTO_UPDATE_CORE', false );
 define( 'FORCE_SSL', true );
 define( 'FORCE_SSL_ADMIN',true );
 $_SERVER['HTTPS']='on';
+define('PA_LANG', true);
 
 /* Multisite */
 define('WP_ALLOW_MULTISITE', true );
