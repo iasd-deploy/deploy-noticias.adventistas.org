@@ -17,5 +17,5 @@ User-agent: SemrushBot
 Allow: *
 
 
-Sitemap: http://noticias.adventistas.org/es/sitemap_index.xml
-Sitemap: http://noticias.adventistas.org/pt/sitemap_index.xml
+Sitemap: https://noticias.adventistas.org/es/sitemap_index.xml
+Sitemap: https://noticias.adventistas.org/pt/sitemap_index.xml
