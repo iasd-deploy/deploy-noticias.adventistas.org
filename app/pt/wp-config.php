@@ -41,6 +41,9 @@ define('AS3CF_SETTINGS', serialize(array(
 	'bucket' => $_ENV['WP_S3_BUCKET']
 )));
 
+// Ativa a lixeira das midias
+define('MEDIA_TRASH', true);
+
 /** configuracoes personalizadas */
 define('WP_MAX_MEMORY_LIMIT', '512M');
 define('SITE', 'noticias');
