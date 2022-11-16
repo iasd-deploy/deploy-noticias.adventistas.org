@@ -7,11 +7,12 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Generator: GlotPress/3.0.0-alpha.2\n"
+"X-Generator: GlotPress/4.0.0-alpha.3\n"
 "Language: pt_BR\n"
 "Project-Id-Version: Themes - Twenty Twenty-Two\n"
 
 #. Theme Name of the theme
+#, gp-priority: high
 msgid "Twenty Twenty-Two"
 msgstr "Twenty Twenty-Two"
 
@@ -25,22 +26,22 @@ msgctxt "Template part name"
 msgid "Header"
 msgstr "Cabeçalho"
 
-#: theme.json
+#: theme.json styles/blue.json styles/pink.json styles/swiss.json
 msgctxt "Color name"
 msgid "Secondary"
 msgstr "Secundário"
 
-#: theme.json
+#: theme.json styles/blue.json styles/pink.json styles/swiss.json
 msgctxt "Color name"
 msgid "Primary"
 msgstr "Primário"
 
-#: theme.json
+#: theme.json styles/blue.json styles/pink.json styles/swiss.json
 msgctxt "Color name"
 msgid "Background"
 msgstr "Plano de fundo"
 
-#: theme.json
+#: theme.json styles/blue.json styles/pink.json styles/swiss.json
 msgctxt "Color name"
 msgid "Tertiary"
 msgstr "Terciário"
@@ -105,7 +106,7 @@ msgctxt "Duotone name"
 msgid "Foreground and secondary"
 msgstr "Primeiro plano e secundária"
 
-#: theme.json
+#: theme.json styles/blue.json styles/pink.json styles/swiss.json
 msgctxt "Color name"
 msgid "Foreground"
 msgstr "Primeiro plano"
@@ -601,9 +602,11 @@ msgid "Support the show"
 msgstr "Apoie o programa"
 
 #. Author of the theme
+#, gp-priority: low
 msgid "the WordPress team"
 msgstr "a equipe do WordPress"
 
 #. Author URI of the theme
+#, gp-priority: low
 msgid "https://wordpress.org/"
 msgstr "https://br.wordpress.org/"

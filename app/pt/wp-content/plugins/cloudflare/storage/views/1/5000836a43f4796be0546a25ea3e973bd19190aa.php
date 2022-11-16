@@ -1,0 +1,2 @@
+<div class="pa-post-meta"><?php echo the_date(); ?></div>
+<?php /**PATH /var/www/html/pt/wp-content/themes/pa-theme-noticias/components/metas/meta.blade.php ENDPATH**/ ?>
