@@ -3,7 +3,7 @@
  * Plugin Name: Really Simple SSL
  * Plugin URI: https://really-simple-ssl.com
  * Description: Lightweight SSL & Hardening Plugin
- * Version: 6.0.10
+ * Version: 6.0.11
  * Author: Really Simple Plugins
  * Author URI: https://really-simple-plugins.com
  * License: GPL2
@@ -110,7 +110,7 @@ class REALLY_SIMPLE_SSL
         if (!defined('rsssl_file') ){
             define('rsssl_file', __FILE__);
         }
-		define('rsssl_version', '6.0.10');
+		define('rsssl_version', '6.0.11');
 		define('rsssl_le_cron_generation_renewal_check', 20);
 		define('rsssl_le_manual_generation_renewal_check', 15);
 	}
@@ -275,6 +275,9 @@ add_action('plugins_loaded', 'RSSSL', 8);
 if ( !function_exists('rsssl_is_logged_in_rest')){
 	function rsssl_is_logged_in_rest(){
 		$valid_request = isset($_SERVER['REQUEST_URI']) && strpos($_SERVER['REQUEST_URI'], '/reallysimplessl/v1/')!==false;
-		return $valid_request && isset($_SERVER['HTTP_X_WP_NONCE']) && wp_verify_nonce($_SERVER['HTTP_X_WP_NONCE'], 'wp_rest');
+        if ( !$valid_request ) {
+            return false;
+        }
+        return is_user_logged_in();
 	}
 }

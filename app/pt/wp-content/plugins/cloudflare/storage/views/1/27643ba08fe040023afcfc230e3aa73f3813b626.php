@@ -8,16 +8,16 @@
 
     <?php if($format_slug != 'audio' && $format_slug != 'video'): ?>
 
-        <h2 class="mb-3 pb-3"><?php echo \Illuminate\Support\Str::of(get_the_excerpt())->limit(250); ?></h3>
+        <h2 class="mb-3 pb-3"><?php echo \Illuminate\Support\Str::of(get_the_excerpt())->limit(250); ?></h2>
 
+        <div class="d-md-flex justify-content-between">
             <?php echo $__env->make('components.metas.author', get_the_ID(), \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
-
             <?php echo $__env->make('components.metas.meta', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+        </div>
 
-            <hr class="my-45">
+        <hr class="my-45">
 
         <?php echo $__env->make('components.metas.share', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 
     <?php endif; ?>
-</header>
-<?php /**PATH /var/www/html/pt/wp-content/themes/pa-theme-noticias/template-parts/single/header.blade.php ENDPATH**/ ?>
+</header><?php /**PATH /var/www/html/pt/wp-content/themes/pa-theme-noticias/template-parts/single/header.blade.php ENDPATH**/ ?>
