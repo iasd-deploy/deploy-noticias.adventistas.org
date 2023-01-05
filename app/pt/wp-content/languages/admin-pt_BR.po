@@ -784,7 +784,7 @@ msgstr "Ativo"
 
 #: wp-admin/includes/class-core-upgrader.php:160
 #: wp-admin/includes/class-wp-upgrader.php:166
-#: wp-admin/includes/update-core.php:1020
+#: wp-admin/includes/update-core.php:1018
 msgid "The update cannot be installed because some files could not be copied. This is usually due to inconsistent file permissions."
 msgstr "A atualização não pode ser instalada porque não foi possível copiar alguns arquivos. Isso geralmente ocorre devido a permissões de arquivo inconsistentes."
 
@@ -2888,7 +2888,7 @@ msgid "The seventh parameter passed to %s should be numeric representing menu po
 msgstr "O sétimo parâmetro passado para %s deve ser um número representando a posição no menu."
 
 #. translators: 1: WordPress version number, 2: The PHP extension name needed.
-#: wp-admin/includes/update-core.php:1115
+#: wp-admin/includes/update-core.php:1113
 msgid "The update cannot be installed because WordPress %1$s requires the %2$s PHP extension."
 msgstr "A atualização não pode ser instalada porque o WordPress %1$s requer a extensão %2$s do PHP."
 
@@ -9002,8 +9002,8 @@ msgstr "O seu site em %1$s passou por uma falha crítica ao tentar atualizar o W
 msgid "WordPress %s is also now available."
 msgstr "O WordPress %s também está disponível agora."
 
-#: wp-admin/includes/update-core.php:1192
-#: wp-admin/includes/update-core.php:1228
+#: wp-admin/includes/update-core.php:1190
+#: wp-admin/includes/update-core.php:1226
 msgid "The update cannot be installed because your site is unable to copy some files. This is usually due to inconsistent file permissions."
 msgstr "A atualização não pode ser instalada porque não foi possível copiar alguns arquivos em seu site. Normalmente isto ocorre devido a permissões de arquivo inconsistentes."
 
@@ -9118,7 +9118,7 @@ msgstr "Atualizar traduções"
 msgid "Background updates"
 msgstr "Atualizações em segundo plano"
 
-#: wp-admin/includes/update-core.php:1288
+#: wp-admin/includes/update-core.php:1286
 msgid "There is not enough free disk space to complete the update."
 msgstr "Não há espaço em disco suficiente para completar a atualização."
 
@@ -9196,11 +9196,11 @@ msgstr "O nome de usuário que você forneceu possui caracteres inválidos."
 msgid "Please provide a valid username."
 msgstr "Forneça um nome de usuário válido."
 
-#: wp-admin/includes/update-core.php:1209
+#: wp-admin/includes/update-core.php:1207
 msgid "Copying the required files&#8230;"
 msgstr "Copiando os arquivos necessários&#8230;"
 
-#: wp-admin/includes/update-core.php:1123
+#: wp-admin/includes/update-core.php:1121
 msgid "Preparing to install the latest version&#8230;"
 msgstr "Preparando para instalar a versão mais recente&#8230;"
 
@@ -9893,7 +9893,7 @@ msgid "Search engine visibility"
 msgstr "Visibilidade nos motores de busca"
 
 #. translators: 1: WordPress version, 2: URL to About screen.
-#: wp-admin/includes/update-core.php:1522 wp-admin/update-core.php:904
+#: wp-admin/includes/update-core.php:1520 wp-admin/update-core.php:904
 msgid "Welcome to WordPress %1$s. You will be redirected to the About WordPress screen. If not, click <a href=\"%2$s\">here</a>."
 msgstr "Bem-vindo(a) ao WordPress %1$s. Você será redirecionado(a) à tela Sobre o WordPress. Se não, clique <a href=\"%2$s\">aqui</a>."
 
@@ -10670,7 +10670,7 @@ msgid "This screen allows you to choose your permalink structure. You can choose
 msgstr "Esta tela permite que você escolha a estrutura padrão para seu links permanentes. Você pode escolher a partir de uma das opções padrão ou criar uma estrutura de URL personalizada."
 
 #. translators: 1: WordPress version, 2: URL to About screen.
-#: wp-admin/includes/update-core.php:1530 wp-admin/update-core.php:912
+#: wp-admin/includes/update-core.php:1528 wp-admin/update-core.php:912
 msgid "Welcome to WordPress %1$s. <a href=\"%2$s\">Learn more</a>."
 msgstr "Bem-vindo ao WordPress%1$s. <a href=\"%2$s\">Saiba mais</a>."
 
@@ -12677,7 +12677,7 @@ msgid "User already exists. Password inherited."
 msgstr "O usuário já existe. Senha herdada."
 
 #: wp-admin/includes/class-wp-automatic-updater.php:428
-#: wp-admin/includes/update-core.php:1516 wp-admin/update-core.php:900
+#: wp-admin/includes/update-core.php:1514 wp-admin/update-core.php:900
 msgid "WordPress updated successfully."
 msgstr "O WordPress foi atualizado."
 
@@ -13915,34 +13915,34 @@ msgstr "Atualizar para %s"
 msgid "You are using a development version (%1$s). Cool! Please <a href=\"%2$s\">stay updated</a>."
 msgstr "Você está usando uma versão para desenvolvedores (%1$s). Legal! <a href=\"%2$s\">Mantenha-se atualizado</a>."
 
-#: wp-admin/includes/update-core.php:1446
+#: wp-admin/includes/update-core.php:1444
 msgid "Upgrading database&#8230;"
 msgstr "Atualizando banco de dados&#8230;"
 
-#: wp-admin/includes/update-core.php:1004
+#: wp-admin/includes/update-core.php:1002
 msgid "The update could not be unpacked"
 msgstr "A atualização não pode ser descompactada"
 
-#: wp-admin/includes/update-core.php:986
+#: wp-admin/includes/update-core.php:984
 msgid "Verifying the unpacked files&#8230;"
 msgstr "Verificando arquivos descompactados&#8230;"
 
 #. translators: 1: WordPress version number, 2: Minimum required MySQL version
 #. number, 3: Current MySQL version number.
-#: wp-admin/includes/update-core.php:1101
+#: wp-admin/includes/update-core.php:1099
 msgid "The update cannot be installed because WordPress %1$s requires MySQL version %2$s or higher. You are running version %3$s."
 msgstr "A atualização não pode ser instalada, porque o WordPress %1$s necessita a versão %2$s ou mais recente do MySQL. Você está usando a versão %3$s."
 
 #. translators: 1: WordPress version number, 2: Minimum required PHP version
 #. number, 3: Current PHP version number.
-#: wp-admin/includes/update-core.php:1090
+#: wp-admin/includes/update-core.php:1088
 msgid "The update cannot be installed because WordPress %1$s requires PHP version %2$s or higher. You are running version %3$s."
 msgstr "A atualização não pode ser instalada, porque o WordPress %1$s necessita a versão %2$s ou mais recente do PHP. Você está usando a versão %3$s."
 
 #. translators: 1: WordPress version number, 2: Minimum required PHP version
 #. number, 3: Minimum required MySQL version number, 4: Current PHP version
 #. number, 5: Current MySQL version number.
-#: wp-admin/includes/update-core.php:1077
+#: wp-admin/includes/update-core.php:1075
 msgid "The update cannot be installed because WordPress %1$s requires PHP version %2$s or higher and MySQL version %3$s or higher. You are running PHP version %4$s and MySQL version %5$s."
 msgstr "A atualização não pode ser instalada porque o WordPress %1$s necessita a versão %2$s ou mais recente do PHP e a versão %3$s ou mais recente do MySQL. Você está usando a versão %4$s do PHP e a %5$s do MySQL."
 
@@ -14883,7 +14883,7 @@ msgid "Empty archive."
 msgstr "Arquivo vazio."
 
 #: wp-admin/includes/file.php:1742 wp-admin/includes/file.php:1872
-#: wp-admin/includes/file.php:1917 wp-admin/includes/update-core.php:1387
+#: wp-admin/includes/file.php:1917 wp-admin/includes/update-core.php:1385
 msgid "Could not copy file."
 msgstr "Não foi possível copiar o arquivo."
 
@@ -15201,12 +15201,12 @@ msgid "The plugin is at the latest version."
 msgstr "O plugin está na sua versão mais recente."
 
 #: wp-admin/includes/class-wp-upgrader.php:169
-#: wp-admin/includes/update-core.php:1336
+#: wp-admin/includes/update-core.php:1334
 msgid "Disabling Maintenance mode&#8230;"
 msgstr "Desativando modo de manutenção&#8230;"
 
 #: wp-admin/includes/class-wp-upgrader.php:168
-#: wp-admin/includes/update-core.php:1200
+#: wp-admin/includes/update-core.php:1198
 msgid "Enabling Maintenance mode&#8230;"
 msgstr "Ativando modo de manutenção&#8230;"
 

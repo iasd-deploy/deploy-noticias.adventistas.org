@@ -8,9 +8,7 @@ class rsssl_progress {
 			wp_die( sprintf( '%s is a singleton class and you cannot create a second instance.', get_class( $this ) ) );
 		self::$_this = $this;
 
-		if ( RSSSL()->admin->is_settings_page() ) {
-			add_action( 'admin_init', array( $this, 'dismiss_from_admin_notice') );
-		}
+		add_action( 'admin_init', array( $this, 'dismiss_from_admin_notice') );
 	}
 
 	static function this() {
@@ -110,6 +108,9 @@ class rsssl_progress {
 		return count($premium_notices) ;
 	}
 
+	/**
+	 * @return void
+	 */
 	public function dismiss_from_admin_notice(){
 		if ( !rsssl_user_can_manage() ) {
 			return;
@@ -134,17 +135,17 @@ class rsssl_progress {
 		if ( !empty($id) ) {
 			$id = sanitize_title( $id );
 			update_option( "rsssl_".$id."_dismissed", true, false );
-			$count = get_transient( 'rsssl_plusone_count' );
+			$count = get_option( 'rsssl_plusone_count' );
 			if (is_numeric($count) && $count>0) {
 				$count--;
 			}
-			set_transient('rsssl_plusone_count', $count, WEEK_IN_SECONDS);
+			update_option('rsssl_plusone_count', $count, WEEK_IN_SECONDS);
 			//remove this notice from the admin notices list
-			$notices = get_transient( 'rsssl_admin_notices' );
+			$notices = get_option( 'rsssl_admin_notices' );
 			if (isset($notices[$id])) {
 				unset($notices[$id]);
 			}
-			set_transient('rsssl_admin_notices', $notices, DAY_IN_SECONDS);
+			update_option('rsssl_admin_notices', $notices);
 		}
 
 		return [

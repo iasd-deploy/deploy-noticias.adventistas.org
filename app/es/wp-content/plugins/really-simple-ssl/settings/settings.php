@@ -9,7 +9,6 @@ defined('ABSPATH') or die();
 
 require_once( rsssl_path . 'settings/config/config.php' );
 require_once( rsssl_path . 'settings/config/disable-fields-filter.php' );
-//require_once( rsssl_path . 'settings/rest-api-optimizer/rest-api-optimizer.php' );
 
 /**
  * Fix for WPML issue where WPML breaks the rest api by adding a language locale in the url
@@ -22,13 +21,25 @@ require_once( rsssl_path . 'settings/config/disable-fields-filter.php' );
  * @return string
  */
 function rsssl_fix_rest_url_for_wpml( $url, $path, $blog_id, $scheme)  {
+    if ( strpos($url, 'reallysimplessl/v')===false ) {
+        return $url;
+    }
+
+	$current_language = false;
 	if ( function_exists( 'icl_register_string' ) ) {
 		$current_language = apply_filters( 'wpml_current_language', null );
-        if ( strpos($url, '/'.$current_language.'/wp-json/') ) {
-	        $url = str_replace( '/'.$current_language.'/wp-json/', '/wp-json/', $url);
-        }
 	}
-    return $url;
+
+	if ( function_exists('qtranxf_getLanguage') ){
+		$current_language = qtranxf_getLanguage();
+	}
+
+	if ( $current_language ) {
+		if ( strpos($url, '/'.$current_language.'/wp-json/') ) {
+			$url = str_replace( '/'.$current_language.'/wp-json/', '/wp-json/', $url);
+		}
+	}
+	return $url;
 }
 add_filter( 'rest_url', 'rsssl_fix_rest_url_for_wpml', 10, 4 );
 
@@ -202,10 +213,30 @@ function rsssl_do_action($request){
         case 'plugin_actions':
 			$data = rsssl_plugin_actions($request);
 			break;
+        case 'clear_cache':
+			$data = rsssl_clear_test_caches($request);
+			break;
 		default:
 			$data = apply_filters("rsssl_do_action", [], $action, $request);
 	}
     return $data;
+}
+
+/**
+ * @param WP_REST_Request $request
+ *
+ * @return array
+ */
+function rsssl_clear_test_caches($request){
+    if (!rsssl_user_can_manage()) {
+        return [];
+    }
+
+	$data = $request->get_params();
+	$cache_id = sanitize_title($data['cache_id']);
+
+    do_action('rsssl_clear_test_caches', $request);
+    return [];
 }
 
 /**
@@ -425,7 +456,7 @@ function rsssl_rest_api_fields_set($request){
 
         $config_field_index = array_search($field['id'], $config_ids);
         $config_field = $config_fields[$config_field_index];
-		if ( !$config_field_index ){
+		if ( $config_field_index===false ){
 			unset($fields[$index]);
 			continue;
 		}
@@ -505,11 +536,11 @@ function rsssl_update_option( $name, $value ) {
 	$config_fields = rsssl_fields(false);
 	$config_ids = array_column($config_fields, 'id');
 	$config_field_index = array_search($name, $config_ids);
-	$config_field = $config_fields[$config_field_index];
 	if ( $config_field_index === false ){
 		return;
 	}
 
+	$config_field = $config_fields[$config_field_index];
 	$type = $config_field['type'] ?? false;
     if ( !$type ) {
 	    return;
@@ -525,6 +556,12 @@ function rsssl_update_option( $name, $value ) {
 	$type = rsssl_sanitize_field_type($config_field['type']);
 	$value = rsssl_sanitize_field( $value, $type, $name );
 	$value = apply_filters("rsssl_fieldvalue", $value, sanitize_text_field($name), $type);
+
+    #skip if value wasn't changed
+    if ( isset($options[$name]) && $options[$name]===$value ) {
+        return;
+    }
+
 	$options[$name] = $value;
 	if ( is_multisite() && rsssl_is_networkwide_active() ) {
 		update_site_option( 'rsssl_options', $options );
@@ -593,21 +630,22 @@ function rsssl_drop_empty_menu_items( $menu_items, $fields) {
 	if ( !rsssl_user_can_manage() ) {
 		return $menu_items;
 	}
-    $new_menu_items = $menu_items;
-    foreach($menu_items as $key => $menu_item) {
-        $searchResult = array_search($menu_item['id'], array_column($fields, 'menu_id'));
-        if($searchResult === false) {
-            unset($new_menu_items[$key]);
-            //reset array keys to prevent issues with react
-	        $new_menu_items = array_values($new_menu_items);
-        } else {
-            if(isset($menu_item['menu_items'])){
-                $updatedValue = rsssl_drop_empty_menu_items($menu_item['menu_items'], $fields);
-                $new_menu_items[$key]['menu_items'] = $updatedValue;
-            }
-        }
-    }
-    return $new_menu_items;
+	foreach($menu_items as $key => $menu_item) {
+		//if menu has submenu items, show anyway
+		$has_submenu = isset($menu_item['menu_items']);
+		$has_fields = array_search($menu_item['id'], array_column($fields, 'menu_id'));
+		if( $has_fields === false && !$has_submenu) {
+			unset($menu_items[$key]);
+			//reset array keys to prevent issues with react
+			$menu_items = array_values($menu_items);
+		} else {
+			if( $has_submenu ){
+				$updatedValue = rsssl_drop_empty_menu_items($menu_item['menu_items'], $fields);
+				$menu_items[$key]['menu_items'] = $updatedValue;
+			}
+		}
+	}
+    return $menu_items;
 }
 
 /**
