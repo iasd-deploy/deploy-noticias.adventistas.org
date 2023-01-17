@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the Plugins - Jetpack &#8211; WP Security, Backup, Speed, &amp; Growth - Stable (latest release) package.
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2022-12-06 20:10:46+0000\n"
+"PO-Revision-Date: 2023-01-08 10:25:16+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -1046,7 +1046,7 @@ msgstr "Corrección ortográfica"
 #: jetpack_vendor/automattic/jetpack-my-jetpack/src/products/class-search.php:106
 #: jetpack_vendor/automattic/jetpack-search/build/dashboard/jp-search-dashboard.js:27
 msgid "Supports 38 languages"
-msgstr "Compatible con 38 idiomas"
+msgstr "Compatible con 29 idiomas"
 
 #: jetpack_vendor/automattic/jetpack-my-jetpack/src/products/class-search.php:105
 #: jetpack_vendor/automattic/jetpack-search/build/dashboard/jp-search-dashboard.js:27
@@ -1628,7 +1628,7 @@ msgstr "Seguridad completa para tu sitio, con copia de seguridad, exploración y
 #: jetpack_vendor/automattic/jetpack-my-jetpack/src/products/class-backup.php:92
 msgctxt "Backup Product Feature"
 msgid "30-day archive & activity log*"
-msgstr "Archivo y registro de actividad de 30 días*"
+msgstr "Archivo y registro de actividad de 30 días"
 
 #: class.jetpack.php:6719
 #: jetpack_vendor/automattic/jetpack-my-jetpack/src/products/class-backup.php:91
@@ -1774,7 +1774,7 @@ msgstr "Corrección ortográfica"
 #: class.jetpack.php:6755
 msgctxt "Search Product Feature"
 msgid "Supports 38 languages"
-msgstr "Compatible con 38 idiomas"
+msgstr "Compatible con 29 idiomas"
 
 #: class.jetpack.php:6754
 msgctxt "Search Product Feature"
@@ -1937,7 +1937,7 @@ msgstr "CRM"
 
 #: modules/stats/class-jetpack-stats-upgrade-nudges.php:531
 msgid "Sell more and get more leads with the free Jetpack CRM plugin built specifically for WordPress."
-msgstr "Vende más y consigue más clientes potenciales con el plugin gratuito Jetpack CRM, creado específicamente para WordPress."
+msgstr "Vende más y consigue más clientes potenciales con el plugin Jetpack CRM, creado específicamente para WordPress."
 
 #: modules/stats/class-jetpack-stats-upgrade-nudges.php:527
 msgid "Install CRM"
@@ -2024,7 +2024,7 @@ msgstr "Compra un plan Pro para<br>activar la personalización de CSS"
 
 #: modules/masterbar/nudges/additional-css/class-wpcom-additional-css-manager.php:42
 msgid "Purchase a Premium Plan to<br> activate CSS customization"
-msgstr "Compra un plan Premium para<br>activar la personalización CSS"
+msgstr "Compra un plan Business para<br>activar la personalización CSS"
 
 #: modules/carousel/jetpack-carousel.php:625
 msgid "This image has comments."
@@ -2468,7 +2468,7 @@ msgstr "Muestra el menú de compartir en el reproductor."
 
 #: jetpack_vendor/automattic/jetpack-videopress/src/class-wpcom-rest-api-v2-endpoint-videopress.php:70
 msgid "The video content rating. One of G, PG-13 or R-17"
-msgstr "La valoración del contenido del vídeo. Entre G, PG-13 o R-17"
+msgstr "La valoración del contenido del vídeo. Entre G, PG-13, R-17 o X-18"
 
 #: jetpack_vendor/automattic/jetpack-videopress/src/class-wpcom-rest-api-v2-endpoint-videopress.php:58
 msgid "The description of the video."
@@ -3220,7 +3220,7 @@ msgstr "Esta opción se gestiona a través de las cookies, por lo que, si las bo
 
 #: modules/wordads/php/class-wordads-california-privacy.php:213
 msgid "If you'd prefer not to see ads that are personalized based on information from your visits to this site, you can opt-out by toggling the \"Do Not Sell or Share My Personal Information\" switch below to the On position."
-msgstr "Si prefieres no ver anuncios personalizados basados en la información de tus visitas a este sitio, debes activar el interruptor de «No vender mi información personal»."
+msgstr "Si prefieres no ver anuncios personalizados basados en la información de tus visitas a este sitio, debes activar el interruptor de \"No vender mi información personal\"."
 
 #: modules/wordads/php/class-wordads-california-privacy.php:212
 msgid "We never share information that identifies you personally, like your name or email address, as part of the advertising program."
@@ -3735,7 +3735,7 @@ msgstr "El código de estado de la respuesta de la URL."
 #. https://subscribe.wordpress.com/, 2: Description of this link
 #: modules/subscriptions/views.php:248
 msgid "You subscribed to this site before but you have not clicked the confirmation link yet. Please check your inbox. <br /> Otherwise, you can manage your preferences at <a href=\"%1$s\" title=\"%2$s\" target=\"_blank\" rel=\"noopener noreferrer\">subscribe.wordpress.com</a>."
-msgstr "Ya te has suscrito a este sitio, pero todavía no has hecho clic en el enlace de confirmación. Por favor, comprueba tu bandeja de entrada. <br /> También puedes gestionar tus preferencias en <a href=\"%1$s\" title=\"%2$s\" target=\"_blank\" rel=\"noopener noreferrer\">subscribe.wordpress.com</a>."
+msgstr "Ya te has suscrito a este sitio, pero todavía no has hecho clic en el enlace de confirmación. Comprueba tu bandeja de entrada. <br /> También puedes gestionar tus preferencias en <a href=\"%1$s\" title=\"%2$s\" target=\"_blank\" rel=\"noopener noreferrer\">subscribe.wordpress.com</a>."
 
 #. translators: 1: Link to Subscription Management page
 #. https://subscribe.wordpress.com/, 2: Description of this link
@@ -5438,7 +5438,7 @@ msgstr "Tu plan no incluye Pay with PayPal <a href=\"%s\" rel=\"noopener norefer
 #. %2$s is the target of the link
 #: jetpack_vendor/automattic/jetpack-publicize/src/class-publicize.php:811
 msgid "<a class=\"button\" href=\"%1$s\" target=\"%2$s\">Create a Facebook page</a> to get started."
-msgstr "<a class=\"button\" href=\"%1$s\" target=\"%2$s\">Crea una página de Facebook</a> para empezar."
+msgstr "<a class=\"button\" href=\"%s\" target=\"%s\">Crea una página de Facebook</a> para empezar."
 
 #. translators: %s is the link to the support page about using Facebook with
 #. Jetpack Social
@@ -5730,7 +5730,7 @@ msgstr "El consentimiento caduca después de"
 
 #: modules/widgets/eu-cookie-law/form.php:201
 msgid "Visitors must provide consent by clicking the dismiss button when WordAds is turned on."
-msgstr "Cuando WordAds esté activado, los visitantes deberán hacer clic en el botón «Descartar» para proporcionar su consentimiento."
+msgstr "Los visitantes deben dar su consentimiento haciendo clic en el botón desestimar cuando se active Jetpack Ads."
 
 #: modules/widgets/eu-cookie-law/form.php:149
 msgctxt "action"
@@ -5744,7 +5744,7 @@ msgstr "Texto del enlace"
 #. Translators: %s is the URL to a Jetpack support article.
 #: modules/widgets/eu-cookie-law/form.php:97
 msgid "For GDPR compliance, please make sure your policy contains <a href=\"%s\" target=\"_blank\">privacy information relating to WordAds</a>."
-msgstr "Para cumplir con el RGPD, por favor, asegúrate de que tu política contiene la <a href=\"%s\" target=\"_blank\">información de privacidad relacionada con WordAds</a>."
+msgstr "Para cumplir con el RGPD, asegúrate de que tu política contenga <a href=\"%s\" target=\"_blank\"> información de privacidad relacionada con Jetpack Ads</a>."
 
 #: modules/widgets/eu-cookie-law/form.php:86
 msgid "The default policy URL only covers cookies set by Jetpack. If you’re running other plugins, custom cookies, or third-party tracking technologies, you should create and link to your own cookie statement."
@@ -5917,7 +5917,7 @@ msgstr "Ocurrió un error validando esta solicitud."
 #: jetpack_vendor/automattic/jetpack-connection/src/class-secrets.php:186
 #: jetpack_vendor/automattic/jetpack-connection/src/class-secrets.php:205
 msgid "The required \"%s\" parameter is missing."
-msgstr "Falta el parámetro necesario «%s»."
+msgstr "Falta el parámetro requerido «nonce»."
 
 #: jetpack_vendor/automattic/jetpack-connection/legacy/class-jetpack-xmlrpc-server.php:284
 #: jetpack_vendor/automattic/jetpack-connection/legacy/class-jetpack-xmlrpc-server.php:385
@@ -7187,7 +7187,7 @@ msgstr "Muestra distintos tipos de contenido en tu sitio con tipos de contenido 
 #: modules/module-headings.php:36
 msgctxt "Module Description"
 msgid "Let visitors use a WordPress.com, Twitter, or Facebook account to comment"
-msgstr "Permite a los lectores usar cuentas de WordPress.com, Twitter o Facebook para comentar"
+msgstr "Permite a los lectores usar cuentas de WordPress.com, Twitter, Facebook o Google para comentar"
 
 #: modules/masterbar/masterbar/class-masterbar.php:1404
 msgctxt "Label for the button on the Masterbar to add a new domain"
@@ -8365,7 +8365,9 @@ msgstr "Empezar Fresh &amp; Crear Nueva Conexión"
 #. translators: %s: Site URL.
 #: jetpack_vendor/automattic/jetpack-identity-crisis/src/class-identity-crisis.php:1055
 msgid "No. <a href=\"%1$s\">%2$s</a> is a new and different website that's separate from <a href=\"%3$s\">%4$s</a>. It requires  a new connection to WordPress.com for new stats and subscribers."
-msgstr "No. <a href=\"%1$s\">%2$s </a> es una web nueva y diferente, separada de <a href=\"%3$s\">%4$s </a>. Necesita una nueva conexión a WordPress.com para nuevas estadísticas y suscriptores."
+msgstr ""
+"No. <a href=\"%1$s\">%2$s </a> es una web nueva y diferente a la de \n"
+" <a href=\"%3$s\">%4$s </a>. Requiere una nueva conexión a WordPress.com para nuevas estadísticas y suscriptores."
 
 #: jetpack_vendor/automattic/jetpack-identity-crisis/src/class-identity-crisis.php:1033
 msgid "Migrate Stats &amp; Subscribers"
@@ -8374,7 +8376,9 @@ msgstr "Migrar estadísticas &amp; Suscriptores"
 #. translators: %s: Site URL.
 #: jetpack_vendor/automattic/jetpack-identity-crisis/src/class-identity-crisis.php:1007
 msgid "Yes. <a href=\"%1$s\">%2$s</a> is replacing <a href=\"%3$s\">%4$s</a>. I would like to migrate my stats and subscribers from <a href=\"%3$s\">%4$s</a> to <a href=\"%1$s\">%2$s</a>."
-msgstr "Sí. <a href=\"%1$s\">%2$s</a> está reemplazando <a href=\"%3$s\">%4$s</a>. Me gustaría migrar mis estadísticas y suscriptores de <a href=\"%3$s\">%4$s</a> a <a href=\"%1$s\">%2$s</a>."
+msgstr ""
+"Sí. <a href=\"%1$s\">%2$s</a> estás reemplazando <a href=\"%3$s\">%4$s</a>. Me gustaría \n"
+"\t\t\t\t\tmigrar mis estadísticas y suscriptores de <a href=\"%3$s\">%4$s</a> a <a href=\"%1$s\">%2$s</a>."
 
 #. translators: %s: Site URL.
 #: jetpack_vendor/automattic/jetpack-identity-crisis/src/class-identity-crisis.php:982
@@ -8388,7 +8392,9 @@ msgstr "Arregla la conexión de Jetpack"
 #. translators: %s: Site URL.
 #: jetpack_vendor/automattic/jetpack-identity-crisis/src/class-identity-crisis.php:937
 msgid "If this is a separate and new website, or the new home of <a href=\"%1$s\">%2$s</a>, we recommend turning Safe Mode off, and re-establishing your connection to WordPress.com."
-msgstr "Si se trata de una nueva web separada o de la nueva página de inicio de <a href=\"%1$s\">%2$s</a>, recomendamos desactivar el modo a prueba de fallos y restablecer tu conexión a WordPress.com."
+msgstr ""
+"Si se trata de una web independiente y nueva, o de la nueva portada de <a href=\"%1$s\">%2$s</a>, \n"
+" \t \t \t \t \t te recomendamos desactivar el modo a prueba de fallos y restablecer tu conexión a WordPress.com."
 
 #: jetpack_vendor/automattic/jetpack-identity-crisis/src/class-identity-crisis.php:915
 msgid "Confirm Safe Mode"
@@ -8397,12 +8403,16 @@ msgstr "Confirmar Modo a prueba de fallos"
 #. translators: %s: Site URL.
 #: jetpack_vendor/automattic/jetpack-identity-crisis/src/class-identity-crisis.php:891
 msgid "Is this website a temporary duplicate of <a href=\"%1$s\">%2$s</a> for the purposes of testing, staging or development? If so, we recommend keeping it in Safe Mode."
-msgstr "¿Esta web es un duplicado temporal de <a href=\"%1$s\">%2$s </a> para hacer pruebas, ensayos o desarrollo? Si es así, recomendamos mantenerla en el modo a prueba de fallos."
+msgstr ""
+"¿Esta web es un duplicado temporal de <a href=\"%1$s\">%2$s </a> para hacer \n"
+" \t \t \t \t \t pruebas, ensayos o desarrollo? Si es así, recomendamos que la mantengas en el modo a prueba de fallos."
 
 #. translators: %s: Safe mode docs URL.
 #: jetpack_vendor/automattic/jetpack-identity-crisis/src/class-identity-crisis.php:865
 msgid "Please confirm Safe Mode or fix the Jetpack connection. Select one of the options below or <a href=\"%1$s\">learn more about Safe Mode</a>."
-msgstr "Por favor, confirma el modo a prueba de fallos o corrige la conexión a Jetpack. Selecciona una de las siguientes opciones o <a href=\"%1$s\">aprende más sobre el modo a prueba de fallos</a>."
+msgstr ""
+"Por favor, confirma el modo a prueba de fallos o corrije la conexión a Jetpack. Selecciona una de las opciones siguientes o <a href=\"%1$s\"> aprende \n"
+" \t \t \t \t \t más acerca del modo de a prueba de fallos </a>."
 
 #. translators: %s: Safe mode docs URL and site URL.
 #: jetpack_vendor/automattic/jetpack-identity-crisis/src/class-identity-crisis.php:837
@@ -8481,7 +8491,7 @@ msgstr "El acceso mediante WordPres.com no está disponible en este momento debi
 #. Translators: placeholder is an IP address.
 #: views/admin/network-settings.php:43
 msgid "Your current IP: %1$s"
-msgstr "Tu IP actual: %1$s"
+msgstr "Tu IP actual: %(ip)s"
 
 #: _inc/lib/class.core-rest-api-endpoints.php:1170
 msgid "Invalid parameter \"dismissed\"."
@@ -8667,7 +8677,7 @@ msgid ""
 "\t\tand email. You can configure services to appear as icons, text, or both and some services like Twitter\n"
 "\t\thave additional options."
 msgstr ""
-"Los visitantes pueden compartir tus entradas en Twitter, Facebook, Reddit, Digg, LinkedIn, imprimirlos,\n"
+"Los visitantes pueden compartir tus entradas en Twitter, Facebook, Reddit, Digg, LinkedIn, Google+, imprimirlos,\n"
 "\t\ty mandarlos por correo electrónico. Puedes configurar que los servicios se muestren como iconos, texto o ambos y algunos servicios, como Twitter,\n"
 "\t\ttienen ajustes adicionales."
 
@@ -10304,7 +10314,7 @@ msgstr "URL de la página de Facebook"
 #. translators: %s: link to widgets administration screen.
 #: modules/widgets/facebook-likebox.php:125
 msgid "It looks like your Facebook URL is incorrectly configured. Please check it in your <a href=\"%1$s\">widget settings</a>."
-msgstr "Parece que tu URL de Facebook no está correctamente configurada. Por favor, compruébala en tus <a href=\"%1$s\">ajustes de los widgets</a>."
+msgstr "Parece que tu URL de Facebook está correctamente configurada. Por favor, márcalo en tus <a href=\"%s\">ajustes de widgets</a>."
 
 #: modules/widgets/contact-info.php:329
 msgid "Hours:"
@@ -11304,7 +11314,7 @@ msgstr "Twitter"
 
 #: modules/sharedaddy/sharing-sources.php:989
 msgid "Click to email a link to a friend"
-msgstr "Haz clic para enviar un enlace por correo electrónico a un amigo"
+msgstr "Haz clic para enviar por correo electrónico a un amigo"
 
 #: modules/sharedaddy/sharing-sources.php:988
 msgctxt "share to"
@@ -11394,7 +11404,7 @@ msgstr "Entrada similar"
 #: modules/related-posts/jetpack-related-posts.php:1733
 msgid "With %s comment"
 msgid_plural "With %s comments"
-msgstr[0] "Con %s comentario"
+msgstr[0] "Con 1 comentario"
 msgstr[1] "Con %s comentarios"
 
 #. Translators: The category or tag name.
@@ -11851,7 +11861,7 @@ msgstr "Shortcodes incrustados"
 #: modules/module-headings.php:171
 msgctxt "Module Description"
 msgid "Add Twitter and Facebook buttons at the bottom of each post, making it easy for visitors to share your content."
-msgstr "Añade botones de Twitter y Facebook en la parte inferior de cada entrada, facilitando a los visitantes compartir tu contenido."
+msgstr "Añade botones de Twitter, Facebook y Google+ en la parte inferior de cada entrada, lo que facilita a los visitantes compartir tu contenido."
 
 #: modules/module-headings.php:170
 msgctxt "Module Name"
@@ -12315,7 +12325,7 @@ msgstr "Recomendaciones"
 
 #: modules/custom-post-types/portfolios.php:1021
 msgid "Types:"
-msgstr "Tipos:"
+msgstr "Tipos"
 
 #: modules/custom-post-types/portfolios.php:942
 msgid "Your Portfolio Archive currently has no entries. You can start creating them on your dashboard."

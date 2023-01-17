@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the Plugins - Really Simple SSL - Stable (latest release) package.
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2022-12-28 12:34:00+0000\n"
+"PO-Revision-Date: 2023-01-11 17:32:53+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -11,9 +11,13 @@ msgstr ""
 "Language: es\n"
 "Project-Id-Version: Plugins - Really Simple SSL - Stable (latest release)\n"
 
-#: settings/config/config.php:671
-msgid "(default)"
-msgstr "(por defecto)"
+#: settings/config/config.php:672
+msgid "(recommended)"
+msgstr "(recomendado)"
+
+#: class-admin.php:1921
+msgid "SSL is now activated. Follow the three steps in this article to check if your website is secure."
+msgstr "El SSL está activado. Sigue los tres pasos de este artículo para comprobar si tu sitio es seguro."
 
 #: security/wordpress/file-editing.php:28
 msgid "The DISALLOW_FILE_EDIT constant is defined and set to false. You can remove it from your wp-config.php."
@@ -63,211 +67,215 @@ msgstr "Encabezados de Seguridad Recomendados"
 msgid "Terms & Conditions."
 msgstr "Términos y Condiciones"
 
-#: onboarding/config.php:76 settings/settings.php:345
+#: settings/config/config.php:671
+msgid "disabled"
+msgstr "desactivado"
+
+#: onboarding/config.php:76 settings/settings.php:346
 msgid "Complianz - Cookie Consent Management as it should be"
 msgstr "Complianz - Gestión de consentimiento como debería ser"
 
-#: settings/config/config.php:1180
+#: settings/config/config.php:1181
 msgid "Other Plugins"
 msgstr "Otros plugins"
 
-#: settings/config/config.php:1153
+#: settings/config/config.php:1154
 msgid "Status"
 msgstr "Estado"
 
-#: settings/config/config.php:1151
+#: settings/config/config.php:1152
 msgid "Powered by Qualys"
 msgstr "Desarrollado por Qualys"
 
-#: settings/config/config.php:1138
+#: settings/config/config.php:1139
 msgid "Progress"
 msgstr "Progreso"
 
-#: settings/config/config.php:1091
+#: settings/config/config.php:1092
 msgid "Source"
 msgstr "Origen"
 
-#: settings/config/config.php:1086
+#: settings/config/config.php:1087
 msgid "Directive"
 msgstr "Directiva"
 
-#: settings/config/config.php:1047
+#: settings/config/config.php:1048
 msgid "Add additional domains which can embed your website, if needed. Comma seperated."
 msgstr "Añade dominios adicionales que puedan incrustar tu sitio web, si es necesario. Separados por comas."
 
-#: settings/config/config.php:1038
+#: settings/config/config.php:1039
 msgid "Allow your domain to be embedded"
 msgstr "Permitir que tu dominio sea incrustado"
 
-#: settings/config/config.php:1034
+#: settings/config/config.php:1035
 msgid "Disable (Default)"
 msgstr "Desactivado (Predeterminado)"
 
-#: settings/config/config.php:1019
+#: settings/config/config.php:1020
 msgid "The content security policy has many options, so we always recommend starting in ‘learning mode’ to see what files and scripts are loaded."
 msgstr "La política de seguridad de contenidos tiene muchas opciones, por lo que siempre recomendamos empezar en \"modo aprendizaje\" para ver qué archivos y scripts son cargados."
 
-#: settings/config/config.php:1018
+#: settings/config/config.php:1019
 msgid "About the Content Security Policy"
 msgstr "Acerca de la Política de Seguridad de los Contenidos"
 
-#: settings/config/config.php:1012
+#: settings/config/config.php:1013
 msgid "Serve encrypted and authenticated responses"
 msgstr "Servir respuestas cifradas y autentificadas"
 
-#: settings/config/config.php:1003
+#: settings/config/config.php:1004
 msgid "Enable Permissions Policy"
 msgstr "Habilitar la Política de Permisos"
 
-#: settings/config/config.php:930
+#: settings/config/config.php:931
 msgid "Options"
 msgstr "Opciones"
 
-#: settings/config/config.php:925
+#: settings/config/config.php:926
 msgid "Feature"
 msgstr "Característica"
 
-#: settings/config/config.php:921
+#: settings/config/config.php:922
 msgid "They might be misused if you don’t actively tell the browser to disable these features."
 msgstr "Podrían ser mal utilizadas si no le dices activamente al navegador que desactive estas funciones."
 
-#: settings/config/config.php:921
+#: settings/config/config.php:922
 msgid "Browser features are plentiful, but most are not needed on your website."
 msgstr "Las características del navegador son abundantes, pero la mayoría no son necesarias en tu sitio web."
 
-#: settings/config/config.php:920
+#: settings/config/config.php:921
 msgid "About the Permission Policy"
 msgstr "Acerca de la Política de Permisos"
 
-#: settings/config/config.php:914
+#: settings/config/config.php:915
 msgid "Self (Default)"
 msgstr "Auto (por defecto)"
 
-#: settings/config/config.php:914 settings/build/index.js:382
+#: settings/config/config.php:915 settings/build/index.js:382
 #: settings/src/Settings/LearningMode.js:260
 #: settings/src/Settings/PermissionsPolicy.js:149
 msgid "Disable"
 msgstr "Desactivar"
 
-#: settings/config/config.php:914 settings/build/index.js:382
+#: settings/config/config.php:915 settings/build/index.js:382
 #: settings/src/Settings/ChangeStatus.js:11
 msgid "Allow"
 msgstr "Permitir"
 
-#: settings/config/config.php:899 settings/build/index.js:382
+#: settings/config/config.php:900 settings/build/index.js:382
 #: settings/src/Dashboard/TaskElement.js:56
 #: settings/src/Dashboard/TaskElement.js:57 settings/src/Modal/Modal.js:80
 #: settings/src/Settings/MixedContentScan.js:233
 msgid "Fix"
 msgstr "Corregido"
 
-#: settings/config/config.php:886 settings/config/config.php:1081
+#: settings/config/config.php:887 settings/config/config.php:1082
 msgid "Location"
 msgstr "Ubicación"
 
-#: settings/config/config.php:880
+#: settings/config/config.php:881
 msgid "Description"
 msgstr "Descripción"
 
-#: settings/config/config.php:874
+#: settings/config/config.php:875
 msgid "Type"
 msgstr "Tipo"
 
-#: settings/config/config.php:870
+#: settings/config/config.php:871
 msgid "The extensive mixed content scan will list all current and future issues and provide a fix, or instructions to fix manually."
 msgstr "La extensa exploración de contenido mixto listará todos los problemas actuales y futuros y proporcionará una solución, o instrucciones para arreglar los problemas manualmente."
 
-#: settings/config/config.php:869
+#: settings/config/config.php:870
 msgid "About the Mixed Content Scan"
 msgstr "Acerca de la Exploración de Contenidos Mixtos"
 
-#: settings/config/config.php:864
+#: settings/config/config.php:865
 msgid "Mixed content scan"
 msgstr "Exploración de Mixed content"
 
-#: settings/config/config.php:855
+#: settings/config/config.php:856
 msgid "Cross Origin Embedder Policy"
 msgstr "Cross Origin Embedder Policy"
 
-#: settings/config/config.php:840
+#: settings/config/config.php:841
 msgid "Cross Origin Resource Policy"
 msgstr "Cross Origin Resource Policy"
 
-#: settings/config/config.php:825
+#: settings/config/config.php:826
 msgid "Cross Origin Opener Policy"
 msgstr "Cross Origin Opener Policy"
 
-#: settings/config/config.php:822
+#: settings/config/config.php:823
 msgid "One of the most powerful features, and therefore the most complex are the Cross-Origin headers that can isolate your website so any data leaks are minimized."
 msgstr "Una de las características más potentes, y por lo tanto más complejas, son las cabeceras Cross-Origin (Origen Cruzado) que pueden aislar tu sitio web para minimizar cualquier fuga de datos."
 
-#: settings/config/config.php:821
+#: settings/config/config.php:822
 msgid "About Cross Origin Policies"
 msgstr "Acerca de las Políticas de Origen Cruzado"
 
-#: settings/config/config.php:797
+#: settings/config/config.php:798
 msgid "Choose the max-age for HSTS"
 msgstr "Elige el valor max-age para HSTS"
 
-#: settings/config/config.php:795
+#: settings/config/config.php:796
 msgid "Two years (required for preload)"
 msgstr "Dos años (necesarios para la precarga)"
 
-#: settings/config/config.php:794
+#: settings/config/config.php:795
 msgid "One year"
 msgstr "Un año"
 
-#: settings/config/config.php:793
+#: settings/config/config.php:794
 msgid "One day (for testing only)"
 msgstr "Un día (sólo para pruebas)"
 
-#: settings/config/config.php:777
+#: settings/config/config.php:778
 msgid "Include subdomains"
 msgstr "Incluir subdominios"
 
-#: settings/config/config.php:755
+#: settings/config/config.php:756
 msgid "After enabling this feature, you can submit your site to %shstspreload.org%s"
 msgstr "Después de activar esta característica puedes enviar tu sitio a %shstspreload.org%s"
 
-#: settings/config/config.php:754
+#: settings/config/config.php:755
 msgid "Include preload"
 msgstr "Incluir la precarga"
 
-#: settings/config/config.php:739
+#: settings/config/config.php:740
 msgid "Leveraging your SSL certificate with HSTS is a staple for every website. Force your website over SSL, mitigating risks of malicious counterfeit websites in your name."
 msgstr "Aprovechar tu certificado SSL con HSTS es un elemento básico para todo sitio web. Forzar tu sitio web a través de SSL, mitigando los riesgos de sitios web maliciosos falsificados en tu nombre."
 
-#: settings/config/config.php:738
+#: settings/config/config.php:739
 msgid "About HTTP Strict Transport Security"
 msgstr "Acerca de la Seguridad de Transporte Estricta de HTTP"
 
-#: settings/config/config.php:723
+#: settings/config/config.php:724
 msgid "Referrer Policy"
 msgstr "Referrer Policy"
 
-#: settings/config/config.php:714
+#: settings/config/config.php:715
 msgid "recommended"
 msgstr "recomendado"
 
-#: settings/config/config.php:703
+#: settings/config/config.php:704
 msgid "X-Frame options"
 msgstr "X-Frame options"
 
-#: settings/config/config.php:699 settings/config/config.php:713
-#: settings/config/config.php:813 settings/config/config.php:835
-#: settings/config/config.php:850
+#: settings/config/config.php:700 settings/config/config.php:714
+#: settings/config/config.php:814 settings/config/config.php:836
+#: settings/config/config.php:851
 msgid "Off"
 msgstr "Desconectado"
 
-#: settings/config/config.php:689
+#: settings/config/config.php:690
 msgid "X-Content-Type options"
 msgstr "X-Content-Type options"
 
-#: settings/config/config.php:681
+#: settings/config/config.php:682
 msgid "These security headers are the fundamental security measures to protect your website visitors while visiting your website."
 msgstr "Estas cabeceras de seguridad son las medidas de seguridad fundamentales para proteger a los visitantes de tu sitio web mientras lo visitan."
 
-#: settings/config/config.php:680
+#: settings/config/config.php:681
 msgid "About Recommended Security Headers"
 msgstr "Acerca de las Cabeceras de Seguridad Recomendadas"
 
@@ -279,7 +287,7 @@ msgstr "X-XSS-Protection"
 msgid "Delete"
 msgstr "Borrar"
 
-#: settings/config/config.php:653 settings/config/config.php:1096
+#: settings/config/config.php:653 settings/config/config.php:1097
 msgid "Action"
 msgstr "Acción"
 
@@ -479,7 +487,7 @@ msgstr "Actualiza las Solicitudes Inseguras con %sReally Simple SSL Pro%s"
 msgid "Get the Permissions Policy with %sReally Simple SSL Pro%s"
 msgstr "Obtén la Política de Permisos con %sReally Simple SSL Pro%s"
 
-#: settings/config/config.php:915
+#: settings/config/config.php:916
 msgid "Permissions Policy"
 msgstr "Política de Permisos"
 
@@ -487,7 +495,7 @@ msgstr "Política de Permisos"
 msgid "Get HTTP Strict Transport Security with %sReally Simple SSL Pro%s"
 msgstr "Obtén Seguridad de Transporte Estricta HTTP con %sReally Simple SSL Pro%s"
 
-#: settings/config/config.php:122 settings/config/config.php:732
+#: settings/config/config.php:122 settings/config/config.php:733
 msgid "HTTP Strict Transport Security"
 msgstr "Seguridad de Transporte Estricta HTTP"
 
@@ -520,7 +528,7 @@ msgid "Advanced Hardening"
 msgstr "Endurecimiento avanzado"
 
 #: settings/config/config.php:44 settings/config/config.php:50
-#: settings/config/config.php:1161
+#: settings/config/config.php:1162
 msgid "Hardening"
 msgstr "Endurecimiento"
 
@@ -734,7 +742,7 @@ msgstr "Contenido mixto en la tabla postmeta"
 
 #: placeholders/class-placeholder.php:155
 msgid "Mixed content in post: "
-msgstr "Contenido mixto en la entrada:"
+msgstr "Contenido mixto en la entrada: "
 
 #: placeholders/class-placeholder.php:138
 msgid "Mixed content in CSS/JS file from other domain"
@@ -763,7 +771,7 @@ msgstr "Contenido mixto en %s"
 #: placeholders/class-placeholder.php:142
 #: placeholders/class-placeholder.php:159
 #: placeholders/class-placeholder.php:185
-#: placeholders/class-placeholder.php:210 settings/config/config.php:893
+#: placeholders/class-placeholder.php:210 settings/config/config.php:894
 #: settings/build/index.js:382 settings/src/Settings/MixedContentScan.js:227
 msgid "Details"
 msgstr "Detalles"
@@ -920,15 +928,15 @@ msgstr "Activación SSL en curso"
 msgid "SSL is not enabled on your network"
 msgstr "SSL no está activado en tu red"
 
-#: class-admin.php:2679 class-multisite.php:223
+#: class-admin.php:2663 class-multisite.php:223
 msgid "Improve security - Upgrade"
 msgstr "Mejora la seguridad - Actualizar"
 
-#: class-admin.php:2258
+#: class-admin.php:2242
 msgid "Thanks for updating to Really Simple SSL 6.0! Check out our new features on the settings page."
 msgstr "¡Gracias por actualizar a Really Simple SSL 6.0! Echa un vistazo a nuestras nuevas características en la página de configuración."
 
-#: class-admin.php:2171
+#: class-admin.php:2155
 msgid "See which recommended security headers are not present on your website."
 msgstr "Puedes ver qué cabeceras de seguridad recomendadas no están presentes en tu sitio web."
 
@@ -946,7 +954,7 @@ msgstr "Actualizar"
 msgid "Lightweight SSL & Hardening Plugin"
 msgstr "Plugin ligero de SSL y refuerzo"
 
-#: settings/settings.php:337
+#: settings/settings.php:338
 msgid "Self-hosted, Privacy-friendly analytics tool"
 msgstr "Herramienta de análisis autoalojada y respetuosa con la privacidad"
 
@@ -1094,23 +1102,19 @@ msgstr "Posibilidad de crear una carpeta de destino"
 msgid "Checking if plugin folder exists..."
 msgstr "Comprobando si la carpeta de plugins existe..."
 
-#: class-admin.php:2189
+#: class-admin.php:2173
 msgid "Improve security with Really Simple SSL Pro."
 msgstr "Mejora la seguridad con Really Simple SSL Pro."
 
-#: class-admin.php:1986
+#: class-admin.php:1970
 msgid "Check manually"
 msgstr "Comprobar manualmente"
 
-#: class-admin.php:1983
+#: class-admin.php:1967
 msgid "Could not test certificate"
 msgstr "No se ha podido probar el certificado"
 
-#: class-admin.php:1936
-msgid "Remember to change your URLs in external services like Google Analytics, Search Console and others. This should prevent any data loss resulting from the switch to https."
-msgstr "Recuerda cambiar tus URL en servicios externos como Google Analytics, Search Console y otros. Esto debería evitar cualquier pérdida de datos resultante del cambio a HTTPS."
-
-#: class-admin.php:1984 onboarding/config.php:175
+#: class-admin.php:1968 onboarding/config.php:175
 msgid "Automatic certificate detection is not possible on your server."
 msgstr "La detección automática de certificados no es posible en tu servidor."
 
@@ -1130,7 +1134,7 @@ msgstr "Después de completar la instalación, puedes dejar que Really Simple SS
 msgid "We have not detected any known hosting limitations."
 msgstr "No hemos detectado ninguna limitación conocida del alojamiento."
 
-#: class-admin.php:1971
+#: class-admin.php:1955
 msgid "The wp-config.php file is not writable, and needs to be edited. Please set this file to writable."
 msgstr "El archivo «wp-config.php» no tiene permisos de escritura y tiene que ser editado. Por favor, establece los permisos de escritura para este archivo."
 
@@ -1143,7 +1147,7 @@ msgstr "Tu web no envía todas las cabeceras de seguridad recomendadas."
 msgid "Security"
 msgstr "Seguridad"
 
-#: class-admin.php:2177
+#: class-admin.php:2161
 msgid "Recommended security headers enabled."
 msgstr "Cabeceras de seguridad recomendadas activadas."
 
@@ -1159,7 +1163,7 @@ msgstr "El grapado OCSP está configurado como activado por defecto. Puedes desa
 msgid "For more information, please read this %sarticle%s"
 msgstr "Para más información, por favor, lee este %sartículo%s"
 
-#: class-admin.php:2242
+#: class-admin.php:2226
 msgid "Black Friday sale! Get 40% Off Really Simple SSL Pro"
 msgstr "¡Oferta de Black Friday! Ahorra un 40% en Really Simple SSL Pro"
 
@@ -1175,15 +1179,15 @@ msgstr "Los términos y condiciones no se han aceptado. Por favor, acéptalos en
 msgid "Terms & Conditions are accepted."
 msgstr "Los términos y condiciones se han aceptado."
 
-#: class-admin.php:2137
+#: class-admin.php:2121
 msgid "HttpOnly Secure cookies have been set automatically!"
 msgstr "¡Las cookies seguras HttpOnly se han configurado automáticamente!"
 
-#: class-admin.php:2227
+#: class-admin.php:2211
 msgid "As Really Simple SSL handles all the functionality this plugin provides, we recommend to disable this plugin to prevent unexpected behavior."
 msgstr "Como Really Simple SSL gestiona toda la funcionalidad que proporciona este plugin, recomendamos desactivar este plugin para evitar comportamientos inesperados."
 
-#: class-admin.php:2227
+#: class-admin.php:2211
 msgid "We have detected the %s plugin on your website."
 msgstr "Hemos detectado en tu web el plugin %s."
 
@@ -1207,7 +1211,7 @@ msgstr "Si has introducido tus registros DNS antes, es necesario cambiarlos."
 msgid "Order ID mismatch, regenerate order."
 msgstr "El ID del pedido no coincide. Vuelve a generar el pedido."
 
-#: class-admin.php:1921
+#: class-admin.php:1905
 msgid "Really Simple SSL Pro is not up to date. Update Really Simple SSL Pro to ensure compatibility."
 msgstr "Really Simple SSL pro no está actualizado. Actualiza Really Simple SSL pro para asegurar la compatibilidad."
 
@@ -1446,7 +1450,7 @@ msgstr "Esto incluirá tanto la versión www. como la no-www. de su dominio."
 msgid "Domain"
 msgstr "Dominio"
 
-#: settings/settings.php:352
+#: settings/settings.php:353
 msgid "Terms and Conditions"
 msgstr "Términos y Condiciones"
 
@@ -1920,32 +1924,32 @@ msgstr "No es posible instalar Let's Encrypt en una configuración de subcarpeta
 msgid "It is not possible to install Let's Encrypt on a subsite. Please go to the main site of your website."
 msgstr "No es posible instalar Let's Encrypt en un subsitio. Por favor, vaya al sitio principal de su sitio web."
 
-#: class-admin.php:2216
+#: class-admin.php:2200
 msgid "You have the Really Simple SSL Let's Encrypt beta add-on activated. This functionality has now been integrated in core, so you can deactivate the add-on."
 msgstr "Tiene activado el add-on beta de Let's Encrypt para Really Simple SSL . Esta funcionalidad se ha integrado en el núcleo, por lo que puede desactivar el add-on."
 
-#: class-admin.php:2000 settings/build/index.js:382
+#: class-admin.php:1984 settings/build/index.js:382
 #: settings/src/Dashboard/TaskElement.js:55
 msgid "Re-check"
 msgstr "Vuelva a revisar"
 
-#: class-admin.php:1998
+#: class-admin.php:1982
 msgid "Depending on your hosting provider, %smanual installation%s may be required."
 msgstr "Dependiendo de su empresa de alojamiento, es posible que se requiera la %sinstalación manual%s. "
 
-#: class-admin.php:1997
+#: class-admin.php:1981
 msgid "If your hosting provider auto-renews your certificate, no action is required. Alternatively, you have the option to generate an SSL certificate with Really Simple SSL."
 msgstr "Si su proveedor de alojamiento renueva automáticamente su certificado, no es necesario hacer nada. Como alternativa, tiene la opción de generar un certificado SSL con Really Simple SSL."
 
-#: class-admin.php:1997
+#: class-admin.php:1981
 msgid "SSL certificate will expire on %s."
 msgstr "El certificado SSL expirará en %s."
 
-#: class-admin.php:1996
+#: class-admin.php:1980
 msgid "Your SSL certificate will expire soon."
 msgstr "Su certificado SSL expirará pronto."
 
-#: class-admin.php:1976
+#: class-admin.php:1960
 msgid "No SSL detected. Use the retry button to check again."
 msgstr "No se ha detectado SSL. Utilice el botón de reintento para volver a comprobarlo."
 
@@ -1953,11 +1957,11 @@ msgstr "No se ha detectado SSL. Utilice el botón de reintento para volver a com
 msgid "(Unknown)"
 msgstr "(Desconocido)"
 
-#: class-admin.php:1977 class-admin.php:1985 class-admin.php:1999
+#: class-admin.php:1961 class-admin.php:1969 class-admin.php:1983
 msgid "Install SSL certificate"
 msgstr "Instalar el certificado SSL"
 
-#: class-admin.php:1978
+#: class-admin.php:1962
 msgid "Retry"
 msgstr "Reintentar"
 
@@ -1965,23 +1969,23 @@ msgstr "Reintentar"
 msgid "An SSL certificate has been detected"
 msgstr "Se ha detectado un certificado SSL"
 
-#: class-admin.php:2157
+#: class-admin.php:2141
 msgid "Or set your wp-config.php to writable and reload this page."
 msgstr "O configura tu archivo «wp-config.php» para que tenga permisos de escritura y recarga esta página."
 
-#: class-admin.php:2149
+#: class-admin.php:2133
 msgid "Add the following lines of code to your wp-config.php."
 msgstr "Añade las siguientes líneas de código a tu archivo «wp-config.php»."
 
-#: class-admin.php:2149
+#: class-admin.php:2133
 msgid "To set the httponly secure cookie settings, your wp-config.php has to be edited, but the file is not writable."
 msgstr "Para configurar los ajustes de cookie segura «httponly», tiene que ser editado tu archivo «wp-config.php», pero el archivo no tiene permisos de escritura."
 
-#: class-admin.php:2142
+#: class-admin.php:2126
 msgid "HttpOnly Secure cookies not set."
 msgstr "Cookies seguras «HttpOnly» no configuradas."
 
-#: class-admin.php:2203
+#: class-admin.php:2187
 msgid "Due to a recent update by WP Engine, we have changed your settings automatically to adapt."
 msgstr "Debido a una actualización reciente de WP Engine, hemos cambiado automáticamente tus ajustes para adaptarlo."
 
@@ -2013,7 +2017,7 @@ msgstr "Prueba de cabeceras de seguridad"
 msgid "SSL Status Test"
 msgstr "Prueba del estado de SSL"
 
-#: class-admin.php:1975
+#: class-admin.php:1959
 msgid "No SSL detected"
 msgstr "No se ha detectado SSL"
 
@@ -2045,27 +2049,27 @@ msgstr "Really Simple SSL ha detectado un certificado SSL, pero no se ha configu
 msgid "SSL is not enabled."
 msgstr "SSL no está activado."
 
-#: class-admin.php:2640
+#: class-admin.php:2624
 msgid "Deactivate, revert to http"
 msgstr "Desactivar, volver a http"
 
-#: class-admin.php:2639
+#: class-admin.php:2623
 msgid "Deactivate, keep https"
 msgstr "Desactivar, mantener https"
 
-#: class-admin.php:2627
+#: class-admin.php:2611
 msgid "The WordPress 301 redirect will stop working"
 msgstr "La redirección 301 de WordPress dejará de funcionar"
 
-#: class-admin.php:2622
+#: class-admin.php:2606
 msgid "Deactivate, and revert to http. This will remove all changes by the plugin."
 msgstr "Desactivar y volver a http. Esto eliminará todos los cambios hechos por el plugin."
 
-#: class-admin.php:2621
+#: class-admin.php:2605
 msgid "Deactivate, but stay on SSL."
 msgstr "Desactivar, pero permanecer en SSL."
 
-#: class-admin.php:2619
+#: class-admin.php:2603
 msgid "To deactivate the plugin correctly, please select if you want to:"
 msgstr "Para desactivar el plugin correctamente, por favor, selecciona si quieres:"
 
@@ -2097,45 +2101,41 @@ msgstr "Instalado"
 msgid "Install"
 msgstr "Instalar"
 
-#: settings/config/config.php:1169
+#: settings/config/config.php:1170
 msgid "Tips & Tricks"
 msgstr "Consejos y trucos"
 
-#: class-admin.php:2121
+#: class-admin.php:2105
 msgid "Your site uses Divi. This can require some additional steps before getting the secure lock."
 msgstr "Tu sitio usa Divi. Esto puede requerir algunos pasos adicionales antes de conseguir el candado de seguridad."
 
-#: class-admin.php:2107
+#: class-admin.php:2091
 msgid "Your site uses Elementor. This can require some additional steps before getting the secure lock."
 msgstr "Tu sitio usa Elementor. Esto puede requerir algunos pasos adicionales antes de conseguir el candado de seguridad."
 
-#: class-admin.php:2092
+#: class-admin.php:2076
 msgid "The .htaccess redirect rules selected by this plugin failed in the test. Set manually or dismiss to leave on PHP redirect."
 msgstr "Las reglas de redirección .htaccess seleccionadas por este plugin fallaron en la prueba. Configura manualmente o descarta para dejar en redirección de PHP."
 
-#: class-admin.php:2078
+#: class-admin.php:2062
 msgid "WordPress 301 redirect enabled. We recommend to enable a 301 .htaccess redirect."
 msgstr "Redirección 301 de WordPress activada. Recomendamos activar una redirección 301 en el archivo «.htaccess»."
 
-#: class-admin.php:2035
+#: class-admin.php:2019
 msgid "Mixed content fixer not enabled. Enable the option to fix mixed content on your site."
 msgstr "El corrector de contenido mixto no está activado. Activa la opción para corregir el contenido mixto en tu sitio."
 
-#: class-admin.php:2024
+#: class-admin.php:2008
 msgid "The mixed content fixer is active, but was not detected on the frontpage."
 msgstr "El corrector de contenido mixto está activo, pero no se ha detectado en la portada."
 
-#: class-admin.php:2017
+#: class-admin.php:2001
 msgid "Really Simple SSL has received no response from the webpage."
 msgstr "Really Simple SSL no ha recibido ninguna respuesta de la web."
 
-#: class-admin.php:1954
+#: class-admin.php:1938
 msgid "SSL is not enabled yet."
 msgstr "SSL aún no está activada."
-
-#: class-admin.php:1906
-msgid "SSL is now activated. Check if your website is secure by following this article."
-msgstr "SSL ya está activado. Comprueba si tu web es segura consultando este artículo."
 
 #: class-admin.php:1815
 msgid "No recommended redirect rules detected."
@@ -2157,8 +2157,8 @@ msgstr "No se puede activar Really Simple SSL. El plugin requiere WordPress 5.7 
 msgid "Really Simple SSL cannot be activated. The plugin requires PHP 7.2 or higher"
 msgstr "No se puede activar Really Simple SSL. El plugin requiere PHP 7.2 o superior"
 
-#: class-admin.php:2674 class-multisite.php:219 settings/build/index.js:382
-#: settings/src/Header.js:46
+#: class-admin.php:2658 class-multisite.php:219 settings/build/index.js:382
+#: settings/src/Header.js:48
 msgid "Support"
 msgstr "Soporte"
 
@@ -2210,11 +2210,11 @@ msgstr "Echa un vistazo a Really Simple SSL Pro"
 msgid "Don't show again"
 msgstr "No volver a mostrar"
 
-#: class-admin.php:2041
+#: class-admin.php:2025
 msgid "The mixed content fixer could not be detected due to a cURL error: %s. cURL errors are often caused by an outdated version of PHP or cURL and don't affect the front-end of your site. Contact your hosting provider for a fix."
 msgstr "El corrector de contenido mixto no ha podido ser detectado debido a un error de cURL: %s. Los errores de cURL a menudo son causados por una versión obsoleta de PHP o de cURL y no afectan a la portada de tu sitio. Contacta con tu proveedor de alojamiento para corregirlo."
 
-#: class-admin.php:2029
+#: class-admin.php:2013
 msgid "Error occurred when retrieving the webpage."
 msgstr "Ha ocurrido un error al recuperar la web."
 
@@ -2243,7 +2243,7 @@ msgstr "Descartar"
 msgid "Enable"
 msgstr "Activar"
 
-#: class-admin.php:2073
+#: class-admin.php:2057
 msgid "301 redirect to https set: .htaccess redirect."
 msgstr "Redirección 301 a https configurada: Redirección .htaccess."
 
@@ -2279,27 +2279,27 @@ msgstr "Esto provoca problemas al activar SSL en toda la red, ya que los subdomi
 msgid "You run a Multisite installation with subdomains, but your site doesn't have a wildcard certificate."
 msgstr "Estás ejecutando una instalación multisitio con subdominios, pero tu sitio no tiene un certificado wildcard."
 
-#: class-admin.php:2638 upgrade/upgrade-to-pro.php:370
+#: class-admin.php:2622 upgrade/upgrade-to-pro.php:370
 msgid "Cancel"
 msgstr "Cancelar"
 
-#: class-admin.php:2629
+#: class-admin.php:2613
 msgid "The .htaccess redirect will remain active"
 msgstr "La redirección del archivo «.htaccess» seguirá activa"
 
-#: class-admin.php:2628
+#: class-admin.php:2612
 msgid "Your site address will remain https://"
 msgstr "La dirección de tu sitio seguirá siendo https://"
 
-#: class-admin.php:2626
+#: class-admin.php:2610
 msgid "The mixed content fixer will stop working"
 msgstr "El corrector de contenido mixto dejará de funcionar"
 
-#: class-admin.php:2624
+#: class-admin.php:2608
 msgid "Deactivating the plugin while keeping SSL will do the following:"
 msgstr "Desactivar el plugin manteniendo el SSL hará lo siguiente:"
 
-#: class-admin.php:2608
+#: class-admin.php:2592
 msgid "Are you sure?"
 msgstr "¿Estás seguro?"
 
@@ -2332,19 +2332,19 @@ msgstr "Puede que tengas que acceder de nuevo."
 msgid "Enable 301 .htaccess redirect"
 msgstr "Activar la redirección 301 de .htaccess"
 
-#: class-admin.php:2058
+#: class-admin.php:2042
 msgid "No 301 redirect is set. Enable the WordPress 301 redirect in the settings to get a 301 permanent redirect."
 msgstr "No se ha configurado ninguna redirección 301. Activa la redirección 301 de WordPress en los ajustes para conseguir una redirección 301 permanente."
 
-#: class-admin.php:2085
+#: class-admin.php:2069
 msgid "Enable a .htaccess redirect or PHP redirect in the settings to create a 301 redirect."
 msgstr "Activa una redirección .htaccess o una redirección PHP en la configuración para crear una redirección 301."
 
-#: class-admin.php:2090
+#: class-admin.php:2074
 msgid ".htaccess redirect."
 msgstr ".htaccess redirección."
 
-#: class-admin.php:2054
+#: class-admin.php:2038
 msgid "301 redirect to https set."
 msgstr "Redirección 301 a https establecido."
 
@@ -2362,7 +2362,7 @@ msgstr "Soporte premium"
 msgid "Instructions"
 msgstr "Instrucciones"
 
-#: class-admin.php:1950
+#: class-admin.php:1934
 msgid "SSL is enabled on your site."
 msgstr "SSL está activo en tu sitio."
 
@@ -2397,12 +2397,12 @@ msgstr "¡Casi listo para migrar a SSL!"
 msgid "%s is a singleton class and you cannot create a second instance."
 msgstr "%s es una clase singleton y no puedes crear una segunda instancia."
 
-#: class-admin.php:2012
+#: class-admin.php:1996
 msgid "Mixed content fixer was successfully detected on the front-end."
 msgstr "El corrector de contenido mixto se ha detectado correctamente en la portada."
 
 #: settings/templates/tips-tricks-footer.php:3 settings/build/index.js:382
-#: settings/src/Header.js:42
+#: settings/src/Header.js:41
 msgid "Documentation"
 msgstr "Documentación"
 
@@ -2418,7 +2418,7 @@ msgstr "Really Simple SSL"
 msgid "Stop editing the .htaccess file"
 msgstr "Detener la edición del archivo «.htaccess»"
 
-#: class-admin.php:1991
+#: class-admin.php:1975
 msgid "An SSL certificate was detected on your site."
 msgstr "Se ha detectado un certificado SSL en tu sitio."
 
@@ -2426,7 +2426,7 @@ msgstr "Se ha detectado un certificado SSL en tu sitio."
 msgid "No SSL detected."
 msgstr "No se ha detectado SSL."
 
-#: class-admin.php:1715 class-admin.php:2666 class-admin.php:2669
+#: class-admin.php:1715 class-admin.php:2650 class-admin.php:2653
 #: class-multisite.php:87 class-multisite.php:216 settings/config/config.php:17
 #: settings/build/index.js:382
 #: settings/src/Dashboard/SecurityFeaturesBlock/SecurityFeaturesFooter.js:14
@@ -2437,11 +2437,11 @@ msgstr "Ajustes"
 msgid "Mixed content fixer"
 msgstr "Corrector de contenido mixto"
 
-#: settings/settings.php:97
+#: settings/settings.php:98
 msgid "SSL"
 msgstr "SSL"
 
-#: settings/settings.php:96
+#: settings/settings.php:97
 msgid "SSL settings"
 msgstr "Ajustes SSL"
 
