@@ -63,7 +63,7 @@ define('PATH_CURRENT_SITE', '/es/');
 define('SITE_ID_CURRENT_SITE', 1);
 define('BLOG_ID_CURRENT_SITE', 1);
 
-define('WP_POST_REVISIONS', false);
+define( 'WP_POST_REVISIONS', 3 );
 
 header('X-Frame-Options: SAMEORIGIN');
 @ini_set('session.cookie_httponly', true);
