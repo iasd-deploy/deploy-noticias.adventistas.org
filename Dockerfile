@@ -11,6 +11,7 @@ COPY --chown=www-data:www-data --from=internetdsa/pa-theme-noticias /var/www/bui
 
 COPY extras/init /usr/local/bin/docker-entrypoint.sh
 COPY extras/opcache.ini /usr/local/etc/php/conf.d/opcache.ini
+COPY extras/php.ini $PHP_INI_DIR/conf.d/php.ini
 
 ARG WP_DB_HOST
 ARG WP_DB_NAME
