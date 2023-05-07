@@ -1,1 +1,10 @@
 storage/views
+app/pt/wp-content/uploads/.bladecache/*
+app/es/wp-content/uploads/.bladecache/*
+mysql/aria_log_control
+mysql/aria_log.00000001
+mysql/ib_buffer_pool
+mysql/ib_logfile0
+mysql/ibdata1
+mysql/ibtmp1
+mysql/multi-master.info
