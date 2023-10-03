@@ -17,16 +17,16 @@
 
 // ** MySQL settings - You can get this info from your web host ** //
 /** The name of the database for WordPress */
-define('DB_NAME', "noticias_pt_old");
+define('DB_NAME', $_ENV['WP_DB_NAME'] . "_pt");
+
 /** MySQL database username */
-define('DB_USER', 'root');
+define('DB_USER', $_ENV['WP_DB_USER']);
 
 /** MySQL database password */
-define('DB_PASSWORD', 'root');
+define('DB_PASSWORD', $_ENV['WP_DB_PASSWORD']);
 
 /** MySQL hostname */
-// define('DB_HOST', 'noticias_db');
-define('DB_HOST', 'noticias_db');
+define('DB_HOST', $_ENV['WP_DB_HOST'] .':3306');
 
 /** Database Charset to use in creating database tables. */
 define('DB_CHARSET', 'utf8mb4');
@@ -36,10 +36,9 @@ define('DB_COLLATE', 'utf8mb4_unicode_ci');
 
 define('AS3CF_SETTINGS', serialize(array(
 	'provider' => 'aws',
-	'access-key-id' => 'AKIAWRJWC2TSLUAONOEJ',
-	'secret-access-key' => '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',
-	'bucket' => 'files.adventistas.org',
-	'region' => 'us-east-1'
+	'access-key-id' => $_ENV['WP_S3_ACCESS_KEY'],
+	'secret-access-key' => $_ENV['WP_S3_SECRET_KEY'],
+	'bucket' => $_ENV['WP_S3_BUCKET']
 )));
 
 // Ativa a lixeira das midias
@@ -64,7 +63,7 @@ define('PATH_CURRENT_SITE', '/pt/');
 define('SITE_ID_CURRENT_SITE', 1);
 define('BLOG_ID_CURRENT_SITE', 1);
 
-define('WP_POST_REVISIONS', 3);
+define( 'WP_POST_REVISIONS', 3 );
 
 header('X-Frame-Options: SAMEORIGIN');
 @ini_set('session.cookie_httponly', true);
