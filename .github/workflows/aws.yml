@@ -43,13 +43,13 @@ jobs:
         # push it to ECR so that it can
         # be deployed to ECS.
 
-        sed -i 's/email@maranataja.com/${{ secrets.CLOUDFLARE_EMAIL }}/' ./app/pt/wp-content/w3tc-config/master.php
-        sed -i 's/key_maranataja/${{ secrets.CLOUDFLARE_SECRET }}/' ./app/pt/wp-content/w3tc-config/master.php
-        sed -i 's/zone_id_maranataja/${{ secrets.CLOUDFLARE_ZONEID }}/' ./app/pt/wp-content/w3tc-config/master.php
+        sed -i 's/cloudflare_email/${{ secrets.CLOUDFLARE_EMAIL }}/' ./app/pt/wp-content/w3tc-config/master.php
+        sed -i 's/cloudflare_key/${{ secrets.CLOUDFLARE_SECRET }}/' ./app/pt/wp-content/w3tc-config/master.php
+        sed -i 's/cloudflare_zone_id/${{ secrets.CLOUDFLARE_ZONEID }}/' ./app/pt/wp-content/w3tc-config/master.php
 
-        sed -i 's/email@maranataja.com/${{ secrets.CLOUDFLARE_EMAIL }}/' ./app/es/wp-content/w3tc-config/master.php
-        sed -i 's/key_maranataja/${{ secrets.CLOUDFLARE_SECRET }}/' ./app/es/wp-content/w3tc-config/master.php
-        sed -i 's/zone_id_maranataja/${{ secrets.CLOUDFLARE_ZONEID }}/' ./app/es/wp-content/w3tc-config/master.php
+        sed -i 's/cloudflare_email/${{ secrets.CLOUDFLARE_EMAIL }}/' ./app/es/wp-content/w3tc-config/master.php
+        sed -i 's/cloudflare_key/${{ secrets.CLOUDFLARE_SECRET }}/' ./app/es/wp-content/w3tc-config/master.php
+        sed -i 's/cloudflare_zone_id/${{ secrets.CLOUDFLARE_ZONEID }}/' ./app/es/wp-content/w3tc-config/master.php
 
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
           --build-arg WP_DB_HOST='${{ secrets.WP_DB_HOST }}' \
