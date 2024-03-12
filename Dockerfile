@@ -4,6 +4,11 @@ COPY --chown=www-data:www-data app /var/www/html
 
 RUN docker-php-ext-install opcache
 
+RUN apt-get update && \
+    apt-get install -y git zip unzip && \
+    pecl install redis && \
+    docker-php-ext-enable redis
+
 COPY --chown=www-data:www-data --from=internetdsa/pa-theme-sedes /var/www/build /var/www/html/pt/wp-content/themes/pa-theme-sedes
 COPY --chown=www-data:www-data --from=internetdsa/pa-theme-sedes /var/www/build /var/www/html/es/wp-content/themes/pa-theme-sedes
 COPY --chown=www-data:www-data --from=internetdsa/pa-theme-noticias /var/www/build /var/www/html/pt/wp-content/themes/pa-theme-noticias
