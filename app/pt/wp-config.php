@@ -69,6 +69,7 @@ header('X-Frame-Options: SAMEORIGIN');
 @ini_set('session.cookie_httponly', true);
 @ini_set('session.cookie_secure', true);
 @ini_set('session.use_only_cookies', true);
+@ini_set( 'max_input_vars' , 5000 );
 
 # define('DISABLE_WP_CRON', false);
 
