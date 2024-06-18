@@ -1,21 +1,21 @@
-/******/ (function() { // webpackBootstrap
+/******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
 /***/ "./src/advanced-custom-fields-pro/assets/src/js/pro/_acf-blocks.js":
 /*!*************************************************************************!*\
   !*** ./src/advanced-custom-fields-pro/assets/src/js/pro/_acf-blocks.js ***!
   \*************************************************************************/
-/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/defineProperty */ "./node_modules/@babel/runtime/helpers/esm/defineProperty.js");
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/element */ "./node_modules/react/index.js");
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_1__);
 
 
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0,_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__["default"])(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { (0,_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__["default"])(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
 const md5 = __webpack_require__(/*! md5 */ "./node_modules/md5/md5.js");
 (($, undefined) => {
   // Dependencies.
@@ -40,7 +40,7 @@ const md5 = __webpack_require__(/*! md5 */ "./node_modules/md5/md5.js");
     Component
   } = React;
   const {
-    withSelect
+    useSelect
   } = wp.data;
   const {
     createHigherOrderComponent
@@ -60,6 +60,15 @@ const md5 = __webpack_require__(/*! md5 */ "./node_modules/md5/md5.js");
    * @var object
    */
   const blockTypes = {};
+
+  /**
+   * Data storage for Block Instances and their DynamicHTML components.
+   * This is temporarily stored on the ACF object, but this will be replaced in ACF 6.4.
+   * Developers should not rely on reading or using any aspect of acf.blockInstances.
+   *
+   * @since 6.3
+   */
+  acf.blockInstances = {};
 
   /**
    * Returns a block type for the given name.
@@ -86,6 +95,19 @@ const md5 = __webpack_require__(/*! md5 */ "./node_modules/md5/md5.js");
   function getBlockVersion(name) {
     const blockType = getBlockType(name);
     return blockType.acf_block_version || 1;
+  }
+
+  /**
+   * Returns a block's validate property. Default true.
+   *
+   * @since 6.3
+   *
+   * @param string name The block name
+   * @return boolean
+   */
+  function blockSupportsValidation(name) {
+    const blockType = getBlockType(name);
+    return blockType.validate;
   }
 
   /**
@@ -199,7 +221,7 @@ const md5 = __webpack_require__(/*! md5 */ "./node_modules/md5/md5.js");
     // Handle svg HTML.
     if (typeof blockType.icon === 'string' && blockType.icon.substr(0, 4) === '<svg') {
       const iconHTML = blockType.icon;
-      blockType.icon = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(Div, null, iconHTML);
+      blockType.icon = (0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)(Div, null, iconHTML);
     }
 
     // Remove icon if empty to allow for default "block".
@@ -229,7 +251,7 @@ const md5 = __webpack_require__(/*! md5 */ "./node_modules/md5/md5.js");
     // Remove all empty attribute defaults from PHP values to allow serialisation.
     // https://github.com/WordPress/gutenberg/issues/7342
     for (const key in blockType.attributes) {
-      if (blockType.attributes[key].default.length === 0) {
+      if ('default' in blockType.attributes[key] && blockType.attributes[key].default.length === 0) {
         delete blockType.attributes[key].default;
       }
     }
@@ -264,8 +286,17 @@ const md5 = __webpack_require__(/*! md5 */ "./node_modules/md5/md5.js");
     }
 
     // Set edit and save functions.
-    blockType.edit = props => (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(ThisBlockEdit, _objectSpread({}, props));
-    blockType.save = () => (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(ThisBlockSave, null);
+    blockType.edit = props => {
+      // Ensure we remove our save lock if a block is removed.
+      wp.element.useEffect(() => {
+        return () => {
+          if (!wp.data.dispatch('core/editor')) return;
+          wp.data.dispatch('core/editor').unlockPostSaving('acf/block/' + props.clientId);
+        };
+      }, []);
+      return (0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)(ThisBlockEdit, _objectSpread({}, props));
+    };
+    blockType.save = () => (0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)(ThisBlockSave, null);
 
     // Add to storage.
     blockTypes[blockType.name] = blockType;
@@ -496,7 +527,7 @@ const md5 = __webpack_require__(/*! md5 */ "./node_modules/md5/md5.js");
       nodeAttrs[name] = value;
     });
     if ('ACFInnerBlocks' === nodeName) {
-      return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(ACFInnerBlocks, _objectSpread({}, nodeAttrs));
+      return (0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)(ACFInnerBlocks, _objectSpread({}, nodeAttrs));
     }
 
     // Define args for React.createElement().
@@ -574,7 +605,7 @@ const md5 = __webpack_require__(/*! md5 */ "./node_modules/md5/md5.js");
     const innerBlockProps = useInnerBlocksProps({
       className: className
     }, props);
-    return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", _objectSpread({}, innerBlockProps), innerBlockProps.children);
+    return (0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", _objectSpread({}, innerBlockProps), innerBlockProps.children);
   }
 
   /**
@@ -708,7 +739,7 @@ const md5 = __webpack_require__(/*! md5 */ "./node_modules/md5/md5.js");
       }
     }
     render() {
-      return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(BlockListBlock, _objectSpread({}, this.props));
+      return (0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)(BlockListBlock, _objectSpread({}, this.props));
     }
   }, 'withDefaultAttributes');
   wp.hooks.addFilter('editor.BlockListBlock', 'acf/with-default-attributes', withDefaultAttributes);
@@ -720,7 +751,7 @@ const md5 = __webpack_require__(/*! md5 */ "./node_modules/md5/md5.js");
    * @since	5.9.0
    */
   function BlockSave() {
-    return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(InnerBlocks.Content, null);
+    return (0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)(InnerBlocks.Content, null);
   }
 
   /**
@@ -796,61 +827,75 @@ const md5 = __webpack_require__(/*! md5 */ "./node_modules/md5/md5.js");
       }
 
       // Return template.
-      return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(Fragment, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(BlockControls, null, showToggle && (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(ToolbarGroup, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(ToolbarButton, {
+      return (0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)(Fragment, null, (0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)(BlockControls, null, showToggle && (0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)(ToolbarGroup, null, (0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)(ToolbarButton, {
         className: "components-icon-button components-toolbar__control",
         label: toggleText,
         icon: toggleIcon,
         onClick: toggleMode
-      }))), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(InspectorControls, null, mode === 'preview' && (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", {
+      }))), (0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)(InspectorControls, null, mode === 'preview' && (0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", {
         className: "acf-block-component acf-block-panel"
-      }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(BlockForm, _objectSpread({}, this.props)))), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(BlockBody, _objectSpread({}, this.props)));
+      }, (0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)(BlockForm, _objectSpread({}, this.props)))), (0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)(BlockBody, _objectSpread({}, this.props)));
     }
   }
 
   /**
    * The BlockBody functional component.
    *
-   * @date	19/2/19
    * @since	5.7.12
    */
-  function _BlockBody(props) {
+  function BlockBody(props) {
     const {
       attributes,
       isSelected,
-      name
+      name,
+      clientId
     } = props;
     const {
       mode
     } = attributes;
+    const index = useSelect(select => {
+      const rootClientId = select('core/block-editor').getBlockRootClientId(clientId);
+      return select('core/block-editor').getBlockIndex(clientId, rootClientId);
+    });
     let showForm = true;
     let additionalClasses = 'acf-block-component acf-block-body';
     if (mode === 'auto' && !isSelected || mode === 'preview') {
       additionalClasses += ' acf-block-preview';
       showForm = false;
     }
+
+    // Setup block cache if required, and update mode.
+    if (!(clientId in acf.blockInstances)) {
+      acf.blockInstances[clientId] = {
+        validation_errors: false,
+        mode: mode
+      };
+    }
+    acf.blockInstances[clientId].mode = mode;
+    if (!isSelected) {
+      if (blockSupportsValidation(name) && acf.blockInstances[clientId].validation_errors) {
+        additionalClasses += ' acf-block-has-validation-error';
+      }
+      acf.blockInstances[clientId].has_been_deselected = true;
+    }
     if (getBlockVersion(name) > 1) {
-      return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", _objectSpread({}, useBlockProps({
+      return (0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", _objectSpread({}, useBlockProps({
         className: additionalClasses
-      })), showForm ? (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(BlockForm, _objectSpread({}, props)) : (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(BlockPreview, _objectSpread({}, props)));
+      })), showForm ? (0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)(BlockForm, _objectSpread(_objectSpread({}, props), {}, {
+        index: index
+      })) : (0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)(BlockPreview, _objectSpread(_objectSpread({}, props), {}, {
+        index: index
+      })));
     } else {
-      return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", _objectSpread({}, useBlockProps()), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", {
+      return (0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", _objectSpread({}, useBlockProps()), (0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", {
         className: "acf-block-component acf-block-body"
-      }, showForm ? (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(BlockForm, _objectSpread({}, props)) : (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(BlockPreview, _objectSpread({}, props))));
+      }, showForm ? (0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)(BlockForm, _objectSpread(_objectSpread({}, props), {}, {
+        index: index
+      })) : (0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)(BlockPreview, _objectSpread(_objectSpread({}, props), {}, {
+        index: index
+      }))));
     }
   }
-
-  // Append blockIndex to component props.
-  const BlockBody = withSelect((select, ownProps) => {
-    const {
-      clientId
-    } = ownProps;
-    // Use optional rootClientId to allow discoverability of child blocks.
-    const rootClientId = select('core/block-editor').getBlockRootClientId(clientId);
-    const index = select('core/block-editor').getBlockIndex(clientId, rootClientId);
-    return {
-      index
-    };
-  })(_BlockBody);
 
   /**
    * A react component to append HTMl.
@@ -863,7 +908,7 @@ const md5 = __webpack_require__(/*! md5 */ "./node_modules/md5/md5.js");
    */
   class Div extends Component {
     render() {
-      return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", {
+      return (0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", {
         dangerouslySetInnerHTML: {
           __html: this.props.children
         }
@@ -885,7 +930,7 @@ const md5 = __webpack_require__(/*! md5 */ "./node_modules/md5/md5.js");
    */
   class Script extends Component {
     render() {
-      return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", {
+      return (0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", {
         ref: el => this.el = el
       });
     }
@@ -899,9 +944,6 @@ const md5 = __webpack_require__(/*! md5 */ "./node_modules/md5/md5.js");
       this.setHTML(this.props.children);
     }
   }
-
-  // Data storage for DynamicHTML components.
-  const store = {};
 
   /**
    * DynamicHTML Class.
@@ -926,42 +968,72 @@ const md5 = __webpack_require__(/*! md5 */ "./node_modules/md5/md5.js");
       this.el = false;
       this.subscribed = true;
       this.renderMethod = 'jQuery';
+      this.passedValidation = false;
       this.setup(props);
 
       // Load state.
       this.loadState();
     }
     setup(props) {
-      // Do nothing.
+      const constructor = this.constructor.name;
+      const clientId = props.clientId;
+      if (!(clientId in acf.blockInstances)) {
+        acf.blockInstances[clientId] = {
+          validation_errors: false,
+          mode: props.mode
+        };
+      }
+      if (!(constructor in acf.blockInstances[clientId])) {
+        acf.blockInstances[clientId][constructor] = {};
+      }
     }
     fetch() {
       // Do nothing.
     }
     maybePreload(blockId, clientId, form) {
-      if (this.state.html === undefined && !isBlockInQueryLoop(this.props.clientId)) {
+      acf.debug('Preload check', blockId, clientId, form);
+      if (!isBlockInQueryLoop(this.props.clientId)) {
         const preloadedBlocks = acf.get('preloadedBlocks');
         const modeText = form ? 'form' : 'preview';
         if (preloadedBlocks && preloadedBlocks[blockId]) {
           // Ensure we only preload the correct block state (form or preview).
-          if (form && !preloadedBlocks[blockId].form || !form && preloadedBlocks[blockId].form) return false;
+          if (form && !preloadedBlocks[blockId].form || !form && preloadedBlocks[blockId].form) {
+            acf.debug('Preload failed: state not preloaded.');
+            return false;
+          }
 
           // Set HTML to the preloaded version.
-          return preloadedBlocks[blockId].html.replaceAll(blockId, clientId);
+          preloadedBlocks[blockId].html = preloadedBlocks[blockId].html.replaceAll(blockId, clientId);
+
+          // Replace blockId in errors.
+          if (preloadedBlocks[blockId].validation && preloadedBlocks[blockId].validation.errors) {
+            preloadedBlocks[blockId].validation.errors = preloadedBlocks[blockId].validation.errors.map(error => {
+              error.input = error.input.replaceAll(blockId, clientId);
+              return error;
+            });
+          }
+
+          // Return preloaded object.
+          acf.debug('Preload successful', preloadedBlocks[blockId]);
+          return preloadedBlocks[blockId];
         }
       }
+      acf.debug('Preload failed: not preloaded.');
       return false;
     }
     loadState() {
-      this.state = store[this.id] || {};
+      const client = acf.blockInstances[this.props.clientId] || {};
+      this.state = client[this.constructor.name] || {};
     }
     setState(state) {
-      store[this.id] = _objectSpread(_objectSpread({}, this.state), state);
+      acf.blockInstances[this.props.clientId][this.constructor.name] = _objectSpread(_objectSpread({}, this.state), state);
 
       // Update component state if subscribed.
       // - Allows AJAX callback to update store without modifying state of an unmounted component.
       if (this.subscribed) {
         super.setState(state);
       }
+      acf.debug('SetState', Object.assign({}, this), this.props.clientId, this.constructor.name, Object.assign({}, acf.blockInstances[this.props.clientId][this.constructor.name]));
     }
     setHtml(html) {
       html = html ? html.trim() : '';
@@ -1009,16 +1081,16 @@ const md5 = __webpack_require__(/*! md5 */ "./node_modules/md5/md5.js");
           this.setRef(this.state.jsx);
           return this.state.jsx;
         } else {
-          return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", {
+          return (0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", {
             ref: this.setRef
           }, this.state.jsx);
         }
       }
 
       // Return HTML.
-      return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", {
+      return (0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", {
         ref: this.setRef
-      }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(Placeholder, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(Spinner, null)));
+      }, (0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)(Placeholder, null, (0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)(Spinner, null)));
     }
     shouldComponentUpdate({
       index
@@ -1051,6 +1123,13 @@ const md5 = __webpack_require__(/*! md5 */ "./node_modules/md5/md5.js");
         }
       }
 
+      // Lock block if required.
+      if (this.getValidationErrors() && this.isNotNewlyAdded()) {
+        this.lockBlockForSaving();
+      } else {
+        this.unlockBlockForSaving();
+      }
+
       // Call context specific method.
       switch (context) {
         case 'append':
@@ -1060,6 +1139,9 @@ const md5 = __webpack_require__(/*! md5 */ "./node_modules/md5/md5.js");
           this.componentDidRemount();
           break;
       }
+    }
+    validate() {
+      // Do nothing.
     }
     componentDidMount() {
       // Fetch on first load.
@@ -1102,6 +1184,65 @@ const md5 = __webpack_require__(/*! md5 */ "./node_modules/md5/md5.js");
         acf.doAction('remount', this.state.$el);
       });
     }
+    isNotNewlyAdded() {
+      return acf.blockInstances[this.props.clientId].has_been_deselected || false;
+    }
+    hasShownValidation() {
+      return acf.blockInstances[this.props.clientId].shown_validation || false;
+    }
+    setShownValidation() {
+      acf.blockInstances[this.props.clientId].shown_validation = true;
+    }
+    setValidationErrors(errors) {
+      acf.blockInstances[this.props.clientId].validation_errors = errors;
+    }
+    getValidationErrors() {
+      return acf.blockInstances[this.props.clientId].validation_errors;
+    }
+    getMode() {
+      return acf.blockInstances[this.props.clientId].mode;
+    }
+    lockBlockForSaving() {
+      if (!wp.data.dispatch('core/editor')) return;
+      wp.data.dispatch('core/editor').lockPostSaving('acf/block/' + this.props.clientId);
+    }
+    unlockBlockForSaving() {
+      if (!wp.data.dispatch('core/editor')) return;
+      wp.data.dispatch('core/editor').unlockPostSaving('acf/block/' + this.props.clientId);
+    }
+    displayValidation($formEl) {
+      if (!blockSupportsValidation(this.props.name)) {
+        acf.debug('Block does not support validation');
+        return;
+      }
+      if (!$formEl || $formEl.hasClass('acf-empty-block-fields')) {
+        acf.debug('There is no edit form available to validate.');
+        return;
+      }
+      const errors = this.getValidationErrors();
+      acf.debug('Starting handle validation', Object.assign({}, this), Object.assign({}, $formEl), errors);
+      this.setShownValidation();
+      let validator = acf.getBlockFormValidator($formEl);
+      validator.clearErrors();
+      acf.doAction('blocks/validation/pre_apply', errors);
+      if (errors) {
+        validator.addErrors(errors);
+        validator.showErrors('after');
+        this.lockBlockForSaving();
+      } else {
+        // remove previous error message
+        if (validator.has('notice')) {
+          validator.get('notice').update({
+            type: 'success',
+            text: acf.__('Validation successful'),
+            timeout: 1000
+          });
+          validator.set('notice', null);
+        }
+        this.unlockBlockForSaving();
+      }
+      acf.doAction('blocks/validation/post_apply', errors);
+    }
   }
 
   /**
@@ -1116,25 +1257,41 @@ const md5 = __webpack_require__(/*! md5 */ "./node_modules/md5/md5.js");
    * @return	void
    */
   class BlockForm extends DynamicHTML {
-    setup({
-      clientId
-    }) {
-      this.id = `BlockForm-${clientId}`;
+    setup(props) {
+      this.id = `BlockForm-${props.clientId}`;
+      super.setup(props);
     }
-    fetch() {
+    fetch(validate_only = false, data = false) {
       // Extract props.
       const {
-        attributes,
         context,
-        clientId
+        clientId,
+        name
       } = this.props;
+      let {
+        attributes
+      } = this.props;
+      let query = {
+        form: true
+      };
+      if (validate_only) {
+        query = {
+          validate: true
+        };
+        attributes.data = data;
+      }
       const hash = createBlockAttributesHash(attributes, context);
+      acf.debug('BlockForm fetch', attributes, query);
 
       // Try preloaded data first.
       const preloaded = this.maybePreload(hash, clientId, true);
       if (preloaded) {
-        this.setHtml(preloaded);
+        this.setHtml(acf.applyFilters('blocks/form/render', preloaded.html, true));
+        if (preloaded.validation) this.setValidationErrors(preloaded.validation.errors);
         return;
+      }
+      if (!blockSupportsValidation(name)) {
+        query.validate = false;
       }
 
       // Request AJAX and update HTML on complete.
@@ -1142,20 +1299,51 @@ const md5 = __webpack_require__(/*! md5 */ "./node_modules/md5/md5.js");
         attributes,
         context,
         clientId,
-        query: {
-          form: true
-        }
+        query
       }).done(({
         data
       }) => {
-        this.setHtml(data.form.replaceAll(data.clientId, clientId));
+        acf.debug('fetch block form promise');
+        if (data.form) {
+          this.setHtml(acf.applyFilters('blocks/form/render', data.form.replaceAll(data.clientId, clientId), false));
+        }
+        if (data.validation) this.setValidationErrors(data.validation.errors);
+        if (this.isNotNewlyAdded()) {
+          acf.debug("Block has already shown it's invalid. The form needs to show validation errors");
+          this.validate();
+        }
       });
+    }
+    validate(loadState = true) {
+      if (loadState) {
+        this.loadState();
+      }
+      acf.debug('BlockForm calling validate with state', Object.assign({}, this));
+      super.displayValidation(this.state.$el);
+    }
+    shouldComponentUpdate(nextProps, nextState) {
+      if (blockSupportsValidation(this.props.name) && this.state.$el && this.isNotNewlyAdded() && !this.hasShownValidation()) {
+        this.validate(false); // Shouldn't update state in shouldComponentUpdate.
+      }
+      return super.shouldComponentUpdate(nextProps, nextState);
+    }
+    componentWillUnmount() {
+      super.componentWillUnmount();
+
+      //TODO: either delete this, or clear validations here (if that's a sensible idea)
+
+      acf.debug('BlockForm Component did unmount');
     }
     componentDidRemount() {
       super.componentDidRemount();
+      acf.debug('BlockForm component did remount');
       const {
         $el
       } = this.state;
+      if (blockSupportsValidation(this.props.name) && this.isNotNewlyAdded()) {
+        acf.debug("Block has already shown it's invalid. The form needs to show validation errors");
+        this.validate();
+      }
 
       // Make sure our on append events are registered.
       if ($el.data('acf-events-added') !== true) {
@@ -1164,27 +1352,33 @@ const md5 = __webpack_require__(/*! md5 */ "./node_modules/md5/md5.js");
     }
     componentDidAppend() {
       super.componentDidAppend();
+      acf.debug('BlockForm component did append');
 
       // Extract props.
       const {
         attributes,
         setAttributes,
-        clientId
+        clientId,
+        name
       } = this.props;
-      const props = this.props;
+      const thisBlockForm = this;
       const {
         $el
       } = this.state;
 
-      // Callback for updating block data.
+      // Callback for updating block data and validation status if we're in an edit only mode.
       function serializeData(silent = false) {
-        const data = acf.serialize($el, `acf-${clientId}`);
+        const data = acf.serialize($el, `acf-block_${clientId}`);
         if (silent) {
           attributes.data = data;
         } else {
           setAttributes({
             data
           });
+        }
+        if (blockSupportsValidation(name) && !silent && thisBlockForm.getMode() !== 'preview') {
+          acf.debug('No block preview currently available. Need to trigger a validation only fetch.');
+          thisBlockForm.fetch(true, data);
         }
       }
 
@@ -1218,17 +1412,15 @@ const md5 = __webpack_require__(/*! md5 */ "./node_modules/md5/md5.js");
    * @return	void
    */
   class BlockPreview extends DynamicHTML {
-    setup({
-      clientId,
-      name
-    }) {
-      const blockType = getBlockType(name);
+    setup(props) {
+      const blockType = getBlockType(props.name);
       const contextPostId = acf.isget(this.props, 'context', 'postId');
-      this.id = `BlockPreview-${clientId}`;
+      this.id = `BlockPreview-${props.clientId}`;
+      super.setup(props);
 
       // Apply the contextPostId to the ID if set to stop query loop ID duplication.
       if (contextPostId) {
-        this.id = `BlockPreview-${clientId}-${contextPostId}`;
+        this.id = `BlockPreview-${props.clientId}-${contextPostId}`;
       }
       if (blockType.supports.jsx) {
         this.renderMethod = 'jsx';
@@ -1256,10 +1448,17 @@ const md5 = __webpack_require__(/*! md5 */ "./node_modules/md5/md5.js");
       let preloaded = this.maybePreload(hash, clientId, false);
       if (preloaded) {
         if (getBlockVersion(name) == 1) {
-          preloaded = '<div class="acf-block-preview">' + preloaded + '</div>';
+          preloaded.html = '<div class="acf-block-preview">' + preloaded.html + '</div>';
         }
-        this.setHtml(preloaded);
+        this.setHtml(acf.applyFilters('blocks/preview/render', preloaded.html, true));
+        if (preloaded.validation) this.setValidationErrors(preloaded.validation.errors);
         return;
+      }
+      let query = {
+        preview: true
+      };
+      if (!blockSupportsValidation(name)) {
+        query.validate = false;
       }
 
       // Request AJAX and update HTML on complete.
@@ -1267,9 +1466,7 @@ const md5 = __webpack_require__(/*! md5 */ "./node_modules/md5/md5.js");
         attributes,
         context,
         clientId,
-        query: {
-          preview: true
-        },
+        query,
         delay
       }).done(({
         data
@@ -1278,8 +1475,23 @@ const md5 = __webpack_require__(/*! md5 */ "./node_modules/md5/md5.js");
         if (getBlockVersion(name) == 1) {
           replaceHtml = '<div class="acf-block-preview">' + replaceHtml + '</div>';
         }
-        this.setHtml(replaceHtml);
+        acf.debug('fetch block render promise');
+        this.setHtml(acf.applyFilters('blocks/preview/render', replaceHtml, false));
+        if (data.validation) {
+          this.setValidationErrors(data.validation.errors);
+        }
+        if (this.isNotNewlyAdded()) {
+          this.validate();
+        }
       });
+    }
+    validate() {
+      // Check we've got a block form for this instance.
+      const client = acf.blockInstances[this.props.clientId] || {};
+      const blockFormState = client.BlockForm || false;
+      if (blockFormState) {
+        super.displayValidation(blockFormState.$el);
+      }
     }
     componentDidAppend() {
       super.componentDidAppend();
@@ -1300,6 +1512,7 @@ const md5 = __webpack_require__(/*! md5 */ "./node_modules/md5/md5.js");
         if (nextAttributes.anchor !== thisAttributes.anchor) {
           delay = 300;
         }
+        acf.debug('Triggering fetch from block preview shouldComponentUpdate');
         this.fetch({
           attributes: nextAttributes,
           context: nextProps.context,
@@ -1337,9 +1550,11 @@ const md5 = __webpack_require__(/*! md5 */ "./node_modules/md5/md5.js");
     }
     componentDidRemount() {
       super.componentDidRemount();
+      acf.debug('Checking if fetch is required in BlockPreview componentDidRemount', Object.assign({}, this.state.prevAttributes), Object.assign({}, this.props.attributes), Object.assign({}, this.state.prevContext), Object.assign({}, this.props.context));
 
       // Update preview if data has changed since last render (changing from "edit" to "preview").
       if (!compareObjects(this.state.prevAttributes, this.props.attributes) || !compareObjects(this.state.prevContext, this.props.context)) {
+        acf.debug('Triggering block preview fetch from componentDidRemount');
         this.fetch();
       }
 
@@ -1471,13 +1686,13 @@ const md5 = __webpack_require__(/*! md5 */ "./node_modules/md5/md5.js");
             alignContent: validateAlignment(alignContent)
           });
         }
-        return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(Fragment, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(BlockControls, {
+        return (0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)(Fragment, null, (0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)(BlockControls, {
           group: "block"
-        }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(AlignmentComponent, {
+        }, (0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)(AlignmentComponent, {
           label: acf.__('Change content alignment'),
           value: validateAlignment(alignContent),
           onChange: onChangeAlignContent
-        })), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(OriginalBlockEdit, _objectSpread({}, this.props)));
+        })), (0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)(OriginalBlockEdit, _objectSpread({}, this.props)));
       }
     };
   }
@@ -1513,12 +1728,12 @@ const md5 = __webpack_require__(/*! md5 */ "./node_modules/md5/md5.js");
             alignText: validateAlignment(alignText)
           });
         }
-        return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(Fragment, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(BlockControls, {
+        return (0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)(Fragment, null, (0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)(BlockControls, {
           group: "block"
-        }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(AlignmentToolbar, {
+        }, (0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)(AlignmentToolbar, {
           value: validateAlignment(alignText),
           onChange: onChangeAlignText
-        })), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(OriginalBlockEdit, _objectSpread({}, this.props)));
+        })), (0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)(OriginalBlockEdit, _objectSpread({}, this.props)));
       }
     };
   }
@@ -1551,12 +1766,12 @@ const md5 = __webpack_require__(/*! md5 */ "./node_modules/md5/md5.js");
             fullHeight
           });
         }
-        return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(Fragment, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(BlockControls, {
+        return (0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)(Fragment, null, (0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)(BlockControls, {
           group: "block"
-        }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(BlockFullHeightAlignmentControl, {
+        }, (0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)(BlockFullHeightAlignmentControl, {
           isActive: fullHeight,
           onToggle: onToggleFullHeight
-        })), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(OriginalBlockEdit, _objectSpread({}, this.props)));
+        })), (0,react__WEBPACK_IMPORTED_MODULE_1__.createElement)(OriginalBlockEdit, _objectSpread({}, this.props)));
       }
     };
   }
@@ -1586,11 +1801,23 @@ const md5 = __webpack_require__(/*! md5 */ "./node_modules/md5/md5.js");
    * @return string
    */
   function createBlockAttributesHash(attributes, context) {
-    attributes['_acf_context'] = context;
-    return md5(JSON.stringify(Object.keys(attributes).sort().reduce((acc, currValue) => {
-      acc[currValue] = attributes[currValue];
+    attributes['_acf_context'] = sortObjectByKey(context);
+    return md5(JSON.stringify(sortObjectByKey(attributes)));
+  }
+
+  /**
+   * Key sort an object
+   *
+   * @since 6.3.1
+   *
+   * @param object toSort The object to be sorted
+   * @return object
+   */
+  function sortObjectByKey(toSort) {
+    return Object.keys(toSort).sort().reduce((acc, currValue) => {
+      acc[currValue] = toSort[currValue];
       return acc;
-    }, {})));
+    }, {});
   }
 })(jQuery);
 
@@ -1600,7 +1827,7 @@ const md5 = __webpack_require__(/*! md5 */ "./node_modules/md5/md5.js");
 /*!****************************************************************************!*\
   !*** ./src/advanced-custom-fields-pro/assets/src/js/pro/_acf-jsx-names.js ***!
   \****************************************************************************/
-/***/ (function() {
+/***/ (() => {
 
 (function ($, undefined) {
   acf.jsxNameReplacements = {
@@ -1914,7 +2141,7 @@ const md5 = __webpack_require__(/*! md5 */ "./node_modules/md5/md5.js");
 /*!*****************************************!*\
   !*** ./node_modules/charenc/charenc.js ***!
   \*****************************************/
-/***/ (function(module) {
+/***/ ((module) => {
 
 var charenc = {
   // UTF-8 encoding
@@ -1957,7 +2184,7 @@ module.exports = charenc;
 /*!*************************************!*\
   !*** ./node_modules/crypt/crypt.js ***!
   \*************************************/
-/***/ (function(module) {
+/***/ ((module) => {
 
 (function() {
   var base64map
@@ -2063,7 +2290,7 @@ module.exports = charenc;
 /*!*****************************************!*\
   !*** ./node_modules/is-buffer/index.js ***!
   \*****************************************/
-/***/ (function(module) {
+/***/ ((module) => {
 
 /*!
  * Determine if an object is a Buffer
@@ -2094,7 +2321,7 @@ function isSlowBuffer (obj) {
 /*!*********************************!*\
   !*** ./node_modules/md5/md5.js ***!
   \*********************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 (function(){
   var crypt = __webpack_require__(/*! crypt */ "./node_modules/crypt/crypt.js"),
@@ -2264,7 +2491,7 @@ function isSlowBuffer (obj) {
 /*!*****************************************************!*\
   !*** ./node_modules/react/cjs/react.development.js ***!
   \*****************************************************/
-/***/ (function(module, exports, __webpack_require__) {
+/***/ ((module, exports, __webpack_require__) => {
 
 "use strict";
 /* module decorator */ module = __webpack_require__.nmd(module);
@@ -2293,7 +2520,7 @@ if (
 ) {
   __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart(new Error());
 }
-          var ReactVersion = '18.2.0';
+          var ReactVersion = '18.3.1';
 
 // ATTENTION
 // When adding new symbols to this file,
@@ -4969,6 +5196,7 @@ exports.PureComponent = PureComponent;
 exports.StrictMode = REACT_STRICT_MODE_TYPE;
 exports.Suspense = REACT_SUSPENSE_TYPE;
 exports.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED = ReactSharedInternals;
+exports.act = act;
 exports.cloneElement = cloneElement$1;
 exports.createContext = createContext;
 exports.createElement = createElement$1;
@@ -5015,7 +5243,7 @@ if (
 /*!*************************************!*\
   !*** ./node_modules/react/index.js ***!
   \*************************************/
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
 
@@ -5031,12 +5259,12 @@ if (false) {} else {
 /*!*******************************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/esm/defineProperty.js ***!
   \*******************************************************************/
-/***/ (function(__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) {
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": function() { return /* binding */ _defineProperty; }
+/* harmony export */   "default": () => (/* binding */ _defineProperty)
 /* harmony export */ });
 /* harmony import */ var _toPropertyKey_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./toPropertyKey.js */ "./node_modules/@babel/runtime/helpers/esm/toPropertyKey.js");
 
@@ -5061,24 +5289,24 @@ function _defineProperty(obj, key, value) {
 /*!****************************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/esm/toPrimitive.js ***!
   \****************************************************************/
-/***/ (function(__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) {
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": function() { return /* binding */ _toPrimitive; }
+/* harmony export */   "default": () => (/* binding */ toPrimitive)
 /* harmony export */ });
 /* harmony import */ var _typeof_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./typeof.js */ "./node_modules/@babel/runtime/helpers/esm/typeof.js");
 
-function _toPrimitive(input, hint) {
-  if ((0,_typeof_js__WEBPACK_IMPORTED_MODULE_0__["default"])(input) !== "object" || input === null) return input;
-  var prim = input[Symbol.toPrimitive];
-  if (prim !== undefined) {
-    var res = prim.call(input, hint || "default");
-    if ((0,_typeof_js__WEBPACK_IMPORTED_MODULE_0__["default"])(res) !== "object") return res;
+function toPrimitive(t, r) {
+  if ("object" != (0,_typeof_js__WEBPACK_IMPORTED_MODULE_0__["default"])(t) || !t) return t;
+  var e = t[Symbol.toPrimitive];
+  if (void 0 !== e) {
+    var i = e.call(t, r || "default");
+    if ("object" != (0,_typeof_js__WEBPACK_IMPORTED_MODULE_0__["default"])(i)) return i;
     throw new TypeError("@@toPrimitive must return a primitive value.");
   }
-  return (hint === "string" ? String : Number)(input);
+  return ("string" === r ? String : Number)(t);
 }
 
 /***/ }),
@@ -5087,20 +5315,20 @@ function _toPrimitive(input, hint) {
 /*!******************************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/esm/toPropertyKey.js ***!
   \******************************************************************/
-/***/ (function(__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) {
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": function() { return /* binding */ _toPropertyKey; }
+/* harmony export */   "default": () => (/* binding */ toPropertyKey)
 /* harmony export */ });
 /* harmony import */ var _typeof_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./typeof.js */ "./node_modules/@babel/runtime/helpers/esm/typeof.js");
 /* harmony import */ var _toPrimitive_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./toPrimitive.js */ "./node_modules/@babel/runtime/helpers/esm/toPrimitive.js");
 
 
-function _toPropertyKey(arg) {
-  var key = (0,_toPrimitive_js__WEBPACK_IMPORTED_MODULE_1__["default"])(arg, "string");
-  return (0,_typeof_js__WEBPACK_IMPORTED_MODULE_0__["default"])(key) === "symbol" ? key : String(key);
+function toPropertyKey(t) {
+  var i = (0,_toPrimitive_js__WEBPACK_IMPORTED_MODULE_1__["default"])(t, "string");
+  return "symbol" == (0,_typeof_js__WEBPACK_IMPORTED_MODULE_0__["default"])(i) ? i : i + "";
 }
 
 /***/ }),
@@ -5109,21 +5337,21 @@ function _toPropertyKey(arg) {
 /*!***********************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/esm/typeof.js ***!
   \***********************************************************/
-/***/ (function(__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) {
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": function() { return /* binding */ _typeof; }
+/* harmony export */   "default": () => (/* binding */ _typeof)
 /* harmony export */ });
-function _typeof(obj) {
+function _typeof(o) {
   "@babel/helpers - typeof";
 
-  return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) {
-    return typeof obj;
-  } : function (obj) {
-    return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-  }, _typeof(obj);
+  return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return typeof o;
+  } : function (o) {
+    return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
+  }, _typeof(o);
 }
 
 /***/ })
@@ -5159,58 +5387,58 @@ function _typeof(obj) {
 /******/ 	
 /************************************************************************/
 /******/ 	/* webpack/runtime/compat get default export */
-/******/ 	!function() {
+/******/ 	(() => {
 /******/ 		// getDefaultExport function for compatibility with non-harmony modules
-/******/ 		__webpack_require__.n = function(module) {
+/******/ 		__webpack_require__.n = (module) => {
 /******/ 			var getter = module && module.__esModule ?
-/******/ 				function() { return module['default']; } :
-/******/ 				function() { return module; };
+/******/ 				() => (module['default']) :
+/******/ 				() => (module);
 /******/ 			__webpack_require__.d(getter, { a: getter });
 /******/ 			return getter;
 /******/ 		};
-/******/ 	}();
+/******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/define property getters */
-/******/ 	!function() {
+/******/ 	(() => {
 /******/ 		// define getter functions for harmony exports
-/******/ 		__webpack_require__.d = function(exports, definition) {
+/******/ 		__webpack_require__.d = (exports, definition) => {
 /******/ 			for(var key in definition) {
 /******/ 				if(__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
 /******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
 /******/ 				}
 /******/ 			}
 /******/ 		};
-/******/ 	}();
+/******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */
-/******/ 	!function() {
-/******/ 		__webpack_require__.o = function(obj, prop) { return Object.prototype.hasOwnProperty.call(obj, prop); }
-/******/ 	}();
+/******/ 	(() => {
+/******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/make namespace object */
-/******/ 	!function() {
+/******/ 	(() => {
 /******/ 		// define __esModule on exports
-/******/ 		__webpack_require__.r = function(exports) {
+/******/ 		__webpack_require__.r = (exports) => {
 /******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
 /******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
 /******/ 			}
 /******/ 			Object.defineProperty(exports, '__esModule', { value: true });
 /******/ 		};
-/******/ 	}();
+/******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/node module decorator */
-/******/ 	!function() {
-/******/ 		__webpack_require__.nmd = function(module) {
+/******/ 	(() => {
+/******/ 		__webpack_require__.nmd = (module) => {
 /******/ 			module.paths = [];
 /******/ 			if (!module.children) module.children = [];
 /******/ 			return module;
 /******/ 		};
-/******/ 	}();
+/******/ 	})();
 /******/ 	
 /************************************************************************/
 var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be in strict mode.
-!function() {
+(() => {
 "use strict";
 /*!****************************************************************************!*\
   !*** ./src/advanced-custom-fields-pro/assets/src/js/pro/acf-pro-blocks.js ***!
@@ -5221,7 +5449,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _acf_blocks_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./_acf-blocks.js */ "./src/advanced-custom-fields-pro/assets/src/js/pro/_acf-blocks.js");
 
 
-}();
+})();
+
 /******/ })()
 ;
 //# sourceMappingURL=acf-pro-blocks.js.map

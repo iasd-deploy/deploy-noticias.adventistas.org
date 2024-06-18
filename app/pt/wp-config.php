@@ -36,9 +36,15 @@ define('DB_COLLATE', 'utf8mb4_unicode_ci');
 
 define('AS3CF_SETTINGS', serialize(array(
 	'provider' => 'aws',
+	'region' => 'us-east-1',
 	'access-key-id' => $_ENV['WP_S3_ACCESS_KEY'],
 	'secret-access-key' => $_ENV['WP_S3_SECRET_KEY'],
 	'bucket' => $_ENV['WP_S3_BUCKET']
+	'enable-delivery-domain' => true,
+	'delivery-domain' => $_ENV['WP_S3_BUCKET'],
+	'signed-urls-object-prefix' => 'noticias.adventistas.org',
+    'force-https' => true,
+	'remove-local-file' => true,
 )));
 
 // Ativa a lixeira das midias
