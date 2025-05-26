@@ -543,9 +543,8 @@
 	background: transparent;
 }
 
-#available-menu-items .accordion-section-title button .toggle-indicator {
-	display: flex;
-	align-items: center;
+#available-menu-items .accordion-section-title button {
+	display: block;
 	width: 28px;
 	height: 35px;
 	position: absolute;
@@ -721,10 +720,8 @@
 	opacity: 1;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-	#customize-preview {
-		transition: all 0.2s;
-	}
+#customize-preview {
+	transition: all 0.2s;
 }
 
 body.adding-menu-items #available-menu-items {
